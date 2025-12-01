@@ -9,5 +9,9 @@
         public string Comment { get; set; }
         public DateTime Date { get; set; }
         public int GradeValue { get; set; }
+
+        public User Student { get; set; }
+        public Homework Homework { get; set; }
+        public Schedule Lesson { get; set; }
     }
 }

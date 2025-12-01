@@ -8,5 +8,9 @@
         public string Text { get; set; }
         public byte[] FilePath { get; set; }
         public int StudentId { get; set; }
+
+        public Schedule Lesson { get; set; }
+        public User Student { get; set; }
+        public ICollection<Grade> Grades { get; set; }
     }
 }

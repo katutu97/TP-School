@@ -1,0 +1,229 @@
+﻿@model List<TP_School.Models.Message>
+@{
+    ViewData["Title"] = "Сообщения";
+    string currentFilter = ViewBag.Filter as string;
+    string filter = string.IsNullOrEmpty(currentFilter) ? "inbox" : currentFilter;
+}
+
+<link rel="stylesheet" href="~/css/messages.css" asp-append-version="true" />
+
+<div class="messages-page-content">
+
+    <a href="#" id="openNewMessageModal" class="btn-new-message">
+        <i class="fas fa-plus"></i> Новое сообщение
+    </a>
+
+    <div class="message-content-box">
+
+        <div class="message-tabs-header">
+            <a href="@Url.Action("Index", new { filter = "inbox" })"
+               class="message-tab @(filter == "inbox" ? "active" : "")">Входящие</a>
+
+            <a href="@Url.Action("Index", new { filter = "sent" })"
+               class="message-tab @(filter == "sent" ? "active" : "")">Отправленные</a>
+        </div>
+
+        <div class="message-list-container">
+
+            @if (!Model.Any())
+            {
+                <p class="empty-list-message">Нет @(filter == "inbox" ? "входящих" : "отправленных") сообщений.</p>
+            }
+            else
+            {
+                <div class="message-list-header">
+                    <div class="message-header-fio">ФИО</div>
+                    <div class="message-header-text">Сообщение</div>
+                    <div class="message-header-actions"></div>
+                </div>
+
+                @foreach (var message in Model)
+                {
+                    // Определяем данные для ответа (получатель - это отправитель текущего сообщения)
+                    var replyUserId = filter == "inbox" ? message.FromUser.UserId : message.ToUser.UserId;
+                    var replyUserName = filter == "inbox" ? message.FromUser.FullName : message.ToUser.FullName;
+
+                    <div class="message-row">
+
+                        <div class="message-user">
+                            @(filter == "inbox" ? message.FromUser.FullName : message.ToUser.FullName)
+                        </div>
+
+                        <div class="message-snippet" title="@message.MessageText">
+                            @message.MessageText
+                        </div>
+
+                        <div class="message-actions">
+
+                            <button type="button" class="btn-action btn-reply"
+                                    data-user-id="@replyUserId"
+                                    data-user-name="@replyUserName">
+                                Ответить
+                            </button>
+
+                            <form asp-action="Delete" asp-route-id="@message.MessageId" method="post" class="inline-form-delete">
+                                <button type="submit" class="btn-action btn-delete" title="Удалить сообщение"
+                                        onclick="return confirm('Вы уверены, что хотите удалить это сообщение?');">
+                                    Удалить
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div id="newMessageModal" class="modal-overlay">
+    <div class="modal-content-form">
+
+        <div class="modal-form-header">
+            Новое сообщение
+        </div>
+
+        <form id="messageForm" method="post" asp-action="Create" asp-controller="Messages">
+            <input type="hidden" name="ToUserId" id="hiddenToUserId" required />
+
+            <input type="text" id="recipientSearch" name="RecipientName"
+                   class="form-input-field recipient-input"
+                   placeholder="Получатель"
+                   required>
+
+            <div id="recipientValidationMessage" class="validation-message"></div>
+
+            <textarea id="messageText" name="MessageText"
+                      class="form-textarea-field"
+                      placeholder="Текст сообщения"
+                      rows="6" required></textarea>
+
+            <div class="modal-form-actions">
+                <button type="button" id="closeNewMessageModal" class="btn btn-secondary-text">Отмена</button>
+                <button type="submit" id="sendMessageButton" class="btn btn-primary-blue" disabled>Отправить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Инициализация элементов
+        const modal = document.getElementById('newMessageModal');
+        const openNewMsgBtn = document.getElementById('openNewMessageModal');
+        const closeBtn = document.getElementById('closeNewMessageModal');
+        const replyButtons = document.querySelectorAll('.btn-reply'); // Все кнопки "Ответить"
+        const searchInput = document.getElementById('recipientSearch');
+        const validationMsg = document.getElementById('recipientValidationMessage');
+        const sendButton = document.getElementById('sendMessageButton');
+        const hiddenToUserId = document.getElementById('hiddenToUserId');
+        const messageTextarea = document.getElementById('messageText');
+
+        // --- Вспомогательные функции ---
+
+        // Сброс и подготовка модального окна
+        function prepareModal(isReply = false, userId = '', userName = '') {
+            document.getElementById('messageForm').reset();
+            validationMsg.textContent = '';
+            validationMsg.className = 'validation-message';
+            messageTextarea.value = '';
+
+            if (isReply) {
+                // Режим "Ответить": предзаполняем поля и делаем поле получателя только для чтения
+                searchInput.value = userName;
+                hiddenToUserId.value = userId;
+                searchInput.readOnly = true;
+                validationMsg.textContent = ''; // Не нужно сообщение о поиске
+                validationMsg.className = 'validation-message';
+                sendButton.disabled = messageTextarea.value.trim().length === 0; // Зависит только от текста
+            } else {
+                // Режим "Новое сообщение": очищаем и делаем поле получателя доступным
+                searchInput.value = '';
+                hiddenToUserId.value = '';
+                searchInput.readOnly = false;
+                sendButton.disabled = true; // Сначала нужно найти получателя
+            }
+            modal.style.display = 'flex';
+        }
+
+        // Проверка активности кнопки отправки (только для режима "Ответить" или после успешного поиска)
+        function checkFormValidity() {
+            const hasRecipient = hiddenToUserId.value !== '';
+            const hasText = messageTextarea.value.trim().length > 0;
+            sendButton.disabled = !(hasRecipient && hasText);
+        }
+
+        // --- Обработчики событий ---
+
+        // Открытие модального окна для НОВОГО сообщения
+        openNewMsgBtn.onclick = function() {
+            prepareModal(false);
+        }
+
+        // Открытие модального окна при клике на "Ответить"
+        replyButtons.forEach(button => {
+            button.onclick = function() {
+                const userId = this.getAttribute('data-user-id');
+                const userName = this.getAttribute('data-user-name');
+                prepareModal(true, userId, userName);
+                messageTextarea.focus(); // Сразу переводим фокус на поле текста
+            };
+        });
+
+        // Закрытие модального окна
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // При изменении текста сообщения, всегда проверяем валидность кнопки отправки
+        messageTextarea.oninput = checkFormValidity;
+
+        // --- ЛОГИКА ПРОВЕРКИ ПОЛУЧАТЕЛЯ (для режима НОВОЕ СООБЩЕНИЕ) ---
+        let searchTimeout;
+
+        searchInput.oninput = function() {
+            // Если поле readOnly (режим "Ответить"), ничего не делаем
+            if (searchInput.readOnly) return;
+
+            clearTimeout(searchTimeout);
+            const fullName = searchInput.value.trim();
+            hiddenToUserId.value = '';
+            checkFormValidity(); // Сброс кнопки
+
+            if (fullName.length < 3) {
+                validationMsg.textContent = '';
+                validationMsg.className = 'validation-message';
+                return;
+            }
+
+            validationMsg.textContent = 'Поиск...';
+            validationMsg.className = 'validation-message text-gray-500';
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch('@Url.Action("SearchUser", "Messages")?fullName=' + encodeURIComponent(fullName));
+                    const result = await response.json();
+
+                    if (result.success) {
+                        validationMsg.textContent = 'Получатель найден: ' + result.fullName;
+                        validationMsg.className = 'validation-message text-green-500';
+                        hiddenToUserId.value = result.userId;
+                        searchInput.value = result.fullName;
+
+                    } else {
+                        validationMsg.textContent = 'Ошибка: Пользователь не найден.';
+                        validationMsg.className = 'validation-message text-red-500';
+                    }
+                } catch (e) {
+                    validationMsg.textContent = 'Произошла ошибка сети/сервера.';
+                    validationMsg.className = 'validation-message text-red-500';
+                }
+                checkFormValidity();
+            }, 500);
+        }
+    </script>
+}

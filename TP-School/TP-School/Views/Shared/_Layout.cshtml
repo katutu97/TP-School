@@ -1,49 +1,123 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using System.Security.Claims
+
+<!DOCTYPE html>
+<html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TP_School</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/TP_School.styles.css" asp-append-version="true" />
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TP_School</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+    <title>@ViewData["Title"] - ШкЭД</title>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - TP_School - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Подключение Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Настройка Tailwind для использования цвета 'primary' -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3B82F6', // Синий, используемый в вашем дизайне
+                        'secondary': '#1E3A8A', // Темно-синий
+                        'light-blue': '#BFDBFE',
+                        'bg-gray': '#F3F4F6', // Фон
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="bg-bg-gray font-sans antialiased min-h-screen flex">
+
+    <!-- 1. Боковое меню (Sidebar) -->
+    <aside id="sidebar" class="w-64 bg-white shadow-xl h-screen sticky top-0 flex-shrink-0">
+        <div class="p-6 border-b border-gray-200">
+            <!-- Логотип -->
+            <h1 class="text-4xl font-extrabold text-primary tracking-tight">ШкЭД</h1>
         </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+        <!-- Навигация -->
+        <nav class="flex flex-col p-4 space-y-2">
+            <!-- Заголовок меню -->
+            <div class="text-xs font-semibold text-gray-500 uppercase px-3 pt-4 pb-2"><h2>Меню</h2></div>
+
+            <!-- Пункты меню (иконки Font Awesome) -->
+            <a href="@Url.Action("Index", "Home")" class="menu-item group @(ViewData["Title"] == "Главная" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+                <i class="fas fa-home w-5 h-5"></i>
+                <span>Главная</span>
+            </a>
+            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+                <i class="fas fa-book-open w-5 h-5"></i>
+                <span>Ведение журнала</span>
+            </a>
+            @{
+                var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+            }
+            <a href="@Url.Action("Index", "Messages")" class="menu-item group @(currentController == "Messages" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+                <i class="fas fa-envelope w-5 h-5"></i>
+                <span>Сообщения</span>
+            </a>
+            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+                <i class="fas fa-calendar-alt w-5 h-5"></i>
+                <span>Расписание</span>
+            </a>
+            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+                <i class="fas fa-chart-line w-5 h-5"></i>
+                <span>Успеваемость</span>
+            </a>
+            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+                <i class="fas fa-cogs w-5 h-5"></i>
+                <span>Администрирование</span>
+            </a>
+
+            <!-- Разделитель -->
+            <div class="border-t border-gray-200 pt-4"></div>
+
+            <!-- Профиль и Выход -->
+            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+                <i class="fas fa-user-circle w-5 h-5"></i>
+                <span>Профиль</span>
+            </a>
+
+            <!-- Форма выхода (POST-запрос) -->
+            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+                <button type="submit" class="menu-item text-gray-700 hover:bg-red-100 hover:text-red-600 w-full text-left group">
+                    <i class="fas fa-sign-out-alt w-5 h-5"></i>
+                    <span>Выйти</span>
+                </button>
+            </form>
+        </nav>
+
+        <!-- Пользовательские стили для меню -->
+        <style>
+            .menu-item {
+                display: flex;
+                align-items: center;
+                padding: 0.75rem; /* p-3 */
+                border-radius: 0.5rem; /* rounded-lg */
+                transition: all 0.2s;
+                gap: 0.75rem; /* gap-3 */
+            }
+        </style>
+    </aside>
+
+    <!-- 2. Основное содержимое (Main Content) -->
+    <main class="flex-grow p-8">
+        <!-- Заголовок страницы (Хлебные крошки/Заголовок) -->
+        <header class="mb-6 pb-4 border-b border-gray-300">
+            <h1 class="text-3xl font-bold text-gray-800">@ViewData["Title"]</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Приветствуем, @ViewBag.FullName! Вы вошли как @User.FindFirst(ClaimTypes.Role)?.Value.
+            </p>
+        </header>
+
+        <!-- Рендеринг содержимого текущего View (Index.cshtml) -->
+        @RenderBody()
+
+    </main>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

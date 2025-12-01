@@ -1,0 +1,346 @@
+﻿/* ======================================= */
+/* === Стили для страницы Сообщений (Messages) === */
+/* ======================================= */
+
+/* Примечание: предполагается, что основные цвета (var(--color-primary), 
+   var(--color-border-light), var(--color-bg-light) и т.д.) 
+   определены в вашем глобальном файле стилей. */
+
+/* --- Главный контейнер страницы (для имитации структуры messages_inbox.png) --- */
+
+.messages-page-content {
+    /* Если это вся страница, то это главный контейнер.
+       Если это контентная часть, то нужно учесть боковое меню */
+    padding: 20px;
+    background-color: var(--color-bg-light); /* Светлый фон страницы */
+}
+
+/* --- Кнопка "Новое сообщение" (вверху страницы) --- */
+
+.btn-new-message {
+    background-color: #f7f7f7; /* Очень светлый серый для кнопки */
+    color: #444;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: background-color 0.2s, border-color 0.2s;
+    margin-bottom: 20px; /* Отступ от контентного блока */
+}
+
+    .btn-new-message i {
+        margin-right: 5px;
+    }
+
+    .btn-new-message:hover {
+        background-color: #eee;
+        border-color: #bbb;
+    }
+
+/* --- Контейнер контента (белый блок с сообщениями) --- */
+
+.message-content-box {
+    background-color: white;
+    border: 1px solid var(--color-border-light);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Стили для Вкладок (Tabs) --- */
+
+.message-tabs-header {
+    /* Растянуть на всю ширину блока */
+    display: flex;
+    border-bottom: 1px solid var(--color-border-light);
+    /* Отступ слева и справа, как на messages_inbox.png */
+    padding: 0 10px;
+}
+
+.message-tab {
+    /* Для соответствия дизайну messages_inbox.png */
+    padding: 10px 30px;
+    text-decoration: none;
+    color: #666; /* Серый цвет неактивной вкладки */
+    font-size: 1rem;
+    font-weight: 600;
+    transition: color 0.2s;
+    /* Имитация нижней границы с отступом */
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px; /* Наложение на границу контейнера */
+}
+
+    .message-tab:hover {
+        color: #333;
+    }
+
+    .message-tab.active {
+        color: #3b90d3; /* Синий цвет активной вкладки */
+        border-bottom-color: #3b90d3;
+    }
+
+/* --- Стили для Списка Сообщений --- */
+
+.message-list-container {
+    padding: 10px; /* Внутренний отступ контейнера */
+}
+
+/* Заголовок колонок (ФИО | Сообщение | Действия) */
+.message-list-header {
+    display: grid;
+    /* Адаптация колонок под дизайн: ФИО (фиксированная) | Сообщение (оставшееся) | Действия (для выравнивания) */
+    grid-template-columns: 200px 1fr 150px;
+    font-weight: 600;
+    color: #333;
+    padding: 5px 10px;
+}
+
+    .message-list-header > div {
+        /* Выравнивание по левому краю для ФИО и Сообщения */
+        text-align: left;
+    }
+
+.message-header-actions {
+    /* Действия не должны иметь текст в заголовке, но должны быть для выравнивания */
+    text-align: right;
+}
+
+/* Строка сообщения */
+.message-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 150px;
+    padding: 10px;
+    border-bottom: 1px solid #eee; /* Очень светлая граница между строками */
+    align-items: center;
+    cursor: pointer;
+    background-color: white;
+}
+
+    .message-row:last-child {
+        border-bottom: none;
+    }
+
+    .message-row:hover {
+        background-color: #f9f9f9;
+    }
+
+    /* Строка непрочитанного сообщения */
+    .message-row.unread {
+        background-color: #f0f8ff; /* Светло-голубой для непрочитанного */
+        font-weight: 600;
+    }
+
+.message-user {
+    font-weight: inherit; /* Использует жирность из .message-row.unread */
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-snippet {
+    font-weight: inherit; /* Использует жирность из .message-row.unread */
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 20px; /* Отступ от действий */
+}
+
+/* --- Стили для Действий (Кнопок) в списке --- */
+
+.message-actions {
+    white-space: nowrap;
+    text-align: right;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    color: #3b90d3; /* Синий цвет для действий */
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px 8px;
+    margin-left: 5px;
+    transition: color 0.2s;
+    border-radius: 4px;
+}
+
+    .btn-action:hover {
+        color: #1a7bbd;
+        background-color: #f0f0f0;
+    }
+
+.btn-delete {
+    color: #ef4444; /* Красный для Удалить */
+}
+
+    .btn-delete:hover {
+        color: #b91c1c;
+    }
+
+/* --- Стили для пустого списка --- */
+
+.empty-list-message {
+    text-align: center;
+    color: #888;
+    padding: 50px 0;
+    font-size: 1.1rem;
+}
+
+/* ===================================== */
+/* === Стили для Модального окна (message_form.png) === */
+/* ===================================== */
+
+.modal-overlay {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content-form {
+    background-color: #f5f5f5; /* Светло-серый фон, как на изображении */
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px; /* Ограничение ширины */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    padding: 0; /* Удаляем внутренние отступы, чтобы контролировать их внутри элементов */
+}
+
+.modal-form-header {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    padding: 20px 30px 10px 30px;
+    border-bottom: 1px solid #ddd;
+}
+
+.message-form {
+    padding: 20px; /* Отступ внутри формы */
+}
+
+#messageForm {
+    padding: 0 30px; /* Добавлен отступ слева и справа для полей ввода */
+}
+
+/* --- Стили для полей формы --- */
+
+.form-input-field,
+.form-textarea-field {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 0; /* Убираем стандартный нижний отступ */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    color: #333;
+    background-color: #fff; /* Белый фон для полей */
+    resize: vertical;
+}
+
+    .form-input-field:focus,
+    .form-textarea-field:focus {
+        border-color: #3b90d3;
+        outline: none;
+        box-shadow: 0 0 0 1px #3b90d3;
+    }
+
+/* Специальные стили для поля Получатель */
+.recipient-input {
+    margin-top: 20px; /* Отступ от заголовка */
+}
+
+/* Текстареа занимает большую часть */
+.form-textarea-field {
+    min-height: 150px;
+    max-height: 300px;
+}
+
+/* --- Сообщение о валидации --- */
+
+.validation-message {
+    padding: 5px 0;
+    font-size: 0.9rem;
+    min-height: 25px; /* Чтобы не скакало при смене текста */
+    margin-bottom: 5px;
+    color: #999;
+}
+
+.text-red-500 {
+    color: #ef4444;
+}
+
+.text-green-500 {
+    color: #10b981;
+}
+
+/* --- Стили для кнопок в модальном окне --- */
+
+.modal-form-actions {
+    /* Блок с кнопками внизу, как на message_form.png */
+    background-color: #f5f5f5;
+    padding: 15px 30px;
+    text-align: right;
+    border-top: 1px solid #ddd;
+}
+
+    .modal-form-actions .btn {
+        padding: 8px 20px;
+        font-size: 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+.btn-secondary-text {
+    /* Кнопка Отмена */
+    background: none;
+    border: none;
+    color: #666;
+    transition: color 0.2s;
+}
+
+    .btn-secondary-text:hover {
+        color: #333;
+    }
+
+.btn-primary-blue {
+    /* Кнопка Отправить (синяя) */
+    background-color: #3b90d3;
+    color: white;
+    border: 1px solid #3b90d3;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+    .btn-primary-blue:hover {
+        background-color: #1a7bbd;
+        border-color: #1a7bbd;
+    }
+
+    .btn-primary-blue:disabled {
+        background-color: #a0c3e6;
+        border-color: #a0c3e6;
+        cursor: not-allowed;
+    }
+/* Добавим стиль для формы удаления, чтобы она была инлайновой */
+.inline-form-delete {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+/* Убедитесь, что стили для i (иконок) тоже включены, 
+   например, из Font Awesome, если вы их используете. */

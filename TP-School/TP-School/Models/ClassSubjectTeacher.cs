@@ -6,5 +6,9 @@
         public int ClassId { get; set; }
         public int SubjectId { get; set; }
         public int TeacherId { get; set; }
+
+        public SchoolClass Class { get; set; }
+        public Subject Subject { get; set; }
+        public User Teacher { get; set; }
     }
 }

@@ -1,8 +1,200 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Главная";
+    Layout = "_Layout"; // Используем макет с меню
 }
+<link rel="stylesheet" href="~/css/home.css" />
+<div class="dashboard-content-wrapper">
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <div class="announcements-block">
+        <div class="announcements-header">
+            <h3 class="announcements-title">Объявления</h3>
+            @if (User.IsInRole("Учитель"))
+            {
+                <button class="announcements-add-button" id="openAnnouncementModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            }
+        </div>
+        <div class="announcements-list">
+
+            @if (ViewBag.Announcements != null)
+            {
+                @foreach (var announcement in (List<TP_School.Models.Announcement>)ViewBag.Announcements)
+                {
+                    <div class="announcement-item">
+                        <div class="announcement-meta">
+                            <h4 class="announcement-heading">@announcement.Title</h4>
+                            <span class="announcement-date">@announcement.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                        <p class="announcement-text">
+                            @announcement.Text
+                        </p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="announcement-item" style="border: none; background: none; text-align: center;">
+                    <p class="text-gray-500">Объявлений пока нет.</p>
+                </div>
+            }
+
+        </div>
+        
+    </div>
+
+
+
+    <div class="school-info-block">
+
+        <div class="info-header-section">
+            <h2 class="school-info-heading">Школа «Вектор»: где каждый ребёнок находит свой путь</h2>
+            <div class="info-hero-image-container">
+                <center><img src="~/img/Sh1.png" alt="Современное здание школы «Вектор»" style="width: 50%; height: auto; display: block;"></center>
+            </div>
+        </div>
+
+        <div class="info-text-content">
+            <p class="lead-text">
+                Мы — **современная школа «Вектор»**. Здесь мы верим, что у каждого ребёнка
+                есть свой уникальный талант и направление роста. Наша задача — не просто
+                дать знания, а помочь каждому ученику построить свой маршрут к успеху и
+                найти дело по душе.
+            </p>
+
+            <h3 class="info-section-title">Что делает «Вектор» особенным?</h3>
+
+            <ul class="info-feature-list">
+                <li><strong class="text-primary-color">Проекты вместо зубрёжки:</strong> Мы учимся, решая реальные задачи. Создание собственного блога, экологический эксперимент или мини-стартап — вот наши уроки.</li>
+                <li><strong class="text-primary-color">Выбор и ответственность:</strong> С 7 класса ученики могут выбирать часть предметов и элективов, составляя свою учебную программу.</li>
+                <li><strong class="text-primary-color">Атмосфера доверия:</strong> У нас уютно и безопасно. Каждый голос важен. Наши психологи и наставники всегда готовы поддержать.</li>
+            </ul>
+
+            <div class="info-gallery-row">
+            </div>
+
+            <h3 class="info-section-title">Наши принципы:</h3>
+
+            <ul class="info-principle-list">
+                <li>✔ Интерес к познанию — главный двигатель.</li>
+                <li>✔ У нас современная и дружная команда преподователей.</li>
+                <li>✔ Главное в жизни не оценки, а полученный опыт, для того, чтоб построить себя.</li>
+                <li>✔ Сотрудничество, а не конкуренция — работаем в командах.</li>
+                <li>✔ Связь с жизнью — приглашаем экспертов, ходим на экскурсии в компании и лаборатории.</li>
+            </ul>
+
+            <div class="info-separator-image-container">
+            </div>
+
+            <h3 class="info-section-title">Мы готовим не к экзаменам, а к будущему.</h3>
+            <p>
+                Наши выпускники — это не просто отличники. Это аналитики, способные работать с информацией, творцы, умеющие генерировать идеи, и ответственные граждане, готовые менять мир к лучшему.
+            </p>
+
+            <p class="final-call-to-action">
+                Учась у нас вы почувствуете атмосферу «Вектора»!
+            </p>
+
+            <div class="info-final-image-container">
+            </div>
+
+        </div>
+
+        <div class="info-contacts-footer">
+            <h4 class="contacts-title">Контакты:</h4>
+            <ul class="contacts-list">
+                <li><i class="fas fa-map-marker-alt contact-icon"></i> **Адрес:** г. Волжинск, ул. Перспективная, д. 9</li>
+                <li><i class="fas fa-phone contact-icon"></i> **Телефон:** +7 (999) 979-79-79</li>
+                <li><i class="fas fa-envelope contact-icon"></i> **E-mail:** <a href="mailto:vector-school@yandex.ru" class="contact-link">vector-school@yandex.ru</a></li>
+            </ul>
+        </div>
+    </div>
+
 </div>
+
+<div id="announcementModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="modal-header">Новое объявление</h3>
+
+        <form id="announcementForm" class="announcement-form" method="post" action="@Url.Action("CreateAnnouncement", "Home")">
+
+            @Html.AntiForgeryToken()
+
+            <input type="text" id="announcementTitle" name="Title" class="form-input-field" placeholder="Заголовок объявления" required>
+
+            <textarea id="announcementText" name="Text" class="form-textarea-field" placeholder="Текст объявления" rows="10" required></textarea>
+
+            <div class="modal-actions">
+                <button type="button" id="cancelAnnouncementModal" class="btn btn-secondary">Отмена</button>
+                <button type="submit" class="btn btn-primary-modal">Опубликовать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('announcementModal');
+        const openBtn = document.getElementById('openAnnouncementModal');
+        const cancelBtn = document.getElementById('cancelAnnouncementModal');
+        const form = document.getElementById('announcementForm');
+
+        // ... (Функции showModal и hideModal остаются без изменений)
+        function showModal() { modal.style.display = 'flex'; }
+        function hideModal() { modal.style.display = 'none'; }
+
+        // 1. Открытие модального окна по клику на "+"
+        if (openBtn) { openBtn.addEventListener('click', showModal); }
+        // 2. Закрытие модального окна по клику на "Отмена" и оверлей
+        if (cancelBtn) { cancelBtn.addEventListener('click', hideModal); }
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+        }
+
+        // *** 4. Обработка отправки формы через AJAX ***
+        if (form) {
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+                const formData = new FormData(form);
+                const actionUrl = form.getAttribute('action');
+
+                // Отображаем индикатор загрузки/блокируем кнопку
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.textContent = 'Публикуется...';
+                submitButton.disabled = true;
+
+                try {
+                    const response = await fetch(actionUrl, {
+                        method: 'POST',
+                        body: formData,
+                        // ASP.NET Core MVC (как правило) автоматически обработает токен из FormData
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        alert(result.message); // Уведомление об успехе
+                        hideModal(); // Скрываем модальное окно
+                        form.reset(); // Очищаем форму
+                        window.location.reload(); // Перезагружаем страницу для отображения нового объявления
+                    } else {
+                        // Обработка ошибок валидации или ошибок сервера
+                        const errorMessage = result.message || "Не удалось опубликовать объявление.";
+                        alert('Ошибка: ' + errorMessage);
+                    }
+                } catch (error) {
+                    console.error('Ошибка AJAX:', error);
+                    alert('Ошибка сети или сервера.');
+                } finally {
+                    submitButton.textContent = 'Опубликовать';
+                    submitButton.disabled = false;
+                }
+            });
+        }
+    });
+</script>

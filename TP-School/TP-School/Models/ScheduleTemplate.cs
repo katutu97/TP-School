@@ -9,5 +9,9 @@
         public byte DayOfWeek { get; set; }
         public int LessonNumber { get; set; }
         public string Room { get; set; }
+
+        public SchoolClass Class { get; set; }
+        public Subject Subject { get; set; }
+        public User Teacher { get; set; }
     }
 }

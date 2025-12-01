@@ -1,0 +1,68 @@
+﻿/* login.css */
+
+/* Стиль для всей страницы и центрирования */
+.login-page {
+    background-color: #f1f6fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Контейнер для логотипа и карточки */
+.login-container {
+    width: 100%;
+    max-width: 440px;
+}
+
+/* Логотип */
+.logo-box {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-text {
+    /* Фон логотипа (основной синий цвет) */
+    background-color: #3b90d3;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    padding: 5px 20px;
+    border-radius: 5px;
+    letter-spacing: 2px;
+    display: inline-block;
+}
+
+/* Плашка (Карточка) */
+.login-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+    /* ***  Цвет заголовка "Вход в систему" *** */
+    .login-card h2 {
+        color: #3b90d3; /* Устанавливаем синий цвет, как у логотипа */
+        font-weight: 600;
+    }
+
+/* ***  Цвет кнопки "Войти" *** */
+.btn-primary {
+    /* Основной цвет кнопки и рамки */
+    background-color: #3b90d3;
+    border-color: #3b90d3;
+    font-weight: 600;
+}
+
+    .btn-primary:hover {
+        /* Немного более темный цвет при наведении */
+        background-color: #327bbc;
+        border-color: #327bbc;
+    }
+
+/* Стиль полей ввода (если хотите, чтобы они выглядели как на картинке) */
+.form-control-lg {
+    /* Делаем рамку светло-серой */
+    border: 1px solid #e0e0e0;
+}

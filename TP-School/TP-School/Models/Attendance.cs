@@ -5,6 +5,9 @@
         public int Id { get; set; }
         public int StudentId { get; set; }
         public int LessonId { get; set; }
-        public string Status { get; set; } // 'P' - присутствовал, 'A' - отсутствовал
+        public string Status { get; set; }
+
+        public User Student { get; set; }
+        public Schedule Lesson { get; set; }
     }
 }

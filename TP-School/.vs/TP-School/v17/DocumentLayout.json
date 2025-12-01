@@ -1,70 +1,146 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\",
+  "WorkspaceRootPath": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\studentparents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\studentparents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\announcement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\announcement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\remark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\remark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\grade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\grade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\homework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\homework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\schedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\schedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\scheduletemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\scheduletemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\classsubjectteacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\classsubjectteacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\subject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\subject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\studentclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\studentclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\schoolclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\schoolclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\models\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\messages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\messages\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\wwwroot\\css\\messages.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\wwwroot\\css\\messages.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\migrations\\applicationdbcontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\migrations\\applicationdbcontextmodelsnapshot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\controllers\\messagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\controllers\\messagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\message.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\viewmodels\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\shared\\_layout.cshtml.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\shared\\_layout.cshtml.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\wwwroot\\css\\home.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\wwwroot\\css\\home.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\viewmodels\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\viewmodels\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\viewmodels\\announcementviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\viewmodels\\announcementviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\announcement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\announcement.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\schoolclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\schoolclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\studentclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\studentclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\wwwroot\\css\\login.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\wwwroot\\css\\login.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\shared\\error.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\shared\\error.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\studentparents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\studentparents.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\homework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\homework.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\remark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\remark.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\grade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\grade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\schedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\schedule.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\scheduletemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\scheduletemplate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\classsubjectteacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\classsubjectteacher.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\models\\subject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\models\\subject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\migrations\\20251130182732_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\migrations\\20251130182732_initialcreate.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -74,200 +150,441 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\appsettings.json",
-              "RelativeDocumentMoniker": "TP-School\\appsettings.json",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\appsettings.json",
-              "RelativeToolTip": "TP-School\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABRAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-29T18:27:48.831Z",
+              "DocumentIndex": 6,
+              "Title": "MessagesController.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\MessagesController.cs",
+              "RelativeDocumentMoniker": "TP-School\\Controllers\\MessagesController.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\MessagesController.cs",
+              "RelativeToolTip": "TP-School\\Controllers\\MessagesController.cs",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAowH0AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-01T14:53:22.415Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ApplicationDbContextModelSnapshot.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "RelativeDocumentMoniker": "TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "RelativeToolTip": "TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-01T14:49:05.572Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "StudentParents.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\StudentParents.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\StudentParents.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\StudentParents.cs",
-              "RelativeToolTip": "TP-School\\Models\\StudentParents.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:12:07.404Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Message.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Message.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Message.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Message.cs",
-              "RelativeToolTip": "TP-School\\Models\\Message.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:12:31.717Z"
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Messages\\Index.cshtml",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Messages\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Messages\\Index.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Messages\\Index.cshtml",
+              "ViewState": "AgIAAMYAAAAAAAAAAAAYwNUAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-01T14:55:03.993Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Announcement.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Announcement.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Announcement.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Announcement.cs",
-              "RelativeToolTip": "TP-School\\Models\\Announcement.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:11:43.897Z"
+              "Title": "messages.css",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\messages.css",
+              "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\messages.css",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\messages.css",
+              "RelativeToolTip": "TP-School\\wwwroot\\css\\messages.css",
+              "ViewState": "AgIAAD0BAAAAAAAAAAAAAFYBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-12-01T15:01:02.892Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Remark.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Remark.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Remark.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Remark.cs",
-              "RelativeToolTip": "TP-School\\Models\\Remark.cs",
+              "DocumentIndex": 1,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\User.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\User.cs",
+              "RelativeToolTip": "TP-School\\Models\\User.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAA9wCgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:06:59.117Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Role.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Role.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Role.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Role.cs",
+              "RelativeToolTip": "TP-School\\Models\\Role.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:11:21.648Z"
+              "WhenOpened": "2025-11-29T18:06:21.68Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Attendance.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Attendance.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Attendance.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Attendance.cs",
-              "RelativeToolTip": "TP-School\\Models\\Attendance.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Title": "20251201160735_RemoveIsReadFromMessages.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs",
+              "RelativeDocumentMoniker": "TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs",
+              "RelativeToolTip": "TP-School\\Migrations\\20251201160735_RemoveIsReadFromMessages.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:10:59.439Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Grade.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Grade.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Grade.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Grade.cs",
-              "RelativeToolTip": "TP-School\\Models\\Grade.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:10:33.247Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Homework.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Homework.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Homework.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Homework.cs",
-              "RelativeToolTip": "TP-School\\Models\\Homework.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:10:14.201Z"
+              "WhenOpened": "2025-12-01T16:07:35.9Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
-              "Title": "Schedule.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Schedule.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Schedule.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Schedule.cs",
-              "RelativeToolTip": "TP-School\\Models\\Schedule.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "TP-School\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "TP-School\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAHMAAAAAAAAAAAAwwIcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:09:53.439Z"
+              "WhenOpened": "2025-11-30T13:34:39.924Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
-              "Title": "ScheduleTemplate.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\ScheduleTemplate.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\ScheduleTemplate.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\ScheduleTemplate.cs",
-              "RelativeToolTip": "TP-School\\Models\\ScheduleTemplate.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Title": "LoginViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\LoginViewModel.cs",
+              "RelativeDocumentMoniker": "TP-School\\ViewModels\\LoginViewModel.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\LoginViewModel.cs",
+              "RelativeToolTip": "TP-School\\ViewModels\\LoginViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:09:29.65Z"
+              "WhenOpened": "2025-11-30T20:02:39.902Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
-              "Title": "ClassSubjectTeacher.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\ClassSubjectTeacher.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\ClassSubjectTeacher.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\ClassSubjectTeacher.cs",
-              "RelativeToolTip": "TP-School\\Models\\ClassSubjectTeacher.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "TP-School\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "TP-School\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAADwAAAAAAAAAAAAAAF4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:09:05.906Z"
+              "WhenOpened": "2025-11-30T14:08:11.471Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Message.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Message.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Message.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Message.cs",
+              "RelativeToolTip": "TP-School\\Models\\Message.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAgAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:12:31.717Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 11,
-              "Title": "Subject.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Subject.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Subject.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Subject.cs",
-              "RelativeToolTip": "TP-School\\Models\\Subject.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:08:41.198Z"
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAEcAAAAAAAAAAAAnwDoAAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-30T14:04:07.934Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 12,
-              "Title": "StudentClass.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\StudentClass.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\StudentClass.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\StudentClass.cs",
-              "RelativeToolTip": "TP-School\\Models\\StudentClass.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Title": "_Layout.cshtml.css",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml.css",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_Layout.cshtml.css",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml.css",
+              "RelativeToolTip": "TP-School\\Views\\Shared\\_Layout.cshtml.css",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-30T14:11:38.831Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "home.css",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\home.css",
+              "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\home.css",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\home.css",
+              "RelativeToolTip": "TP-School\\wwwroot\\css\\home.css",
+              "ViewState": "AgIAAPoAAAAAAAAAAAAUwP4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-30T20:55:07.568Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "ErrorViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\ErrorViewModel.cs",
+              "RelativeDocumentMoniker": "TP-School\\ViewModels\\ErrorViewModel.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\ErrorViewModel.cs",
+              "RelativeToolTip": "TP-School\\ViewModels\\ErrorViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:08:16.142Z"
+              "WhenOpened": "2025-11-30T20:39:58.183Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\appsettings.json",
+              "RelativeDocumentMoniker": "TP-School\\appsettings.json",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\appsettings.json",
+              "RelativeToolTip": "TP-School\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-29T18:27:48.831Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 13,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "TP-School\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "TP-School\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAA7wCAAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T16:59:22.851Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AnnouncementViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\AnnouncementViewModel.cs",
+              "RelativeDocumentMoniker": "TP-School\\ViewModels\\AnnouncementViewModel.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\AnnouncementViewModel.cs",
+              "RelativeToolTip": "TP-School\\ViewModels\\AnnouncementViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-01T00:07:16.305Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
               "Title": "SchoolClass.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\SchoolClass.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\SchoolClass.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\SchoolClass.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\SchoolClass.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\SchoolClass.cs",
               "RelativeToolTip": "TP-School\\Models\\SchoolClass.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA8AAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-29T18:07:48.803Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "User.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\User.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\User.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\User.cs",
-              "RelativeToolTip": "TP-School\\Models\\User.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAA5wBMAAAABAAAAAAAAAA==",
+              "DocumentIndex": 20,
+              "Title": "Attendance.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Attendance.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Attendance.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Attendance.cs",
+              "RelativeToolTip": "TP-School\\Models\\Attendance.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:06:59.117Z"
+              "WhenOpened": "2025-11-29T18:10:59.439Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "Role.cs",
-              "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Role.cs",
-              "RelativeDocumentMoniker": "TP-School\\Models\\Role.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Models\\Role.cs",
-              "RelativeToolTip": "TP-School\\Models\\Role.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
+              "DocumentIndex": 18,
+              "Title": "Announcement.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Announcement.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Announcement.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Announcement.cs",
+              "RelativeToolTip": "TP-School\\Models\\Announcement.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-29T18:06:21.68Z"
+              "WhenOpened": "2025-11-30T17:29:38.81Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Account\\Login.cshtml",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-30T14:06:35.08Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "Error.cshtml",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\Error.cshtml",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\Error.cshtml",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\Error.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Shared\\Error.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-30T13:21:36.145Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "StudentClass.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentClass.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\StudentClass.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentClass.cs",
+              "RelativeToolTip": "TP-School\\Models\\StudentClass.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:08:16.142Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Program.cs",
+              "RelativeDocumentMoniker": "TP-School\\Program.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Program.cs",
+              "RelativeToolTip": "TP-School\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T14:11:54.635Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "login.css",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\login.css",
+              "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\login.css",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\login.css",
+              "RelativeToolTip": "TP-School\\wwwroot\\css\\login.css",
+              "ViewState": "AgIAACUAAAAAAAAAAAAUwEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-11-30T13:45:00.175Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "20251130182732_InitialCreate.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251130182732_InitialCreate.cs",
+              "RelativeDocumentMoniker": "TP-School\\Migrations\\20251130182732_InitialCreate.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251130182732_InitialCreate.cs",
+              "RelativeToolTip": "TP-School\\Migrations\\20251130182732_InitialCreate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-30T18:27:32.993Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "StudentParents.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentParents.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\StudentParents.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentParents.cs",
+              "RelativeToolTip": "TP-School\\Models\\StudentParents.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:12:07.404Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Homework.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Homework.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Homework.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Homework.cs",
+              "RelativeToolTip": "TP-School\\Models\\Homework.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:10:14.201Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "Grade.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Grade.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Grade.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Grade.cs",
+              "RelativeToolTip": "TP-School\\Models\\Grade.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:10:33.247Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "Schedule.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Schedule.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Schedule.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Schedule.cs",
+              "RelativeToolTip": "TP-School\\Models\\Schedule.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAmwBcAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:09:53.439Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "ScheduleTemplate.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ScheduleTemplate.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\ScheduleTemplate.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ScheduleTemplate.cs",
+              "RelativeToolTip": "TP-School\\Models\\ScheduleTemplate.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:09:29.65Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "ClassSubjectTeacher.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ClassSubjectTeacher.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\ClassSubjectTeacher.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ClassSubjectTeacher.cs",
+              "RelativeToolTip": "TP-School\\Models\\ClassSubjectTeacher.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:09:05.906Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "Subject.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Subject.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Subject.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Subject.cs",
+              "RelativeToolTip": "TP-School\\Models\\Subject.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:08:41.198Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Remark.cs",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Remark.cs",
+              "RelativeDocumentMoniker": "TP-School\\Models\\Remark.cs",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Remark.cs",
+              "RelativeToolTip": "TP-School\\Models\\Remark.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-29T18:11:21.648Z"
             }
           ]
         }

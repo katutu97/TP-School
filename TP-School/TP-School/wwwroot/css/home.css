@@ -1,7 +1,158 @@
-﻿/*
-  Стили для главной страницы index (home)
+﻿/* ===========================
+   Блок "Информация о школе"
+   =========================== */
 
-*/
+.school-info-block {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 12px 25px -5px rgba(0, 0, 0, 0.1);
+    color: var(--color-text-default);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+/* Заголовок и фото */
+.info-header-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.school-info-heading {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin-bottom: 1.2rem;
+}
+
+.info-hero-image-container img {
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Основной текст */
+.info-text-content {
+    margin-top: 1.5rem;
+}
+
+.lead-text {
+    font-size: 1.1rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* Заголовки разделов */
+.info-section-title {
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    margin: 2rem 0 1rem;
+    font-weight: 600;
+}
+
+/* Блок "Что делает особенным" */
+.info-feature-list {
+    list-style: none;
+    padding: 1.5rem;
+    background-color: var(--color-bg-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: 14px;
+    margin-bottom: 2rem;
+}
+
+    .info-feature-list li {
+        margin-bottom: 1rem;
+        padding-left: 1.2rem;
+        position: relative;
+    }
+
+        .info-feature-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+
+/* Блок "Наши принципы" */
+.info-principle-list {
+    list-style: none;
+    padding: 1.5rem;
+    border: 1px solid var(--color-primary);
+    background-color: var(--color-announcement-bg);
+    border-radius: 14px;
+    margin-bottom: 2rem;
+}
+
+    .info-principle-list li {
+        margin-bottom: 0.7rem;
+        font-weight: 500;
+    }
+
+/* Выделенный акцентный текст */
+.final-call-to-action {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    margin-top: 1.5rem;
+}
+
+/* Блок Контакты */
+.info-contacts-footer {
+    margin-top: 2.5rem;
+    background-color: #ffffff;
+    border: 1.5px solid var(--color-primary);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+}
+
+.contacts-title {
+    font-size: 1.3rem;
+    color: var(--color-primary);
+    margin-bottom: 1rem;
+}
+
+.contacts-list {
+    list-style: none;
+    padding: 0;
+}
+
+    .contacts-list li {
+        padding: 0.4rem 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+    }
+
+.contact-icon {
+    color: var(--color-primary);
+}
+
+.contact-link {
+    color: var(--color-primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+    .contact-link:hover {
+        text-decoration: underline;
+    }
+
+/* Адаптация под маленькие экраны */
+@media (max-width: 768px) {
+    .school-info-block {
+        padding: 1.5rem;
+    }
+
+    .school-info-heading {
+        font-size: 1.5rem;
+    }
+
+    .lead-text {
+        font-size: 1rem;
+    }
+}
 
 :root {
     --color-primary: #3b90d3;

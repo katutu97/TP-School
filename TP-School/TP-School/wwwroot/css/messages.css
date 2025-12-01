@@ -93,6 +93,7 @@
     display: grid;
     /* Адаптация колонок под дизайн: ФИО (фиксированная) | Сообщение (оставшееся) | Действия (для выравнивания) */
     grid-template-columns: 200px 1fr 150px;
+    gap: 30px;
     font-weight: 600;
     color: #333;
     padding: 5px 10px;
@@ -111,6 +112,7 @@
 /* Строка сообщения */
 .message-row {
     display: grid;
+    gap: 30px;
     grid-template-columns: 200px 1fr 150px;
     padding: 10px;
     border-bottom: 1px solid #eee; /* Очень светлая граница между строками */
@@ -344,3 +346,40 @@
 
 /* Убедитесь, что стили для i (иконок) тоже включены, 
    например, из Font Awesome, если вы их используете. */
+/* ===================================== */
+/* === Стили для jQuery UI Autocomplete === */
+/* ===================================== */
+
+.ui-autocomplete {
+    /* Чтобы список был над модальным окном (modal-overlay z-index: 1000) */
+    z-index: 1001 !important;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    max-height: 200px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем скролл, если элементов много */
+    border-radius: 4px;
+}
+
+.ui-menu-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+    .ui-menu-item:last-child {
+        border-bottom: none;
+    }
+
+/* Стиль для активного элемента (при наведении) */
+.ui-menu-item-wrapper.ui-state-active {
+    background-color: #f0f8ff; /* Светло-голубой фон */
+    border-color: #f0f8ff;
+    color: #3b90d3;
+    text-decoration: none;
+}

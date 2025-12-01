@@ -3,9 +3,14 @@
     ViewData["Title"] = "Сообщения";
     string currentFilter = ViewBag.Filter as string;
     string filter = string.IsNullOrEmpty(currentFilter) ? "inbox" : currentFilter;
+    var recipientRoles = ViewBag.RecipientRoles as List<string> ?? new List<string>();
 }
 
 <link rel="stylesheet" href="~/css/messages.css" asp-append-version="true" />
+@* --- ДОБАВЛЯЕМ ССЫЛКИ НА jQuery UI --- *@
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+@* jQuery и jQuery UI скрипты добавим в конце файла в @section Scripts для лучшей производительности *@
+@* ------------------------------------ *@
 
 <div class="messages-page-content">
 
@@ -32,16 +37,17 @@
             else
             {
                 <div class="message-list-header">
-                    <div class="message-header-fio">ФИО</div>
+                    <div class="message-header-fio">@(filter == "inbox" ? "Отправитель" : "Получатель")</div>
                     <div class="message-header-text">Сообщение</div>
-                    <div class="message-header-actions"></div>
+                    <div class="message-header-actions">Действия</div>
                 </div>
 
                 @foreach (var message in Model)
                 {
-                    // Определяем данные для ответа (получатель - это отправитель текущего сообщения)
-                    var replyUserId = filter == "inbox" ? message.FromUser.UserId : message.ToUser.UserId;
-                    var replyUserName = filter == "inbox" ? message.FromUser.FullName : message.ToUser.FullName;
+                    // Определяем данные для ответа (получатель ответа - это отправитель текущего сообщения)
+                    // Эта переменная используется только в блоке 'Ответить', который теперь условный.
+                    var replyUserId = message.FromUser.UserId;
+                    var replyUserName = message.FromUser.FullName;
 
                     <div class="message-row">
 
@@ -55,13 +61,19 @@
 
                         <div class="message-actions">
 
-                            <button type="button" class="btn-action btn-reply"
-                                    data-user-id="@replyUserId"
-                                    data-user-name="@replyUserName">
-                                Ответить
-                            </button>
+                            @if (filter == "inbox") // Условное отображение: только для ВХОДЯЩИХ
+                            {
+                                // Кнопка "Ответить"
+                                <button type="button" class="btn-action btn-reply"
+                                        data-user-id="@replyUserId"
+                                        data-user-name="@replyUserName">
+                                    Ответить
+                                </button>
+                            }
 
                             <form asp-action="Delete" asp-route-id="@message.MessageId" method="post" class="inline-form-delete">
+                                @* Добавляем токен анти-подделки (если его нет в шаблоне) *@
+                                @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-action btn-delete" title="Удалить сообщение"
                                         onclick="return confirm('Вы уверены, что хотите удалить это сообщение?');">
                                     Удалить
@@ -85,11 +97,18 @@
         <form id="messageForm" method="post" asp-action="Create" asp-controller="Messages">
             <input type="hidden" name="ToUserId" id="hiddenToUserId" required />
 
+            <select id="recipientRole" class="form-select-field recipient-input" required>
+                <option value="" disabled selected>Выберите роль получателя</option>
+                @foreach (var roleName in recipientRoles)
+                {
+                    <option value="@roleName">@roleName</option>
+                }
+            </select>
+
             <input type="text" id="recipientSearch" name="RecipientName"
                    class="form-input-field recipient-input"
-                   placeholder="Получатель"
-                   required>
-
+                   placeholder="ФИО (начните вводить после выбора роли)"
+                   disabled required>
             <div id="recipientValidationMessage" class="validation-message"></div>
 
             <textarea id="messageText" name="MessageText"
@@ -106,124 +125,247 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
     <script>
         // Инициализация элементов
         const modal = document.getElementById('newMessageModal');
         const openNewMsgBtn = document.getElementById('openNewMessageModal');
         const closeBtn = document.getElementById('closeNewMessageModal');
-        const replyButtons = document.querySelectorAll('.btn-reply'); // Все кнопки "Ответить"
+        const replyButtons = document.querySelectorAll('.btn-reply');
+
+        const roleSelect = document.getElementById('recipientRole');
         const searchInput = document.getElementById('recipientSearch');
         const validationMsg = document.getElementById('recipientValidationMessage');
         const sendButton = document.getElementById('sendMessageButton');
         const hiddenToUserId = document.getElementById('hiddenToUserId');
         const messageTextarea = document.getElementById('messageText');
+        const messageForm = document.getElementById('messageForm');
 
         // --- Вспомогательные функции ---
 
-        // Сброс и подготовка модального окна
         function prepareModal(isReply = false, userId = '', userName = '') {
             document.getElementById('messageForm').reset();
             validationMsg.textContent = '';
             validationMsg.className = 'validation-message';
             messageTextarea.value = '';
 
+            // Сброс полей роли и поиска
+            roleSelect.selectedIndex = 0;
+            searchInput.value = '';
+            searchInput.disabled = true;
+
+            // Уничтожаем Autocomplete при открытии модального окна для "Новое сообщение"
+            if ($(searchInput).data('ui-autocomplete')) {
+                 $(searchInput).autocomplete('destroy');
+            }
+
             if (isReply) {
-                // Режим "Ответить": предзаполняем поля и делаем поле получателя только для чтения
+                // Режим "Ответить":
                 searchInput.value = userName;
                 hiddenToUserId.value = userId;
                 searchInput.readOnly = true;
-                validationMsg.textContent = ''; // Не нужно сообщение о поиске
-                validationMsg.className = 'validation-message';
-                sendButton.disabled = messageTextarea.value.trim().length === 0; // Зависит только от текста
+                roleSelect.disabled = true;
+                searchInput.disabled = false;
+
+                validationMsg.textContent = 'Ответ пользователю: ' + userName;
+                validationMsg.className = 'validation-message text-green-500';
+                sendButton.disabled = messageTextarea.value.trim().length === 0;
             } else {
-                // Режим "Новое сообщение": очищаем и делаем поле получателя доступным
-                searchInput.value = '';
+                // Режим "Новое сообщение":
                 hiddenToUserId.value = '';
                 searchInput.readOnly = false;
-                sendButton.disabled = true; // Сначала нужно найти получателя
+                roleSelect.disabled = false;
+                sendButton.disabled = true;
             }
             modal.style.display = 'flex';
         }
 
-        // Проверка активности кнопки отправки (только для режима "Ответить" или после успешного поиска)
         function checkFormValidity() {
             const hasRecipient = hiddenToUserId.value !== '';
             const hasText = messageTextarea.value.trim().length > 0;
             sendButton.disabled = !(hasRecipient && hasText);
         }
 
-        // --- Обработчики событий ---
+        // --- Логика Autocomplete ---
 
-        // Открытие модального окна для НОВОГО сообщения
-        openNewMsgBtn.onclick = function() {
-            prepareModal(false);
+        function initAutocomplete() {
+            // Если уже инициализирован, просто возвращаемся
+            if ($(searchInput).data('ui-autocomplete')) return;
+
+            $(searchInput).autocomplete({
+                source: function(request, response) {
+                    const role = roleSelect.value;
+                    const term = request.term;
+
+                    // Если роль не выбрана
+                    if (!role) {
+                        validationMsg.textContent = 'Сначала выберите роль получателя.';
+                        validationMsg.className = 'validation-message text-gray-500';
+                        return response([]);
+                    }
+
+                    // Если поле пустое, не ищем (но Autocomplete разрешит показать пустой список)
+                    if (term.length < 1) {
+                        validationMsg.textContent = 'Начните вводить ФИО получателя.';
+                        validationMsg.className = 'validation-message text-gray-500';
+                        return response([]);
+                    }
+
+                    // Показываем индикатор поиска
+                    validationMsg.textContent = 'Поиск...';
+                    validationMsg.className = 'validation-message text-gray-500';
+                    hiddenToUserId.value = ''; // Сбрасываем ID при новом вводе
+                    checkFormValidity();
+
+                    // Выполняем AJAX-запрос к контроллеру
+                    $.ajax({
+                        url: '@Url.Action("SearchUser", "Messages")',
+                        dataType: "json",
+                        data: {
+                            fullName: term,
+                            role: role
+                        },
+                        success: function(data) {
+                            if (data && data.length > 0) {
+                                validationMsg.textContent = 'Выберите получателя из списка.';
+                                validationMsg.className = 'validation-message text-gray-500';
+                                response($.map(data, function(item) {
+                                    return {
+                                        label: item.fullName + ' (' + role + ')', // Отображаемое значение в списке
+                                        value: item.fullName, // Значение, которое подставится в поле
+                                        userId: item.userId     // ID пользователя
+                                    };
+                                }));
+                            } else {
+                                validationMsg.textContent = 'Пользователи не найдены среди ' + role + '.';
+                                validationMsg.className = 'validation-message text-red-500';
+                                response([]);
+                            }
+                        },
+                        error: function() {
+                            validationMsg.textContent = 'Произошла ошибка сети/сервера.';
+                            validationMsg.className = 'validation-message text-red-500';
+                            response([]);
+                        }
+                    });
+                },
+                minLength: 1,
+                select: function(event, ui) {
+                    // Обработка выбора элемента из списка
+                    hiddenToUserId.value = ui.item.userId; // Сохраняем ID
+                    searchInput.value = ui.item.value;     // Устанавливаем полное ФИО
+                    validationMsg.textContent = 'Получатель найден: ' + ui.item.value;
+                    validationMsg.className = 'validation-message text-green-500';
+                    checkFormValidity();
+                    return false; // Предотвращаем стандартную обработку
+                }
+            });
         }
 
-        // Открытие модального окна при клике на "Ответить"
+        // --- ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ (AJAX) ---
+
+        messageForm.onsubmit = async function(e) {
+            e.preventDefault(); // <-- ОСТАНАВЛИВАЕМ СТАНДАРТНЫЙ ПЕРЕХОД
+
+            if (sendButton.disabled) return;
+
+            const toUserId = hiddenToUserId.value;
+            const messageText = messageTextarea.value;
+
+            // Защита от двойной отправки
+            sendButton.disabled = true;
+            validationMsg.textContent = 'Отправка...';
+            validationMsg.className = 'validation-message text-gray-500';
+
+            try {
+                // Собираем данные формы
+                const formData = new URLSearchParams({
+                    ToUserId: toUserId,
+                    MessageText: messageText
+                });
+
+                // Добавляем токен анти-подделки из скрытого поля формы
+                // (Предполагается, что в вашей Razor-форме есть @Html.AntiForgeryToken())
+                const token = $('input[name="__RequestVerificationToken"]').val();
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+
+
+                const response = await fetch(messageForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                // Обработка ответа
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Успешная отправка
+                    alert('Сообщение успешно отправлено!');
+                    modal.style.display = 'none';
+                    // !!! ПЕРЕЗАГРУЗКА ТЕКУЩЕЙ СТРАНИЦЫ !!!
+                    window.location.reload();
+                } else {
+                    // Ошибка (может быть 400, 500 или success: false)
+                    const errorMsg = result.message || 'Произошла неизвестная ошибка.';
+                    alert('Ошибка отправки: ' + errorMsg);
+                    validationMsg.textContent = 'Ошибка отправки: ' + errorMsg;
+                    validationMsg.className = 'validation-message text-red-500';
+                }
+            } catch (error) {
+                alert('Ошибка сети или сервера.');
+                console.error(error);
+                validationMsg.textContent = 'Ошибка сети или сервера.';
+                validationMsg.className = 'validation-message text-red-500';
+            } finally {
+                sendButton.disabled = false;
+            }
+    };
+
+        // --- Обработчики событий ---
+
+        // 1. При изменении роли - активируем поиск и инициализируем Autocomplete
+        roleSelect.onchange = function() {
+            // Очищаем предыдущие результаты поиска и разрешаем ввод ФИО
+            searchInput.value = '';
+            hiddenToUserId.value = '';
+            searchInput.disabled = false;
+            searchInput.readOnly = false;
+            validationMsg.textContent = 'Введите ФИО...';
+            validationMsg.className = 'validation-message text-gray-500';
+            checkFormValidity();
+
+            initAutocomplete(); // Инициализация Autocomplete
+            searchInput.focus();
+        };
+
+        // 2. Сброс ID при ручном вводе
+        searchInput.oninput = function() {
+            if (!searchInput.readOnly) {
+                hiddenToUserId.value = '';
+                checkFormValidity();
+            }
+        };
+
+
+        // 3. Остальные обработчики
+        openNewMsgBtn.onclick = function() { prepareModal(false); }
+        closeBtn.onclick = function() { modal.style.display = 'none'; }
+        window.onclick = function(event) { if (event.target == modal) { modal.style.display = 'none'; } }
+        messageTextarea.oninput = checkFormValidity;
         replyButtons.forEach(button => {
             button.onclick = function() {
                 const userId = this.getAttribute('data-user-id');
                 const userName = this.getAttribute('data-user-name');
                 prepareModal(true, userId, userName);
-                messageTextarea.focus(); // Сразу переводим фокус на поле текста
+                messageTextarea.focus();
             };
         });
 
-        // Закрытие модального окна
-        closeBtn.onclick = function() {
-            modal.style.display = 'none';
-        }
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-
-        // При изменении текста сообщения, всегда проверяем валидность кнопки отправки
-        messageTextarea.oninput = checkFormValidity;
-
-        // --- ЛОГИКА ПРОВЕРКИ ПОЛУЧАТЕЛЯ (для режима НОВОЕ СООБЩЕНИЕ) ---
-        let searchTimeout;
-
-        searchInput.oninput = function() {
-            // Если поле readOnly (режим "Ответить"), ничего не делаем
-            if (searchInput.readOnly) return;
-
-            clearTimeout(searchTimeout);
-            const fullName = searchInput.value.trim();
-            hiddenToUserId.value = '';
-            checkFormValidity(); // Сброс кнопки
-
-            if (fullName.length < 3) {
-                validationMsg.textContent = '';
-                validationMsg.className = 'validation-message';
-                return;
-            }
-
-            validationMsg.textContent = 'Поиск...';
-            validationMsg.className = 'validation-message text-gray-500';
-
-            searchTimeout = setTimeout(async () => {
-                try {
-                    const response = await fetch('@Url.Action("SearchUser", "Messages")?fullName=' + encodeURIComponent(fullName));
-                    const result = await response.json();
-
-                    if (result.success) {
-                        validationMsg.textContent = 'Получатель найден: ' + result.fullName;
-                        validationMsg.className = 'validation-message text-green-500';
-                        hiddenToUserId.value = result.userId;
-                        searchInput.value = result.fullName;
-
-                    } else {
-                        validationMsg.textContent = 'Ошибка: Пользователь не найден.';
-                        validationMsg.className = 'validation-message text-red-500';
-                    }
-                } catch (e) {
-                    validationMsg.textContent = 'Произошла ошибка сети/сервера.';
-                    validationMsg.className = 'validation-message text-red-500';
-                }
-                checkFormValidity();
-            }, 500);
-        }
     </script>
 }

@@ -56,6 +56,10 @@ public class HomeController : Controller
     {
         ViewBag.FullName = User.Identity.Name ?? "Пользователь";
 
+        // 0.Определяем граничную дату: ровно 7 дней назад
+        // Объявления, опубликованные ДО этого момента, будут исключены.
+        DateTime cutoffDate = DateTime.Now.AddDays(-7);
+
         // 1. Получаем ID класса для текущего учителя
         var classId = await GetClassIdForCurrentTeacherAsync();
 
@@ -63,7 +67,11 @@ public class HomeController : Controller
         if (classId.HasValue)
         {
             var announcements = await _context.Announcements
-                .Where(a => a.ClassId == classId.Value)
+                .Where(a => 
+                    a.ClassId == classId.Value && // Фильтр по классу
+                    a.CreatedAt >= cutoffDate)    // ДОБАВЛЯЕМ ФИЛЬТР ПО ДАТЕ:
+                                              // Дата создания (CreatedAt) должна быть новее или равна дате 7 дней назад
+
                 .OrderByDescending(a => a.CreatedAt)
                 .ToListAsync();
 

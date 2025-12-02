@@ -44,16 +44,20 @@
             <div class="text-xs font-semibold text-gray-500 uppercase px-3 pt-4 pb-2"><h2>Меню</h2></div>
 
             <!-- Пункты меню (иконки Font Awesome) -->
+            @{
+                var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+            }
             <a href="@Url.Action("Index", "Home")" class="menu-item group @(ViewData["Title"] == "Главная" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-home w-5 h-5"></i>
                 <span>Главная</span>
             </a>
-            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
-                <i class="fas fa-book-open w-5 h-5"></i>
-                <span>Ведение журнала</span>
-            </a>
-            @{
-                var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+            @if (User.IsInRole("Учитель") || User.IsInRole("Директор"))
+            {
+                var isJournalActive = currentController == "Journal"; // <-- Здесь возникала ошибка
+                <a href="@Url.Action("Index", "Journal")" class="menu-item group @(isJournalActive ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+                    <i class="fas fa-book-open w-5 h-5"></i>
+                    <span>Ведение журнала</span>
+                </a>
             }
             <a href="@Url.Action("Index", "Messages")" class="menu-item group @(currentController == "Messages" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-envelope w-5 h-5"></i>

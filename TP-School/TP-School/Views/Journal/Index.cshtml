@@ -1,0 +1,247 @@
+﻿@model TP_School.ViewModels.JournalViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Text.Json
+
+@{
+    ViewData["Title"] = "Ведение журнала";
+    Layout = "_Layout";
+}
+
+<div class="bg-gray-100 min-h-full">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+
+        <div class="flex items-center gap-2 bg-white text-gray-700 px-4 py-2 rounded shadow border border-gray-300">
+            <i class="fas fa-info-circle text-gray-500"></i>
+            <span class="font-medium">Кликните на ячейку для редактирования</span>
+        </div>
+
+        @* ФОРМА ФИЛЬТРОВ *@
+        <form method="get" class="flex flex-wrap items-center gap-2 bg-white p-2 rounded shadow-sm">
+            <div class="flex items-center gap-2">
+                <label class="text-gray-500 text-sm">Класс</label>
+                <select name="classId" asp-for="SelectedClassId" asp-items="Model.Classes"
+                        onchange="this.form.submit()"
+                        class="form-select bg-gray-50 border border-gray-200 rounded px-3 py-1 text-gray-700 focus:outline-none focus:border-blue-500">
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-gray-500 text-sm">Предмет</label>
+                <select name="subjectId" asp-for="SelectedSubjectId" asp-items="Model.Subjects"
+                        onchange="this.form.submit()"
+                        class="form-select bg-gray-50 border border-gray-200 rounded px-3 py-1 text-gray-700 focus:outline-none focus:border-blue-500">
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-gray-500 text-sm">Неделя</label>
+                <select name="weekStart" asp-for="WeekStart" asp-items="Model.Weeks"
+                        onchange="this.form.submit()"
+                        class="form-select bg-gray-50 border border-gray-200 rounded px-3 py-1 text-gray-700 focus:outline-none focus:border-blue-500">
+                </select>
+            </div>
+        </form>
+    </div>
+
+    @* ОСНОВНАЯ ТАБЛИЦА ЖУРНАЛА *@
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="text-white uppercase bg-[#5CACE2]" style="background-color: #5aaae3;">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 border-r border-blue-400 w-12 text-center">№</th>
+                        <th scope="col" class="px-4 py-3 border-r border-blue-400 min-w-[250px]">ФИО</th>
+
+                        @foreach (var lesson in Model.LessonsForWeek)
+                        {
+                            <th scope="col" class="px-2 py-3 border-r border-blue-400 text-center min-w-[60px]">
+                                <div class="font-bold">@lesson.Date.ToString("dd.MM")</div>
+                            </th>
+                        }
+
+                        @for (int i = 0; i < (7 - Model.LessonsForWeek.Count); i++)
+                        {
+                            <th class="px-2 py-3 border-r border-blue-400 bg-blue-300 opacity-50"></th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+                    @{
+                        int rowNumber = 1;
+                    }
+                    @foreach (var row in Model.Rows)
+                    {
+                        var rowClass = rowNumber % 2 == 0 ? "bg-[#EBF3F8]" : "bg-[#DEE9F1]";
+
+                        <tr class="@rowClass hover:bg-blue-50 transition duration-150">
+                            <td class="px-4 py-3 text-center font-bold text-gray-600 border-r border-gray-300">
+                                @rowNumber
+                            </td>
+                            <td class="px-4 py-3 font-bold text-gray-700 border-r border-gray-300">
+                                @row.Student.FullName
+                            </td>
+
+                            @foreach (var lesson in Model.LessonsForWeek)
+                            {
+                                var cell = row.Cells.ContainsKey(lesson.LessonId) ? row.Cells[lesson.LessonId] : null;
+
+                                <td class="px-2 py-3 text-center border-r border-gray-300 relative group h-12 cursor-pointer hover:bg-white/50"
+                                    onclick='openEditModal(@row.Student.UserId,
+                                                             @lesson.LessonId,
+                                                             @Json.Serialize(row.Student.FullName),
+                                                             @Json.Serialize(lesson.Date.ToString("dd.MM.yyyy")),
+                                                             @Json.Serialize(cell?.Value ?? ""),
+                                                             @(cell?.IsAttendance.ToString().ToLower() ?? "false"),
+                                                             @Json.Serialize(cell?.Comment ?? ""))'>
+                                    @if (cell != null)
+                                    {
+                                        if (cell.IsAttendance)
+                                        {
+                                            <span class="text-gray-500 font-medium">@cell.Value</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-gray-800 font-bold text-lg">@cell.Value</span>
+                                            if (cell.HasComment)
+                                            {
+                                                <i class="fas fa-comment-dots text-gray-400 text-xs absolute top-1 right-1" title="@cell.Comment"></i>
+                                            }
+                                        }
+                                    }
+                                </td>
+                            }
+
+                            @for (int i = 0; i < (7 - Model.LessonsForWeek.Count); i++)
+                            {
+                                <td class="border-r border-gray-300"></td>
+                            }
+                        </tr>
+                        rowNumber++;
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Rows.Any())
+        {
+            <div class="p-8 text-center text-gray-500">
+                В этом классе нет учеников или расписание не заполнено на эту неделю.
+            </div>
+        }
+    </div>
+</div>
+
+@* HTML модального окна (без изменений) *@
+<div id="editModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen p-4 text-center">
+        <div class="relative bg-white rounded-lg text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full">
+
+            <div class="bg-blue-600 px-4 py-3 sm:px-6 rounded-t-lg flex justify-between items-center">
+                <h3 class="text-lg font-semibold leading-6 text-white" id="modal-title">Редактирование</h3>
+                <button type="button" onclick="closeEditModal()" class="text-white hover:text-gray-100 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <p class="text-sm text-gray-700 mb-4">
+                    Ученик: <strong id="modalStudentName"></strong>, Дата: <strong id="modalLessonDate"></strong>
+                </p>
+
+                <form id="editForm" method="post" action="@Url.Action("SaveGrade", "Journal")">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" id="modalStudentId" name="studentId">
+                    <input type="hidden" id="modalLessonId" name="lessonId">
+
+                    <div class="mb-4">
+                        <label for="gradeInput" class="block text-sm font-medium text-gray-700 mb-1">Оценка:</label>
+                        <select id="gradeInput" name="gradeValue" class="form-select block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">(Не выставлена)</option>
+                            <option value="5">5 - Отлично</option>
+                            <option value="4">4 - Хорошо</option>
+                            <option value="3">3 - Удовлетворительно</option>
+                            <option value="2">2 - Неудовлетворительно</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="attendanceInput" class="block text-sm font-medium text-gray-700 mb-1">Посещаемость:</label>
+                        <select id="attendanceInput" name="attendanceStatus" class="form-select block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">(Присутствовал)</option>
+                            <option value="Н">Н - Отсутствовал (Неуважительно)</option>
+                            <option value="Б">Б - Болел (Уважительно)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label for="commentInput" class="block text-sm font-medium text-gray-700 mb-1">Комментарий учителя:</label>
+                        <textarea id="commentInput" name="comment" rows="3" class="shadow-sm block w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition">Отмена</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@* СКРИПТЫ (Без изменений) *@
+<script>
+    const modal = document.getElementById('editModal');
+
+    function openEditModal(studentId, lessonId, studentName, lessonDate, currentValue, isAttendance, comment) {
+
+        document.getElementById('modalStudentId').value = studentId;
+        document.getElementById('modalLessonId').value = lessonId;
+        document.getElementById('modalStudentName').textContent = studentName;
+        document.getElementById('modalLessonDate').textContent = lessonDate;
+
+        const gradeInput = document.getElementById('gradeInput');
+        const attendanceInput = document.getElementById('attendanceInput');
+        const commentInput = document.getElementById('commentInput');
+
+        commentInput.value = comment;
+
+        if (isAttendance === 'true') {
+            gradeInput.value = "";
+            attendanceInput.value = currentValue;
+        } else if (currentValue) {
+            attendanceInput.value = "";
+            gradeInput.value = currentValue;
+        } else {
+            gradeInput.value = "";
+            attendanceInput.value = "";
+        }
+
+        modal.classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        modal.classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeEditModal();
+        }
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function (event) {
+        const gradeValue = document.getElementById('gradeInput').value.trim();
+        const attendanceStatus = document.getElementById('attendanceInput').value.trim();
+        const comment = document.getElementById('commentInput').value.trim();
+
+        if (!gradeValue && !attendanceStatus && !comment) {
+            if (!confirm("Вы пытаетесь удалить оценку/статус посещаемости и комментарий. Вы уверены?")) {
+                event.preventDefault();
+                return;
+            }
+        }
+    });
+</script>

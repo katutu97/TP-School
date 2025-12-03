@@ -1,0 +1,206 @@
+﻿@model TP_School.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Мой профиль";
+    int? directorId = ViewBag.DirectorId;
+    bool isDirector = User.IsInRole("Директор");
+}
+
+<div class="profile-page-content container mx-auto p-4 sm:p-6 lg:p-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6">
+        <i class="fas fa-user-circle mr-2 text-primary"></i>@ViewData["Title"]
+    </h2>
+
+    @* --- БЛОК ПРОФИЛЯ --- *@
+    <div class="bg-white shadow-xl rounded-lg overflow-hidden">
+        <div class="p-6 sm:p-8">
+            <h3 class="text-2xl font-semibold mb-6 border-b pb-2 text-gray-700">Основная информация</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-gray-600">
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">ФИО:</span>
+                    <p class="text-lg">@Model.LastName @Model.FirstName @Model.MiddleName</p>
+                </div>
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">Роль:</span>
+                    <p class="text-lg">@Model.RoleName</p>
+                </div>
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">Логин:</span>
+                    <p class="text-lg">@Model.Login</p>
+                </div>
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">Email:</span>
+                    <p class="text-lg">@Model.Email</p>
+                </div>
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">Телефон:</span>
+                    <p class="text-lg">@(string.IsNullOrEmpty(Model.Phone) ? "Не указан" : Model.Phone)</p>
+                </div>
+
+                <div class="field-item">
+                    <span class="font-medium text-gray-800">Дата рождения:</span>
+                    <p class="text-lg">@(Model.BirthDate.HasValue? Model.BirthDate.Value.ToShortDateString() : "Не указана")</p>
+                </div>
+
+                @* Динамические поля *@
+                @if (!string.IsNullOrEmpty(Model.ClassInfo))
+                {
+                    <div class="field-item">
+                        <span class="font-medium text-gray-800">@(Model.RoleName == "Учитель" ? "Классное руководство" : "Класс ученика"):</span>
+                        <p class="text-lg">@Model.ClassInfo</p>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.StudentInfo))
+                {
+                    <div class="field-item">
+                        <span class="font-medium text-gray-800">Привязанный ученик:</span>
+                        <p class="text-lg">@Model.StudentInfo</p>
+                    </div>
+                }
+
+                <div class="md:col-span-2 field-item">
+                    <span class="font-medium text-gray-800">Дополнительная информация:</span>
+                    <p class="text-lg whitespace-pre-wrap">@(string.IsNullOrEmpty(Model.Info) ? "Нет данных" : Model.Info)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- БЛОК РЕДАКТИРОВАНИЯ/СООБЩЕНИЯ --- *@
+    @if (!isDirector && directorId.HasValue)
+    {
+       <div class="mt-8 p-6 bg-white border border-gray-300 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-sm">
+            <p class="text-gray-700 text-lg mb-4 sm:mb-0">
+                <i class="fas fa-info-circle text-gray-500 mr-2"></i>
+                Если вам необходимо изменить данные профиля, напишите об этом Директору.
+            </p>
+            {{-- СТИЛЬ КНОПКИ: btn-secondary-text --}}
+            <button type="button" id="sendMessageDirectorBtn"
+                    data-recipient-id="@directorId.Value"
+                    class="btn-secondary-text border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center">
+                <i class="fas fa-envelope mr-2"></i> Написать Директору
+            </button>
+        </div>
+    }
+</div>
+
+@* --- МОДАЛЬНОЕ ОКНО "НОВОЕ СООБЩЕНИЕ" --- *@
+<div id="newMessageModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details w-96">
+        <h3 class="modal-form-header" id="messageModalHeader">Написать сообщение Директору</h3>
+
+        <form id="messageForm" action="@Url.Action("SendMessageToDirector", "Profile")" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="RecipientId" id="recipientIdInput" value="@directorId.GetValueOrDefault()" />
+
+            <div class="mb-4">
+                <label for="messageBody" class="block text-sm font-medium text-gray-700 mb-2">Текст сообщения</label>
+                <textarea id="messageBody" name="Body" rows="5" required
+                          class="form-input-field w-full resize-none"
+                          placeholder="Введите ваше сообщение..."></textarea>
+                <div id="messageValidationMessage" class="text-red-500 text-sm mt-1"></div>
+            </div>
+
+            <div id="messageResponse" class="p-3 my-2 hidden text-sm"></div>
+
+            <div class="modal-form-actions">
+                <button type="button" id="closeMessageModal" class="btn-secondary-text">Отмена</button>
+                <button type="submit" class="btn-primary-blue" id="submitMessageBtn">Отправить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const messageModal = document.getElementById('newMessageModal');
+        const closeMessageBtn = document.getElementById('closeMessageModal');
+        const messageModalHeader = document.getElementById('messageModalHeader');
+        const messageForm = $('#messageForm');
+        const messageBodyInput = document.getElementById('messageBody');
+        const submitMessageBtn = $('#submitMessageBtn');
+        const messageResponse = $('#messageResponse');
+        const messageValidationMessage = $('#messageValidationMessage');
+
+        // --- ФУНКЦИИ УПРАВЛЕНИЯ МОДАЛЬНЫМИ ОКНАМИ ---
+
+        function showMessageModal() {
+            messageModalHeader.textContent = "Написать сообщение Директору";
+            messageBodyInput.value = '';
+            messageResponse.hide().removeClass('bg-green-100 text-green-700 bg-red-100 text-red-700').html('');
+            messageValidationMessage.text('');
+
+            // Показываем окно
+            $(messageModal).fadeIn(300).removeClass('hidden').css('display', 'flex');
+        }
+
+        function hideMessageModal() {
+            $(messageModal).fadeOut(300, function() {
+                $(this).addClass('hidden');
+            });
+        }
+
+        // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+
+        // 1. Открытие модального окна при нажатии кнопки
+        $('#sendMessageDirectorBtn').on('click', function() {
+            showMessageModal();
+        });
+
+        // 2. Закрытие модального окна "Сообщение"
+        $(closeMessageBtn).on('click', hideMessageModal);
+
+        // Закрытие по клику вне модального окна
+        $(messageModal).on('click', function(event) {
+            if (event.target === this) {
+                hideMessageModal();
+            }
+        });
+
+        // 3. Отправка формы сообщения
+        messageForm.on('submit', function(e) {
+            e.preventDefault();
+
+            const body = messageBodyInput.value.trim();
+            if (body === "") {
+                messageValidationMessage.text("Пожалуйста, введите текст сообщения.");
+                return;
+            }
+
+            submitMessageBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Отправка...');
+            messageValidationMessage.text('');
+
+            $.ajax({
+                url: messageForm.attr('action'),
+                type: 'POST',
+                data: messageForm.serialize(),
+                success: function(response) {
+                    messageResponse.removeClass('hidden').show();
+                    if (response.success) {
+                        messageResponse.addClass('bg-green-100 text-green-700').html('<i class="fas fa-check-circle mr-2"></i>' + response.message);
+                        // Сбрасываем форму после успешной отправки
+                        messageBodyInput.value = '';
+                        // Закрыть модальное окно через 2 секунды
+                        setTimeout(hideMessageModal, 2000);
+                    } else {
+                        messageResponse.addClass('bg-red-100 text-red-700').html('<i class="fas fa-exclamation-triangle mr-2"></i>' + response.message);
+                    }
+                },
+                error: function() {
+                    messageResponse.removeClass('hidden').show();
+                    messageResponse.addClass('bg-red-100 text-red-700').html('<i class="fas fa-exclamation-triangle mr-2"></i>Ошибка связи с сервером.');
+                },
+                complete: function() {
+                    submitMessageBtn.prop('disabled', false).html('Отправить');
+                }
+            });
+        });
+
+    </script>
+}

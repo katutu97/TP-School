@@ -86,10 +86,9 @@
                     <div class="user-actions">
                         @if (User.IsInRole("Директор"))
                         {
-                            <button type="button" class="btn-action btn-edit js-edit-user" data-id="@user.UserId">
+                            <button type="button" class="btn-action btn-edit js-edit-user **btn-edit-user**" data-id="@user.UserId">
                                 Редактировать
                             </button>
-
                             <button type="button" class="btn-action btn-delete js-delete-user" data-id="@user.UserId" data-name="@user.FullName">
                                 Удалить
                             </button>
@@ -156,11 +155,19 @@
 @* ------------------------------------------------------------------ *@
 @* --- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ --- *@
 @* ------------------------------------------------------------------ *@
+<!-- Модальное окно для редактирования пользователя -->
 <div id="editUserModal" class="modal-overlay hidden" style="display: none;">
-    <div class="modal-content-details w-11/12 md:w-3/5 lg:w-1/2">
-        <h3 class="modal-form-header">Редактирование пользователя</h3>
-        <div id="editUserContent" class="py-4">
-            <p>Загрузка данных...</p>
+    <div class="modal-content-details w-11/12 md:w-3/5 lg:w-2/3 xl:w-1/2">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="modal-form-header text-2xl font-semibold text-gray-800">
+                <i class="fas fa-user-edit mr-2"></i>Редактирование пользователя
+            </h3>
+            <button type="button" class="text-gray-400 hover:text-gray-600 close-edit-modal">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="editUserModalContent" class="py-4 max-h-[70vh] overflow-y-auto">
+            <!-- Контент будет загружаться через AJAX -->
         </div>
     </div>
 </div>
@@ -274,28 +281,59 @@
             }
         }
                 // Открытие модального окна редактирования
-        $(document).on('click', '.js-edit-user', function() {
-            var userId = $(this).data('id');
-            var modal = $('#editUserModal');
-            var content = $('#editUserContent');
+                // Открытие модального окна редактирования пользователя
+        $(document).on('click', '.btn-edit-user', function() {
+            const userId = $(this).data('user-id');
+            const editModal = $('#editUserModal');
+            const editContent = $('#editUserModalContent');
 
-            modal.removeClass('hidden').fadeIn(300);
-            content.html('<p class="text-blue-600 p-4"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка данных...</p>');
+            // Показываем модальное окно
+            editModal.removeClass('hidden').fadeIn(300);
 
-            // AJAX-запрос для получения частичного представления с формой
+            // Показываем индикатор загрузки
+            editContent.html(`
+                <div class="text-center py-8">
+                    <i class="fas fa-spinner fa-spin text-3xl text-indigo-600 mb-3"></i>
+                    <p class="text-gray-600">Загрузка данных пользователя...</p>
+                </div>
+            `);
+
+            // Загружаем форму редактирования
             $.ajax({
-                url: '@Url.Action("EditPartial", "Users")',
+                url: '@Url.Action("EditUserPartial", "Users")',
                 type: 'GET',
                 data: { id: userId },
                 success: function(data) {
-                    content.html(data);
-                    // Re-parse Unobtrusive Validation for the new form content
-                    $.validator.unobtrusive.parse("#editUserForm");
+                    editContent.html(data);
                 },
-                error: function() {
-                    content.html('<p class="text-red-500 p-4">Ошибка загрузки формы.</p>');
+                error: function(xhr) {
+                    const errorMessage = xhr.status === 403
+                        ? 'Доступ запрещен. Убедитесь, что у вас роль "Директор".'
+                        : 'Не удалось загрузить форму редактирования.';
+
+                    editContent.html(`
+                        <div class="text-red-500 p-4 border border-red-300 rounded bg-red-50">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>${errorMessage}
+                        </div>
+                    `);
                 }
             });
+        });
+
+        // Закрытие модального окна редактирования
+        $(document).on('click', '.close-edit-modal', function() {
+            $('#editUserModal').fadeOut(300, function() {
+                $(this).addClass('hidden');
+            });
+        });
+
+        // Закрытие по клику вне модального окна
+        $(document).on('click', '#editUserModal', function(e) {
+            if (e.target === this) {
+                $(this).fadeOut(300, function() {
+                    $(this).addClass('hidden');
+                });
+            }
         });
 
         // Обработка отправки формы внутри модального окна

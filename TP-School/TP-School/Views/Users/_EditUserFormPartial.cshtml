@@ -1,0 +1,250 @@
+﻿@model TP_School.ViewModels.UserCreateViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    var selectedRole = Model.AvailableRoles
+        .FirstOrDefault(r => r.Value == Model.RoleId.ToString())?.Text;
+
+    var isStudent = selectedRole == "Ученик";
+    var isParent = selectedRole == "Родитель";
+    var isTeacher = selectedRole == "Учитель";
+}
+
+
+<form id="editUserForm" class="space-y-4">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="edit_UserId" name="UserId" value="@Model.UserId" />
+
+    <!-- Основная информация -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="form-group">
+            <label for="edit_LastName" class="block text-sm font-medium text-gray-700 mb-1">
+                Фамилия <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="edit_LastName" name="LastName" value="@Model.LastName"
+                   class="form-input-field w-full" required />
+        </div>
+
+        <div class="form-group">
+            <label for="edit_FirstName" class="block text-sm font-medium text-gray-700 mb-1">
+                Имя <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="edit_FirstName" name="FirstName" value="@Model.FirstName"
+                   class="form-input-field w-full" required />
+        </div>
+
+        <div class="form-group">
+            <label for="edit_MiddleName" class="block text-sm font-medium text-gray-700 mb-1">
+                Отчество
+            </label>
+            <input type="text" id="edit_MiddleName" name="MiddleName" value="@Model.MiddleName"
+                   class="form-input-field w-full" />
+        </div>
+    </div>
+
+    <!-- Контактная информация -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="edit_Email" class="block text-sm font-medium text-gray-700 mb-1">
+                Email <span class="text-red-500">*</span>
+            </label>
+            <input type="email" id="edit_Email" name="Email" value="@Model.Email"
+                   class="form-input-field w-full" required />
+        </div>
+
+        <div class="form-group">
+            <label for="edit_Phone" class="block text-sm font-medium text-gray-700 mb-1">
+                Телефон
+            </label>
+            <input type="tel" id="edit_Phone" name="Phone" value="@Model.Phone"
+                   class="form-input-field w-full" />
+        </div>
+    </div>
+
+    <!-- Дата рождения и дополнительная информация -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="edit_BirthDate" class="block text-sm font-medium text-gray-700 mb-1">
+                Дата рождения
+            </label>
+            <input type="date" id="edit_BirthDate" name="BirthDate"
+                   value="@(Model.BirthDate?.ToString("yyyy-MM-dd"))"
+                   class="form-input-field w-full" />
+        </div>
+
+        <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Роль (нельзя изменить)
+            </label>
+            <div class="p-2 bg-gray-100 rounded border text-gray-700">
+                @Model.AvailableRoles.FirstOrDefault(r => r.Value == Model.RoleId.ToString())?.Text
+            </div>
+        </div>
+    </div>
+
+    <!-- Логин (только для просмотра) -->
+    <div class="form-group">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+            Логин (нельзя изменить)
+        </label>
+        <div class="p-2 bg-gray-100 rounded border text-gray-700">
+            @Model.Login
+        </div>
+    </div>
+
+    <!-- Дополнительная информация -->
+    <div class="form-group">
+        <label for="edit_Info" class="block text-sm font-medium text-gray-700 mb-1">
+            Дополнительная информация
+        </label>
+        <textarea id="edit_Info" name="Info" rows="3"
+                  class="form-input-field w-full">@Model.Info</textarea>
+    </div>
+
+    <!-- Динамические поля в зависимости от роли -->
+    <div id="edit_dynamicFields">
+        @if (isStudent)
+        {
+            <div class="form-group" id="edit_studentClassField">
+                <label for="edit_ClassId" class="block text-sm font-medium text-gray-700 mb-1">
+                    Класс ученика <span class="text-red-500">*</span>
+                </label>
+                <select id="edit_ClassId" name="ClassId" class="form-select-field w-full" required>
+                    <option value="">-- Выберите класс --</option>
+                    @foreach (var item in Model.SchoolClasses)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == Model.ClassId?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        else if (isParent)
+        {
+            <div class="form-group" id="edit_parentStudentField">
+                <label for="edit_StudentIdForParent" class="block text-sm font-medium text-gray-700 mb-1">
+                    Ученик (ребёнок) <span class="text-red-500">*</span>
+                </label>
+                <select id="edit_StudentIdForParent" name="StudentIdForParent"
+                        class="form-select-field w-full" required>
+                    <option value="">-- Выберите ученика --</option>
+                    @foreach (var item in Model.AllStudents)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == Model.StudentIdForParent?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+            </div>
+        }
+        else if (isTeacher)
+        {
+            <div class="form-group" id="edit_teacherClassField">
+                <label for="edit_TeacherClassId" class="block text-sm font-medium text-gray-700 mb-1">
+                    Классное руководство
+                </label>
+                <select id="edit_TeacherClassId" name="TeacherClassId" class="form-select-field w-full">
+                    <option value="">-- Нет классного руководства --</option>
+                    @{
+                        // Получаем список классов, у которых нет классного руководителя или текущий учитель уже руководитель
+                        var availableClasses = ViewBag.AvailableClassesForTeacher as List<SelectListItem> ?? new List<SelectListItem>();
+                    }
+                    @foreach (var item in availableClasses)
+                    {
+                        <option value="@item.Value" selected="@(item.Value == Model.ClassId?.ToString())">
+                            @item.Text
+                        </option>
+                    }
+                </select>
+                <p class="text-xs text-gray-500 mt-1">
+                    При выборе класса текущий классный руководитель (если есть) будет освобожден
+                </p>
+            </div>
+        }
+    </div>
+
+    <!-- Сообщения об ошибках/успехе -->
+    <div id="editUserMessage" class="hidden p-3 rounded-md"></div>
+
+    <!-- Кнопки действий -->
+    <div class="modal-form-actions mt-6 pt-4 border-t flex justify-end space-x-3">
+        <button type="button" class="btn-secondary-text close-edit-modal">
+            Отмена
+        </button>
+        <button type="submit" class="btn-primary-blue bg-green-600 hover:bg-green-700">
+            <i class="fas fa-save mr-1"></i> Сохранить изменения
+        </button>
+    </div>
+</form>
+
+<script>
+    // Инициализация формы редактирования
+    $(document).ready(function() {
+        // Закрытие модального окна
+        $('.close-edit-modal').on('click', function() {
+            $('#editUserModal').fadeOut(300, function() {
+                $(this).addClass('hidden');
+            });
+        });
+
+        // Отправка формы редактирования
+        $('#editUserForm').on('submit', function(e) {
+            e.preventDefault();
+            const $form = $(this);
+            const messageBox = $('#editUserMessage');
+            const submitBtn = $form.find('button[type="submit"]');
+
+            // Сброс сообщений
+            messageBox.removeClass('hidden text-red-500 text-green-500 bg-red-50 bg-green-50')
+                      .html('');
+
+            // Блокировка кнопки отправки
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Сохранение...');
+
+            $.ajax({
+                url: '@Url.Action("Edit", "Users")',
+                type: 'POST',
+                data: $form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        messageBox.addClass('text-green-500 bg-green-50')
+                                 .html('<i class="fas fa-check-circle mr-2"></i>' + response.message);
+
+                        // Обновление данных на странице после успешного сохранения
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        // Если вернули HTML с ошибками (валидация)
+                        $('#editUserModalContent').html(response);
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Произошла ошибка при сохранении.';
+                    try {
+                        const errorData = JSON.parse(xhr.responseText);
+                        errorMessage = errorData.message || errorMessage;
+                    } catch {
+                        errorMessage = xhr.responseText || errorMessage;
+                    }
+
+                    messageBox.addClass('text-red-500 bg-red-50')
+                             .html('<i class="fas fa-exclamation-triangle mr-2"></i>' + errorMessage);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Сохранить изменения');
+                }
+            });
+        });
+
+        // Закрытие по клику вне модального окна
+        $('#editUserModal').on('click', function(e) {
+            if (e.target === this) {
+                $(this).fadeOut(300, function() {
+                    $(this).addClass('hidden');
+                });
+            }
+        });
+    });
+</script>

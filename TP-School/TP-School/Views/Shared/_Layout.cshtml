@@ -80,7 +80,7 @@
             <div class="border-t border-gray-200 pt-4"></div>
 
             <!-- Профиль и Выход -->
-            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+            <a href="@Url.Action("Index", "Profile")" class="menu-item group @(currentController == "Users" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-user-circle w-5 h-5"></i>
                 <span>Профиль</span>
             </a>

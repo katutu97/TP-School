@@ -4,8 +4,16 @@
 @inject TP_School.Data.ApplicationDbContext _context
 
 <div class="user-details-body">
-    @* Используем вычисляемое свойство FullName, которое вы определили *@
-    <h3 class="detail-full-name">@Model.FullName</h3>
+    <!-- Верхняя панель с кнопкой редактирования -->
+    <div class="flex justify-between items-start mb-4">
+        <h3 class="detail-full-name">@Model.FullName</h3>
+        @if (User.IsInRole("Директор"))
+        {
+            <button type="button" class="btn-edit-user" data-user-id="@Model.UserId">
+                <i class="fas fa-edit mr-1"></i> Редактировать
+            </button>
+        }
+    </div>
     <p><strong>Роль:</strong> @Model.Role.RoleName</p> 
     <p><strong>Электронная почта:</strong> @Model.Email</p>
     <p><strong>Телефон:</strong> @Model.Phone</p>

@@ -1,5 +1,10 @@
+wwwroot\css\home.css
+wwwroot\css\login.css
+wwwroot\css\messages.css
 wwwroot\css\site.css
+wwwroot\css\users-admin.css
 wwwroot\favicon.ico
+wwwroot\img\Sh1.png
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -58,8 +63,3 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\css\login.css
-wwwroot\css\home.css
-wwwroot\img\Sh1.png
-wwwroot\css\messages.css
-wwwroot\css\users-admin.css

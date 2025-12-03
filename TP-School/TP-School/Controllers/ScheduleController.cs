@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TP_School.Data;
 using TP_School.Models;
 using TP_School.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace TP_School.Controllers
 {
@@ -339,6 +340,68 @@ namespace TP_School.Controllers
             {
                 return StatusCode(500, new { success = false, message = $"Непредвиденная ошибка сервера: {ex.Message}" });
             }
+        }
+        // 1. Метод для получения всех предметов (для выпадающего списка)
+        [HttpGet]
+        public async Task<IActionResult> GetAllSubjects()
+        {
+            var subjects = await _context.Subjects
+                .Select(s => new {
+                    SubjectId = s.SubjectId,
+                    SubjectName = s.SubjectName
+                })
+                .OrderBy(s => s.SubjectName)
+                .ToListAsync();
+
+            return Json(subjects);
+        }
+
+        // 2. Метод для получения всех учителей (для выпадающего списка)
+        [HttpGet]
+        public async Task<IActionResult> GetAllTeachers()
+        {
+            var teachers = await _context.Users
+                // ИСПРАВЛЕНИЕ: Сравниваем Role.RoleName со строкой
+                .Where(u => u.Role.RoleName == "Teacher")
+                .Select(u => new
+                {
+                    TeacherId = u.UserId,
+                    FullName = u.FullName,
+                    
+                })
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
+            return Json(teachers);
+        }
+
+
+        // 3. Метод для получения данных конкретного урока (для редактирования)
+        [HttpGet]
+        public async Task<IActionResult> GetLessonById(int id)
+        {
+            var lesson = await _context.Schedules
+                .Where(s => s.LessonId == id)
+                .Select(s => new
+                {
+                    s.LessonId,
+                    Date = s.Date.ToString("yyyy-MM-dd"), // Форматируем для input type="date"
+                    s.LessonNumber,
+                    s.SubjectId,
+                    TeacherId = s.TeacherId, // Учитель может быть Nullable, если его нет
+                    ClassId = s.ClassId,
+                    Classroom = s.Class,
+                    LessonTopic = s.LessonTopic,
+                    HomeworkText = s.HomeworkText
+                })
+                .FirstOrDefaultAsync();
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            return Json(lesson);
         }
 
         // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---

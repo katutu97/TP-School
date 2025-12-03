@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\schedule\\scheduleadmin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\schedule\\scheduleadmin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\katya\\desktop\\school\\tp-school\\tp-school\\views\\profile\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\profile\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -214,11 +218,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "ScheduleAdmin.cshtml",
+              "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Schedule\\ScheduleAdmin.cshtml",
+              "RelativeDocumentMoniker": "TP-School\\Views\\Schedule\\ScheduleAdmin.cshtml",
+              "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Schedule\\ScheduleAdmin.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Schedule\\ScheduleAdmin.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-03T05:47:42.448Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "_UserDetailsPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\_UserDetailsPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\_UserDetailsPartial.cshtml",
@@ -231,7 +248,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "_EditUserFormPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\_EditUserFormPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\_EditUserFormPartial.cshtml",
@@ -243,7 +260,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\User.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\User.cs",
@@ -255,7 +272,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_Layout.cshtml",
@@ -267,20 +284,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Profile\\Index.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Profile\\Index.cshtml",
               "ToolTip": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Profile\\Index.cshtml",
               "RelativeToolTip": "TP-School\\Views\\Profile\\Index.cshtml",
-              "ViewState": "AgIAAK0AAAAAAAAAAAAnwAcBAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAAkBAAAAAAAAAAAYwBsBAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-12-03T04:15:01.989Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "ProfileController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\ProfileController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\ProfileController.cs",
@@ -293,7 +310,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Messages\\Index.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Messages\\Index.cshtml",
@@ -306,7 +323,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "StudentClass.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentClass.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\StudentClass.cs",
@@ -318,7 +335,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Message.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Message.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Message.cs",
@@ -331,7 +348,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "SchoolClass.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\SchoolClass.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\SchoolClass.cs",
@@ -343,7 +360,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "ProfileViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\ProfileViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\ProfileViewModel.cs",
@@ -355,7 +372,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\Index.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\Index.cshtml",
@@ -367,7 +384,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "UsersController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\UsersController.cs",
@@ -379,7 +396,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "UserCreateViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\UserCreateViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\UserCreateViewModel.cs",
@@ -391,7 +408,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "_EditUserPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\_EditUserPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\_EditUserPartial.cshtml",
@@ -403,7 +420,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "SendMessageViewModel.cs.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\SendMessageViewModel.cs.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\SendMessageViewModel.cs.cs",
@@ -415,7 +432,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "ManageClassesViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\ManageClassesViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\ManageClassesViewModel.cs",
@@ -427,7 +444,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "_ManageClassesPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\_ManageClassesPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\_ManageClassesPartial.cshtml",
@@ -439,7 +456,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "Create.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\Create.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\Create.cshtml",
@@ -451,7 +468,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "_ManageSubjectsPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Users\\_ManageSubjectsPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Users\\_ManageSubjectsPartial.cshtml",
@@ -463,7 +480,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 22,
               "Title": "Homework.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Homework.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Homework.cs",
@@ -475,7 +492,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 25,
               "Title": "Subject.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Subject.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Subject.cs",
@@ -487,7 +504,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "Grade.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Grade.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Grade.cs",
@@ -499,7 +516,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 23,
               "Title": "Role.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Role.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Role.cs",
@@ -511,7 +528,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 24,
               "Title": "StudentParents.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\StudentParents.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\StudentParents.cs",
@@ -523,7 +540,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 26,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "TP-School\\Data\\ApplicationDbContext.cs",
@@ -535,7 +552,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 28,
+              "DocumentIndex": 29,
               "Title": "_ValidationScriptsPartial.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
@@ -547,7 +564,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 27,
               "Title": "MessagesController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\MessagesController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\MessagesController.cs",
@@ -559,7 +576,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "users-admin.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\users-admin.css",
               "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\users-admin.css",
@@ -571,7 +588,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 29,
+              "DocumentIndex": 30,
               "Title": "JournalController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\JournalController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\JournalController.cs",
@@ -583,7 +600,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 30,
+              "DocumentIndex": 31,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Journal\\Index.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Journal\\Index.cshtml",
@@ -595,7 +612,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 31,
+              "DocumentIndex": 32,
               "Title": "JournalViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\JournalViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\JournalViewModel.cs",
@@ -607,7 +624,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 32,
+              "DocumentIndex": 33,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\appsettings.json",
               "RelativeDocumentMoniker": "TP-School\\appsettings.json",
@@ -619,7 +636,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 33,
+              "DocumentIndex": 34,
               "Title": "messages.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\messages.css",
               "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\messages.css",
@@ -631,7 +648,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 34,
+              "DocumentIndex": 35,
               "Title": "ApplicationDbContextModelSnapshot.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
               "RelativeDocumentMoniker": "TP-School\\Migrations\\ApplicationDbContextModelSnapshot.cs",
@@ -643,7 +660,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 35,
+              "DocumentIndex": 36,
               "Title": "home.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\home.css",
               "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\home.css",
@@ -655,7 +672,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 36,
+              "DocumentIndex": 37,
               "Title": "login.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\login.css",
               "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\login.css",
@@ -667,7 +684,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 37,
+              "DocumentIndex": 38,
               "Title": "HomeController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\HomeController.cs",
@@ -679,7 +696,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 38,
+              "DocumentIndex": 39,
               "Title": "site.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "TP-School\\wwwroot\\css\\site.css",
@@ -691,7 +708,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 39,
+              "DocumentIndex": 40,
               "Title": "AccountController.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\AccountController.cs",
@@ -703,7 +720,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 40,
+              "DocumentIndex": 41,
               "Title": "_Layout.cshtml.css",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml.css",
               "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_Layout.cshtml.css",
@@ -715,7 +732,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 41,
+              "DocumentIndex": 42,
               "Title": "ErrorViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\ErrorViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\ErrorViewModel.cs",
@@ -727,7 +744,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 42,
+              "DocumentIndex": 43,
               "Title": "AnnouncementViewModel.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\ViewModels\\AnnouncementViewModel.cs",
               "RelativeDocumentMoniker": "TP-School\\ViewModels\\AnnouncementViewModel.cs",
@@ -739,7 +756,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 43,
+              "DocumentIndex": 44,
               "Title": "Attendance.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Attendance.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Attendance.cs",
@@ -751,7 +768,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 44,
+              "DocumentIndex": 45,
               "Title": "Announcement.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Announcement.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Announcement.cs",
@@ -763,7 +780,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 45,
+              "DocumentIndex": 46,
               "Title": "Login.cshtml",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Account\\Login.cshtml",
@@ -775,7 +792,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 46,
+              "DocumentIndex": 47,
               "Title": "20251130182732_InitialCreate.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Migrations\\20251130182732_InitialCreate.cs",
               "RelativeDocumentMoniker": "TP-School\\Migrations\\20251130182732_InitialCreate.cs",
@@ -787,7 +804,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 47,
+              "DocumentIndex": 48,
               "Title": "Schedule.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Schedule.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Schedule.cs",
@@ -799,7 +816,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 48,
+              "DocumentIndex": 49,
               "Title": "ScheduleTemplate.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ScheduleTemplate.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\ScheduleTemplate.cs",
@@ -811,7 +828,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 49,
+              "DocumentIndex": 50,
               "Title": "ClassSubjectTeacher.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\ClassSubjectTeacher.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\ClassSubjectTeacher.cs",
@@ -823,7 +840,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 50,
+              "DocumentIndex": 51,
               "Title": "Remark.cs",
               "DocumentMoniker": "C:\\Users\\Katya\\Desktop\\School\\TP-School\\TP-School\\Models\\Remark.cs",
               "RelativeDocumentMoniker": "TP-School\\Models\\Remark.cs",

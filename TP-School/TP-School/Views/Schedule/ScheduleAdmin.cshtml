@@ -2,7 +2,9 @@
 @using System.Globalization
 
 @{
-    ViewData["Title"] = ViewBag.IsDirector ? "Администрирование расписания" : "Расписание учителя";
+    // Исправление ошибки: безопасно проверяем ViewBag.IsDirector
+    bool isDirector = ViewBag.IsDirector ?? false;
+    ViewData["Title"] = isDirector ? "Администрирование расписания" : "Расписание учителя";
     Layout = "_Layout";
 
     // Функция для русского названия дня недели
@@ -19,10 +21,12 @@
             _ => dayOfWeek.ToString().Substring(0, 2)
         };
     }
+    // Загружаем список предметов для модальных окон (в идеале - из ViewBag, но для примера тут)
+    // var allSubjects = ViewBag.AllSubjects as List<Subject> ?? new List<Subject>();
+    // var allTeachers = ViewBag.AllTeachers as List<User> ?? new List<User>();
 }
 
 <div class="container mx-auto px-4 py-8">
-    <!-- Заголовок и кнопки -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">@ViewData["Title"]</h1>
@@ -30,30 +34,27 @@
         </div>
 
         <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
-            <!-- Кнопка добавления урока -->
             <button onclick="openAddLessonModal()"
                     class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center">
                 <i class="fas fa-plus mr-2"></i>Добавить урок
             </button>
 
-            <!-- Кнопка массового редактирования -->
             <button onclick="openBulkEditModal()"
                     class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition flex items-center">
                 <i class="fas fa-edit mr-2"></i>Массовое редактирование
             </button>
 
-            <!-- Кнопка экспорта -->
             <button onclick="exportSchedule()"
                     class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
                 <i class="fas fa-file-export mr-2"></i>Экспорт
             </button>
         </div>
     </div>
+    
+    <hr class="mb-6" />
 
-    <!-- Панель управления -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-center">
-            <!-- Выбор класса -->
             @if (ViewBag.AvailableClasses != null)
             {
                 <div class="mb-4 md:mb-0">
@@ -71,7 +72,6 @@
                 </div>
             }
 
-            <!-- Навигация по неделям -->
             <div class="flex items-center space-x-4">
                 <a href="@Url.Action("Index", new {
                     selectedDate = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"),
@@ -104,18 +104,20 @@
         </div>
     </div>
 
-    <!-- Статистика -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
             <div class="text-sm text-gray-500">Всего уроков</div>
             <div class="text-2xl font-bold text-blue-600">@ViewBag.LessonCount</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">Уроков в день</div>
-            <div class="text-2xl font-bold text-green-600">@(Math.Ceiling(ViewBag.LessonCount / 6.0))</div>
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+            <div class="text-sm text-gray-500">Уроков в день (ср.)</div>
+            @{
+                double avg = ViewBag.LessonCount > 0 ? (double)ViewBag.LessonCount / 6.0 : 0.0;
+            }
+            <div class="text-2xl font-bold text-green-600">@avg.ToString("0.0")</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">Предметов</div>
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+            <div class="text-sm text-gray-500">Предметов (уникальных)</div>
             <div class="text-2xl font-bold text-purple-600">
                 @{
                     var subjects = new HashSet<string>();
@@ -133,8 +135,8 @@
                 }
             </div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="text-sm text-gray-500">Преподавателей</div>
+        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+            <div class="text-sm text-gray-500">Преподавателей (уник.)</div>
             <div class="text-2xl font-bold text-yellow-600">
                 @{
                     var teachers = new HashSet<string>();
@@ -144,7 +146,11 @@
                         {
                             foreach (var lesson in day)
                             {
-                                teachers.Add(lesson.TeacherFullName);
+                                // Исключаем null или пустые строки
+                                if (!string.IsNullOrEmpty(lesson.TeacherFullName))
+                                {
+                                    teachers.Add(lesson.TeacherFullName);
+                                }
                             }
                         }
                     }
@@ -154,28 +160,27 @@
         </div>
     </div>
 
-    <!-- Таблица расписания с управлением -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-blue-600 text-white">
+    <div class="bg-white rounded-lg shadow-lg overflow-x-auto">
+        <table class="w-full min-w-[768px] border-collapse" id="scheduleTable">
+            <thead class="bg-blue-600 text-white sticky top-0 z-10">
                 <tr>
-                    <th class="p-4 text-left font-medium w-32">Время</th>
+                    <th class="p-4 text-left font-medium w-32 border-r border-blue-700">Время</th>
                     @{
                         var days = new[] {
-                    DayOfWeek.Monday,
-                    DayOfWeek.Tuesday,
-                    DayOfWeek.Wednesday,
-                    DayOfWeek.Thursday,
-                    DayOfWeek.Friday,
-                    DayOfWeek.Saturday
-                    };
+                        DayOfWeek.Monday,
+                        DayOfWeek.Tuesday,
+                        DayOfWeek.Wednesday,
+                        DayOfWeek.Thursday,
+                        DayOfWeek.Friday,
+                        DayOfWeek.Saturday
+                        };
                     }
                     @foreach (var day in days)
                     {
-                        var dayDate = Model.StartOfWeek.AddDays((int)day - 1);
+                        var dayDate = Model.StartOfWeek.AddDays(((int)day - (int)DayOfWeek.Monday + 7) % 7);
                         bool isToday = dayDate.Date == DateTime.Today.Date;
 
-                        <th class="p-4 text-center @(isToday ? "bg-blue-700" : "")">
+                        <th class="p-4 text-center border-r border-blue-700 last:border-r-0 @(isToday ? "bg-blue-700" : "")">
                             <div class="font-semibold">@GetRussianDayName(day)</div>
                             <div class="text-sm font-normal opacity-90">@dayDate.ToString("dd.MM")</div>
                         </th>
@@ -185,16 +190,17 @@
             <tbody>
                 @{
                     var lessonTimes = ViewBag.LessonTimes as Dictionary<int, string> ?? new Dictionary<int, string>();
-                    int maxLessons = 6;
+                    int maxLessons = 6; // Ограничение по максимальному количеству уроков
                 }
 
                 @for (int lessonNum = 1; lessonNum <= maxLessons; lessonNum++)
                 {
                     <tr class="@(lessonNum % 2 == 0 ? "bg-gray-50" : "bg-white")">
-                        <td class="p-4 border-r border-gray-200 font-medium text-gray-600">
+                        <td class="p-4 border-r border-gray-200 font-medium text-gray-600 whitespace-nowrap">
                             @if (lessonTimes.ContainsKey(lessonNum))
                             {
-                                @lessonTimes[lessonNum]
+                                <div class="text-lg leading-tight">@lessonTimes[lessonNum]</div>
+                                <div class="text-xs text-gray-400">@lessonNum урок</div>
                             }
                             else
                             {
@@ -204,68 +210,54 @@
 
                         @foreach (var day in days)
                         {
-                            <td class="p-2 border-r border-gray-200 h-28">
-                                @if (Model.ScheduleByDay != null && Model.ScheduleByDay.ContainsKey(day))
+                            <td class="p-2 border-r border-gray-200 h-28 align-top">
+                                @{
+                                    var lessonsForDay = Model.ScheduleByDay?.GetValueOrDefault(day);
+                                    var lesson = lessonsForDay?.FirstOrDefault(l => l.LessonNumber == lessonNum);
+                                }
+
+                                @if (lesson != null)
                                 {
-                                    var lesson = Model.ScheduleByDay[day].FirstOrDefault(l => l.LessonNumber == lessonNum);
-                                    if (lesson != null)
-                                    {
-                                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 h-full relative group">
-                                            <!-- Основная информация -->
-                                            <div class="font-bold text-blue-700 text-sm mb-1">@lesson.SubjectName</div>
-                                            <div class="text-xs text-gray-600 mb-1">@lesson.TeacherFullName</div>
-                                            <div class="text-xs text-gray-500 mb-2">
-                                                <i class="fas fa-door-open mr-1"></i>Каб. @lesson.Classroom
-                                            </div>
-
-                                            <!-- Тема и Д/З -->
-                                            @if (!string.IsNullOrEmpty(lesson.LessonTopic))
-                                            {
-                                                <div class="text-xs text-gray-700 truncate mb-1" title="@lesson.LessonTopic">
-                                                    <i class="fas fa-book mr-1"></i>@lesson.LessonTopic
-                                                </div>
-                                            }
-
-                                            @if (!string.IsNullOrEmpty(lesson.HomeworkText))
-                                            {
-                                                <div class="text-xs text-gray-700 truncate" title="@lesson.HomeworkText">
-                                                    <i class="fas fa-tasks mr-1"></i>@lesson.HomeworkText
-                                                </div>
-                                            }
-
-                                            <!-- Кнопки управления -->
-                                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onclick="editLesson(@lesson.ScheduleId)"
-                                                        class="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-1"
-                                                        title="Редактировать">
-                                                    <i class="fas fa-edit text-xs"></i>
-                                                </button>
-                                                <button onclick="deleteLesson(@lesson.ScheduleId)"
-                                                        class="p-1 bg-red-500 text-white rounded hover:bg-red-600"
-                                                        title="Удалить">
-                                                    <i class="fas fa-trash text-xs"></i>
-                                                </button>
-                                            </div>
+                                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 h-full relative group hover:shadow-md transition duration-150">
+                                        <div class="font-bold text-blue-700 text-sm mb-1 truncate" title="@lesson.SubjectName">@lesson.SubjectName</div>
+                                        <div class="text-xs text-gray-600 mb-1 truncate" title="@lesson.TeacherFullName">@lesson.TeacherFullName</div>
+                                        <div class="text-xs text-gray-500 mb-2">
+                                            <i class="fas fa-door-open mr-1"></i>Каб. @(string.IsNullOrEmpty(lesson.Classroom) ? "N/A" : lesson.Classroom)
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <!-- Пустая ячейка - можно добавить урок -->
-                                        <div class="h-full flex items-center justify-center">
-                                            <button onclick="openAddSpecificLesson(@((int)day), @lessonNum)"
-                                                    class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
-                                                    title="Добавить урок">
-                                                <i class="fas fa-plus"></i>
+
+                                        @if (!string.IsNullOrEmpty(lesson.LessonTopic))
+                                        {
+                                            <div class="text-xs text-gray-700 truncate mb-1" title="Тема: @lesson.LessonTopic">
+                                                <i class="fas fa-book mr-1"></i>Тема: @lesson.LessonTopic
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrEmpty(lesson.HomeworkText))
+                                        {
+                                            <div class="text-xs text-gray-700 truncate" title="Д/З: @lesson.HomeworkText">
+                                                <i class="fas fa-tasks mr-1"></i>Д/З: @lesson.HomeworkText
+                                            </div>
+                                        }
+
+                                        <div class="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onclick="editLesson(@lesson.ScheduleId)"
+                                                    class="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                                                    title="Редактировать">
+                                                <i class="fas fa-edit text-xs"></i>
+                                            </button>
+                                            <button onclick="deleteLesson(@lesson.ScheduleId)"
+                                                    class="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                    title="Удалить">
+                                                <i class="fas fa-trash text-xs"></i>
                                             </button>
                                         </div>
-                                    }
+                                    </div>
                                 }
                                 else
                                 {
-                                    <!-- Пустая ячейка -->
-                                    <div class="h-full flex items-center justify-center">
+                                    <div class="h-full flex items-center justify-center p-3">
                                         <button onclick="openAddSpecificLesson(@((int)day), @lessonNum)"
-                                                class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition"
                                                 title="Добавить урок">
                                             <i class="fas fa-plus"></i>
                                         </button>
@@ -278,7 +270,7 @@
             </tbody>
         </table>
 
-        @if (Model.ScheduleByDay == null || !Model.ScheduleByDay.Any())
+        @if (Model.ScheduleByDay == null || !Model.ScheduleByDay.SelectMany(d => d.Value).Any())
         {
             <div class="p-12 text-center">
                 <i class="fas fa-calendar-plus text-5xl text-gray-300 mb-4"></i>
@@ -293,12 +285,11 @@
     </div>
 </div>
 
-<!-- Модальное окно добавления урока -->
-<div id="addLessonModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+<div id="addLessonModal" class="modal hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
             <div class="flex justify-between items-center p-6 border-b">
-                <h3 class="text-lg font-semibold text-gray-800">Добавить урок</h3>
+                <h3 class="text-lg font-semibold text-gray-800" id="addLessonModalTitle">Добавить урок</h3>
                 <button onclick="closeAddLessonModal()" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </button>
@@ -306,17 +297,18 @@
             <form id="addLessonForm" method="post" action="@Url.Action("AddLesson", "Schedule")">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="ClassId" value="@Model.SelectedClassId" />
+                <input type="hidden" name="ScheduleId" value="0" id="addScheduleId" /> @* Для сброса формы *@
 
                 <div class="p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Дата</label>
-                        <input type="date" name="Date" required
+                        <input type="date" name="Date" required id="addLessonDate"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Номер урока</label>
-                        <select name="LessonNumber" required
+                        <select name="LessonNumber" required id="addLessonNumber"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             @for (int i = 1; i <= 6; i++)
                             {
@@ -327,19 +319,41 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Предмет</label>
-                        <select name="SubjectId" required
+                        <select name="SubjectId" required id="addSubjectId"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <!-- Загружаем предметы через AJAX или из ViewBag -->
-                            <option value="">Выберите предмет</option>
+                            <option value="">Загрузка предметов...</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Преподаватель</label>
+                        <select name="TeacherId" required id="addTeacherId"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Загрузка преподавателей...</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Кабинет</label>
-                        <input type="text" name="Room"
+                        <input type="text" name="Room" id="addLessonRoom"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="Например: 201">
                     </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Тема урока (опционально)</label>
+                        <textarea name="LessonTopic" id="addLessonTopic" rows="2"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Введите тему урока"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Домашнее задание (опционально)</label>
+                        <textarea name="HomeworkText" id="addHomeworkText" rows="2"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Введите домашнее задание"></textarea>
+                    </div>
+                    <div id="addMessageResponse" class="p-3 my-2 hidden text-sm rounded-lg"></div>
                 </div>
 
                 <div class="p-6 border-t flex justify-end space-x-3">
@@ -347,7 +361,7 @@
                             class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
                         Отмена
                     </button>
-                    <button type="submit"
+                    <button type="submit" id="addLessonSubmitBtn"
                             class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
                         Сохранить
                     </button>
@@ -357,29 +371,195 @@
     </div>
 </div>
 
-<!-- Модальное окно редактирования урока -->
-<div id="editLessonModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
-    <!-- Аналогично addLessonModal, но для редактирования -->
+<div id="bulkEditModal" class="modal hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Массовое редактирование расписания</h3>
+                <button onclick="closeBulkEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600">Тут будет интерфейс для копирования, переноса или удаления уроков для всей недели или класса.</p>
+                <div class="mt-4 text-center">
+                    <button onclick="closeBulkEditModal()"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        // Управление модальными окнами
+        // --- Глобальные переменные для элементов формы ---
+        const addLessonModal = document.getElementById('addLessonModal');
+        const addLessonForm = document.getElementById('addLessonForm');
+        const addLessonModalTitle = document.getElementById('addLessonModalTitle');
+        const addScheduleId = document.getElementById('addScheduleId');
+        const addLessonDate = document.getElementById('addLessonDate');
+        const addLessonNumber = document.getElementById('addLessonNumber');
+        const addSubjectId = document.getElementById('addSubjectId');
+        const addTeacherId = document.getElementById('addTeacherId');
+        const addLessonRoom = document.getElementById('addLessonRoom');
+        const addLessonTopic = document.getElementById('addLessonTopic');
+        const addHomeworkText = document.getElementById('addHomeworkText');
+        const addLessonSubmitBtn = document.getElementById('addLessonSubmitBtn');
+        const addMessageResponse = document.getElementById('addMessageResponse');
+
+
+        // --- УПРАВЛЕНИЕ МОДАЛЬНЫМИ ОКНАМИ ---
+
+        function resetAddForm() {
+            addLessonModalTitle.textContent = 'Добавить урок';
+            addLessonForm.action = '@Url.Action("AddLesson", "Schedule")';
+            addScheduleId.value = '0';
+            addLessonForm.reset();
+            addLessonSubmitBtn.textContent = 'Сохранить';
+            addLessonSubmitBtn.classList.remove('bg-yellow-500', 'hover:bg-yellow-600');
+            addLessonSubmitBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            addMessageResponse.classList.add('hidden');
+            addMessageResponse.textContent = '';
+        }
+
         function openAddLessonModal() {
-            document.getElementById('addLessonModal').classList.remove('hidden');
+            resetAddForm();
+            addLessonDate.value = '@DateTime.Today.ToString("yyyy-MM-dd")';
+            fetchSubjectsAndTeachers();
+            addLessonModal.classList.remove('hidden');
         }
 
         function closeAddLessonModal() {
-            document.getElementById('addLessonModal').classList.add('hidden');
+            addLessonModal.classList.add('hidden');
+        }
+        
+        function closeBulkEditModal() {
+            document.getElementById('bulkEditModal').classList.add('hidden');
         }
 
+        function openBulkEditModal() {
+            document.getElementById('bulkEditModal').classList.remove('hidden');
+        }
+
+        function openEditLessonModal(data) {
+            // Устанавливаем заголовок и действие формы
+            addLessonModalTitle.textContent = 'Редактировать урок';
+            addLessonForm.action = '@Url.Action("EditLesson", "Schedule")';
+            addScheduleId.value = data.scheduleId;
+            
+            // Заполняем поля
+            addLessonDate.value = data.date.split('T')[0];
+            addLessonNumber.value = data.lessonNumber;
+            addLessonRoom.value = data.classroom || '';
+            addLessonTopic.value = data.lessonTopic || '';
+            addHomeworkText.value = data.homeworkText || '';
+            
+            // Устанавливаем кнопку на "Редактировать"
+            addLessonSubmitBtn.textContent = 'Обновить';
+            addLessonSubmitBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            addLessonSubmitBtn.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+            
+            // Загружаем предметы и выбираем нужный
+            fetchSubjectsAndTeachers(data.subjectId, data.teacherId);
+
+            addLessonModal.classList.remove('hidden');
+        }
+
+        // --- AJAX ЗАГРУЗКА СПИСКОВ ---
+
+        function fetchSubjectsAndTeachers(selectedSubjectId = null, selectedTeacherId = null) {
+            // 1. Загрузка предметов
+            fetch('@Url.Action("GetAllSubjects", "Schedule")')
+                .then(response => response.json())
+                .then(subjects => {
+                    addSubjectId.innerHTML = '<option value="">Выберите предмет</option>';
+                    subjects.forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject.subjectId;
+                        option.textContent = subject.subjectName;
+                        if (selectedSubjectId && subject.subjectId == selectedSubjectId) {
+                            option.selected = true;
+                        }
+                        addSubjectId.appendChild(option);
+                    });
+                })
+                .catch(() => {
+                    addSubjectId.innerHTML = '<option value="">Ошибка загрузки предметов</option>';
+                });
+                
+            // 2. Загрузка учителей
+            fetch('@Url.Action("GetAllTeachers", "Schedule")')
+                .then(response => response.json())
+                .then(teachers => {
+                    addTeacherId.innerHTML = '<option value="">Выберите преподавателя</option>';
+                    teachers.forEach(teacher => {
+                        const option = document.createElement('option');
+                        option.value = teacher.teacherId;
+                        // Используем FullName, если есть, иначе UserName
+                        option.textContent = teacher.fullName || teacher.userName; 
+                        if (selectedTeacherId && teacher.teacherId == selectedTeacherId) {
+                            option.selected = true;
+                        }
+                        addTeacherId.appendChild(option);
+                    });
+                })
+                .catch(() => {
+                    addTeacherId.innerHTML = '<option value="">Ошибка загрузки преподавателей</option>';
+                });
+        }
+        
+        // --- ДЕЙСТВИЯ ---
+        
+        addLessonForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            addLessonSubmitBtn.disabled = true;
+            addLessonSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Сохранение...';
+
+            fetch(addLessonForm.action, {
+                method: 'POST',
+                body: new FormData(addLessonForm),
+                headers: {
+                    // Обработка AntiForgeryToken
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                addMessageResponse.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+
+                if (result.success) {
+                    addMessageResponse.classList.add('bg-green-100', 'text-green-700');
+                    addMessageResponse.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + result.message;
+                    // Перезагрузка страницы через 1 секунду для обновления расписания
+                    setTimeout(() => { location.reload(); }, 1000); 
+                } else {
+                    addMessageResponse.classList.add('bg-red-100', 'text-red-700');
+                    addMessageResponse.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>' + result.message;
+                    addLessonSubmitBtn.disabled = false;
+                    addLessonSubmitBtn.innerHTML = addScheduleId.value != '0' ? 'Обновить' : 'Сохранить';
+                }
+            })
+            .catch(() => {
+                addMessageResponse.classList.remove('hidden');
+                addMessageResponse.classList.add('bg-red-100', 'text-red-700');
+                addMessageResponse.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i>Ошибка связи с сервером.';
+                addLessonSubmitBtn.disabled = false;
+                addLessonSubmitBtn.innerHTML = addScheduleId.value != '0' ? 'Обновить' : 'Сохранить';
+            });
+        });
+
         function editLesson(lessonId) {
-            // Загружаем данные урока и открываем модальное окно редактирования
-            fetch(`@Url.Action("GetLesson", "Schedule")?id=${lessonId}`)
+            // Загружаем данные урока
+            fetch(`@Url.Action("GetLessonById", "Schedule")?id=${lessonId}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Заполняем форму и открываем модальное окно
                     openEditLessonModal(data);
+                })
+                .catch(() => {
+                    alert('Не удалось загрузить данные урока.');
                 });
         }
 
@@ -392,11 +572,18 @@
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
                     body: `id=${lessonId}`
-                }).then(response => {
-                    if (response.ok) {
-                        location.reload();
-                    }
-                });
+                }).then(response => response.json())
+                  .then(result => {
+                      if (result.success) {
+                          alert(result.message);
+                          location.reload();
+                      } else {
+                          alert(result.message);
+                      }
+                  })
+                  .catch(() => {
+                      alert('Ошибка при удалении урока.');
+                  });
             }
         }
 
@@ -409,35 +596,42 @@
         }
 
         function openAddSpecificLesson(dayOfWeek, lessonNumber) {
-            // Вычисляем дату на основе дня недели
-            const dayIndex = dayOfWeek - 1; // Monday = 1 в C#, но 0 в JS
-            const targetDate = new Date('@Model.StartOfWeek.ToString("yyyy-MM-dd")');
-            targetDate.setDate(targetDate.getDate() + dayIndex);
+            // Вычисляем дату на основе дня недели (1=Пн, 6=Сб)
+            const today = new Date();
+            const startOfWeek = new Date('@Model.StartOfWeek.ToString("yyyy-MM-dd")');
+            
+            // dayOfWeek - это 1 (Пн) до 6 (Сб)
+            const dayIndex = dayOfWeek - 1; 
+
+            // startOfWeek уже установлен на Пн, поэтому просто добавляем dayIndex
+            const targetDate = new Date(startOfWeek);
+            targetDate.setDate(startOfWeek.getDate() + dayIndex);
 
             // Заполняем форму и открываем модальное окно
-            const form = document.getElementById('addLessonForm');
-            form.querySelector('input[name="Date"]').value = targetDate.toISOString().split('T')[0];
-            form.querySelector('select[name="LessonNumber"]').value = lessonNumber;
+            resetAddForm();
+            addLessonDate.value = targetDate.toISOString().split('T')[0];
+            addLessonNumber.value = lessonNumber;
 
             openAddLessonModal();
         }
 
         function exportSchedule() {
-            // Экспорт в PDF или Excel
+            // Тут может быть вызов контроллера для создания PDF или Excel
             alert('Функция экспорта в разработке');
         }
 
-        // Закрытие модальных окон по ESC
+        // --- Управление закрытием модальных окон ---
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeAddLessonModal();
-                closeEditLessonModal();
+                closeBulkEditModal();
             }
         });
 
         // Закрытие по клику вне модального окна
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(event) {
+                // Если клик был ровно по оверлею (а не по контенту внутри)
                 if (event.target === this) {
                     this.classList.add('hidden');
                 }

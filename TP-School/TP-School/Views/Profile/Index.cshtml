@@ -5,12 +5,100 @@
     bool isDirector = User.IsInRole("Директор");
 }
 
-<div class="profile-page-content container mx-auto p-4 sm:p-6 lg:p-8">
-    <h2 class="text-3xl font-bold text-gray-800 mb-6">
-        <i class="fas fa-user-circle mr-2 text-primary"></i>@ViewData["Title"]
-    </h2>
+<style>
+    /* ---------------------------------- */
+    /* Базовые стили для утилит (Tailwind Fallbacks) */
+    /* ---------------------------------- */
+    
+    /* Стили для модального оверлея */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+    }
 
-    @* --- БЛОК ПРОФИЛЯ --- *@
+    /* Стили для содержимого модального окна (как на скриншоте) */
+    .modal-content-details {
+        background-color: #fff;
+        border-radius: 0.5rem; /* rounded-lg */
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+        padding: 0; /* Убираем padding здесь, добавляем в h3 и форму */
+        overflow: hidden;
+        max-width: 90%;
+    }
+    
+    /* Заголовок модального окна (СВЕРХУ ТЕКСТ ОТПРАВИТЬ СООБЩЕНИЕ БЫЛ БОЛЬШЕ) */
+    .modal-form-header {
+        font-size: 1.5rem; /* text-2xl */
+        font-weight: 600; /* font-semibold */
+        color: #1f2937; /* text-gray-800 */
+        padding: 1.5rem 1.5rem 1rem 1.5rem; /* p-6 */
+        border-bottom: 1px solid #e5e7eb; /* border-b border-gray-200 */
+        margin-bottom: 0;
+    }
+
+    /* Общий стиль для полей ввода и textarea */
+    .form-input-field {
+        border: 1px solid #d1d5db; /* border-gray-300 */
+        border-radius: 0.375rem; /* rounded-md */
+        padding: 0.5rem 0.75rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .form-input-field:focus {
+        border-color: #4f46e5; /* indigo-600 */
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5);
+    }
+    
+    /* Стили для кнопок */
+    .btn-primary-blue {
+        background-color: #4f46e5; /* indigo-600 */
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .btn-primary-blue:hover {
+        background-color: #4338ca; /* indigo-700 */
+    }
+
+    .btn-secondary-text {
+        background-color: transparent;
+        color: #374151; /* gray-700 */
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .btn-secondary-text:hover {
+        background-color: #f3f4f6; /* gray-100 */
+    }
+
+    /* Блок с действиями внизу модального окна */
+    .modal-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem; /* space-x-3 */
+        padding: 1rem 1.5rem;
+        background-color: #f9fafb; /* gray-50 */
+        border-top: 1px solid #e5e7eb;
+    }
+</style>
+
+<div class="profile-page-content container mx-auto p-4 sm:p-6 lg:p-8">
+    
+    @* --- БЛОК ПРОФИЛЯ  --- *@
     <div class="bg-white shadow-xl rounded-lg overflow-hidden">
         <div class="p-6 sm:p-8">
             <h3 class="text-2xl font-semibold mb-6 border-b pb-2 text-gray-700">Основная информация</h3>
@@ -71,99 +159,98 @@
         </div>
     </div>
 
-    @* --- БЛОК РЕДАКТИРОВАНИЯ/СООБЩЕНИЯ --- *@
+    @* --- БЛОК С КНОПКОЙ И ФОРМОЙ СООБЩЕНИЯ --- *@
     @if (!isDirector && directorId.HasValue)
     {
-       <div class="mt-8 p-6 bg-white border border-gray-300 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-sm">
+        
+        <div class="mt-8 p-6 bg-white border border-gray-300 rounded-lg flex flex-col sm:flex-row items-center justify-between shadow-sm">
             <p class="text-gray-700 text-lg mb-4 sm:mb-0">
                 <i class="fas fa-info-circle text-gray-500 mr-2"></i>
                 Если вам необходимо изменить данные профиля, напишите об этом Директору.
             </p>
-            {{-- СТИЛЬ КНОПКИ: btn-secondary-text --}}
-            <button type="button" id="sendMessageDirectorBtn"
+            <button type="button" id="toggleMessagePanelBtn"
                     data-recipient-id="@directorId.Value"
                     class="btn-secondary-text border border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-colors flex items-center">
                 <i class="fas fa-envelope mr-2"></i> Написать Директору
             </button>
         </div>
-    }
-</div>
 
-@* --- МОДАЛЬНОЕ ОКНО "НОВОЕ СООБЩЕНИЕ" --- *@
-<div id="newMessageModal" class="modal-overlay hidden" style="display: none;">
-    <div class="modal-content-details w-96">
-        <h3 class="modal-form-header" id="messageModalHeader">Написать сообщение Директору</h3>
+        
+        <div id="messagePanel" class="message-input-panel mt-4 hidden">
+            <h3 class="message-form-header">Отправить сообщение Директору</h3>
 
-        <form id="messageForm" action="@Url.Action("SendMessageToDirector", "Profile")" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="RecipientId" id="recipientIdInput" value="@directorId.GetValueOrDefault()" />
+            <form id="messageForm" action="@Url.Action("SendMessageToDirector", "Profile")" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="RecipientId" id="recipientIdInput" value="@directorId.GetValueOrDefault()" />
 
-            <div class="mb-4">
-                <label for="messageBody" class="block text-sm font-medium text-gray-700 mb-2">Текст сообщения</label>
-                <textarea id="messageBody" name="Body" rows="5" required
+                <div class="mb-4">
+                    <label for="messageBody" class="block text-sm font-medium text-gray-700 mb-2">Текст сообщения</label>
+                    <textarea id="messageBody" name="Body" rows="5" required
                           class="form-input-field w-full resize-none"
                           placeholder="Введите ваше сообщение..."></textarea>
-                <div id="messageValidationMessage" class="text-red-500 text-sm mt-1"></div>
-            </div>
+                    <div id="messageValidationMessage" class="text-red-500 text-sm mt-1"></div>
+                </div>
 
-            <div id="messageResponse" class="p-3 my-2 hidden text-sm"></div>
+                <div id="messageResponse" class="p-3 my-2 hidden text-sm"></div>
 
-            <div class="modal-form-actions">
-                <button type="button" id="closeMessageModal" class="btn-secondary-text">Отмена</button>
-                <button type="submit" class="btn-primary-blue" id="submitMessageBtn">Отправить</button>
-            </div>
-        </form>
-    </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" id="closeMessagePanelBtn" class="btn-secondary-text">Отмена</button>
+                    <button type="submit" class="btn-primary-blue" id="submitMessageBtn">Отправить</button>
+                </div>
+            </form>
+        </div>
+    }
 </div>
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        const messageModal = document.getElementById('newMessageModal');
-        const closeMessageBtn = document.getElementById('closeMessageModal');
-        const messageModalHeader = document.getElementById('messageModalHeader');
+        // Элементы
+        const messagePanel = $('#messagePanel'); // Плашка с формой
+        const toggleMessagePanelBtn = $('#toggleMessagePanelBtn'); // Кнопка "Написать Директору"
+        const closeMessagePanelBtn = $('#closeMessagePanelBtn'); // Кнопка "Отмена" внутри формы
+
         const messageForm = $('#messageForm');
         const messageBodyInput = document.getElementById('messageBody');
         const submitMessageBtn = $('#submitMessageBtn');
         const messageResponse = $('#messageResponse');
         const messageValidationMessage = $('#messageValidationMessage');
 
-        // --- ФУНКЦИИ УПРАВЛЕНИЯ МОДАЛЬНЫМИ ОКНАМИ ---
+        // --- ФУНКЦИИ УПРАВЛЕНИЯ ПАНЕЛЬЮ ---
 
-        function showMessageModal() {
-            messageModalHeader.textContent = "Написать сообщение Директору";
+        function showMessagePanel() {
             messageBodyInput.value = '';
             messageResponse.hide().removeClass('bg-green-100 text-green-700 bg-red-100 text-red-700').html('');
             messageValidationMessage.text('');
 
-            // Показываем окно
-            $(messageModal).fadeIn(300).removeClass('hidden').css('display', 'flex');
+            messagePanel.slideDown(300).removeClass('hidden'); // Плавное появление
+            toggleMessagePanelBtn.text('Скрыть форму'); // Меняем текст кнопки, чтобы дать понять, что она скрывает форму
+            toggleMessagePanelBtn.find('i').removeClass('fa-envelope').addClass('fa-times');
         }
 
-        function hideMessageModal() {
-            $(messageModal).fadeOut(300, function() {
-                $(this).addClass('hidden');
+        function hideMessagePanel() {
+            messagePanel.slideUp(300, function() {
+                $(this).addClass('hidden'); // Плавное скрытие
             });
+            toggleMessagePanelBtn.text('Написать Директору'); // Возвращаем исходный текст
+            toggleMessagePanelBtn.find('i').removeClass('fa-times').addClass('fa-envelope');
         }
 
         // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
 
-        // 1. Открытие модального окна при нажатии кнопки
-        $('#sendMessageDirectorBtn').on('click', function() {
-            showMessageModal();
-        });
-
-        // 2. Закрытие модального окна "Сообщение"
-        $(closeMessageBtn).on('click', hideMessageModal);
-
-        // Закрытие по клику вне модального окна
-        $(messageModal).on('click', function(event) {
-            if (event.target === this) {
-                hideMessageModal();
+        // 1. Открытие/Закрытие плашки при нажатии главной кнопки
+        toggleMessagePanelBtn.on('click', function() {
+            if (messagePanel.hasClass('hidden')) {
+                showMessagePanel();
+            } else {
+                hideMessagePanel();
             }
         });
 
-        // 3. Отправка формы сообщения
+        // 2. Закрытие плашки по кнопке "Отмена"
+        closeMessagePanelBtn.on('click', hideMessagePanel);
+
+
+        // 3. Отправка формы сообщения (оставлена без изменений)
         messageForm.on('submit', function(e) {
             e.preventDefault();
 
@@ -184,10 +271,9 @@
                     messageResponse.removeClass('hidden').show();
                     if (response.success) {
                         messageResponse.addClass('bg-green-100 text-green-700').html('<i class="fas fa-check-circle mr-2"></i>' + response.message);
-                        // Сбрасываем форму после успешной отправки
                         messageBodyInput.value = '';
-                        // Закрыть модальное окно через 2 секунды
-                        setTimeout(hideMessageModal, 2000);
+                        // Скрываем панель через 2 секунды
+                        setTimeout(hideMessagePanel, 2000);
                     } else {
                         messageResponse.addClass('bg-red-100 text-red-700').html('<i class="fas fa-exclamation-triangle mr-2"></i>' + response.message);
                     }
@@ -201,6 +287,5 @@
                 }
             });
         });
-
     </script>
 }

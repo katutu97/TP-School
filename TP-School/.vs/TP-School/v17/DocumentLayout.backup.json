@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\views\\journal\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\journal\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -13,10 +17,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|solutionrelative:tp-school\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{67BC5EA2-6A35-49DD-8059-6465E08847C6}|TP-School\\TP-School.csproj|c:\\users\\\u0438\u0440\u0438\u043D\u0430 \u0441\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\desktop\\tp-school\\tp-school\\tp-school\\views\\profile\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -222,11 +222,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "GradesController.cs",
               "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Controllers\\GradesController.cs",
               "RelativeDocumentMoniker": "TP-School\\Controllers\\GradesController.cs",
@@ -239,13 +239,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Journal\\Index.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Journal\\Index.cshtml",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Journal\\Index.cshtml*",
-              "RelativeToolTip": "TP-School\\Views\\Journal\\Index.cshtml*",
-              "ViewState": "AgIAAIoAAAAAAAAAAAAwwK0AAABVAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Journal\\Index.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Journal\\Index.cshtml",
+              "ViewState": "AgIAAJgAAAAAAAAAAAAAwK0AAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-12-01T23:37:34.637Z",
               "EditorCaption": ""
@@ -265,13 +265,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "TP-School\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml*",
-              "RelativeToolTip": "TP-School\\Views\\Shared\\_Layout.cshtml*",
-              "ViewState": "AgIAADcAAAAAAAAAAAAAAEYAAABrAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "TP-School\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAEIAAAAAAAAAAADgv1UAAABHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-12-02T21:39:00.924Z",
               "EditorCaption": ""
@@ -350,12 +350,12 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "TP-School\\Data\\ApplicationDbContext.cs",
-              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs*",
-              "RelativeToolTip": "TP-School\\Data\\ApplicationDbContext.cs*",
+              "ToolTip": "C:\\Users\\\u0418\u0440\u0438\u043D\u0430 \u0421\u0435\u0440\u0433\u0435\u0435\u0432\u043D\u0430\\Desktop\\TP-School\\TP-School\\TP-School\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "TP-School\\Data\\ApplicationDbContext.cs",
               "ViewState": "AgIAAGEAAAAAAAAAAAAAAH8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-02T02:15:18.117Z",

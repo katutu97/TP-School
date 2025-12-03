@@ -1,0 +1,380 @@
+﻿@model TP_School.ViewModels.ScheduleViewModel
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Расписание";
+    Layout = "_Layout";
+
+    // Функция для русского названия дня недели
+    string GetRussianDayName(DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => "Понедельник",
+            DayOfWeek.Tuesday => "Вторник",
+            DayOfWeek.Wednesday => "Среда",
+            DayOfWeek.Thursday => "Четверг",
+            DayOfWeek.Friday => "Пятница",
+            DayOfWeek.Saturday => "Суббота",
+            DayOfWeek.Sunday => "Воскресенье",
+            _ => dayOfWeek.ToString()
+        };
+    }
+
+    // Функция для сокращенного названия дня
+    string GetShortRussianDayName(DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => "Пн",
+            DayOfWeek.Tuesday => "Вт",
+            DayOfWeek.Wednesday => "Ср",
+            DayOfWeek.Thursday => "Чт",
+            DayOfWeek.Friday => "Пт",
+            DayOfWeek.Saturday => "Сб",
+            DayOfWeek.Sunday => "Вс",
+            _ => dayOfWeek.ToString().Substring(0, 2)
+        };
+    }
+
+    // *** ИСПРАВЛЕНИЕ: Получаем ID контекста для навигации ***
+    var selectedChildId = ViewBag.SelectedChildId as int?;
+    var selectedClassId = ViewBag.SelectedClassId as int?;
+}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 border border-blue-100">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <div class="flex items-center mb-2">
+                    <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                        <i class="fas fa-chalkboard-teacher text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">Классный руководитель: @ViewBag.ClassTeacher</h2>
+                        <p class="text-gray-600">@ViewBag.ClassName</p>
+                    </div>
+                </div>
+            </div>
+
+            @if (ViewBag.IsParent && ViewBag.Children != null)
+            {
+                <div class="mt-4 md:mt-0">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Выберите ребенка:</label>
+                    <div class="flex items-center space-x-2">
+                        <select id="childSelector"
+                                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]">
+                            @foreach (var child in ViewBag.Children)
+                            {
+                                <option value="@child.StudentId"
+                                        selected="@(ViewBag.SelectedChildId == child.StudentId)"
+                                        data-name="@child.FullName">
+                                    @child.FullName
+                                </option>
+                            }
+                        </select>
+                        <button onclick="switchChild()"
+                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center">
+                            <i class="fas fa-sync-alt mr-2"></i>Перейти
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+
+                <a href="@Url.Action("Index", new {
+                    date = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"), // Используем 'date'
+                    classId = selectedClassId,
+                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                })"
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                    <i class="fas fa-chevron-left mr-2"></i> Пред. неделя
+                </a>
+
+                <span class="text-lg font-semibold text-gray-800">
+                    @Model.StartOfWeek.ToString("dd.MM.yyyy") - @Model.StartOfWeek.AddDays(6).ToString("dd.MM.yyyy")
+                </span>
+
+                <a href="@Url.Action("Index", new {
+                    date = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd"), // Используем 'date'
+                    classId = selectedClassId,
+                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                })"
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                    След. неделя <i class="fas fa-chevron-right ml-2"></i>
+                </a>
+            </div>
+
+            <div>
+                <a href="@Url.Action("Index", new {
+                    date = DateTime.Today.ToString("yyyy-MM-dd"), // Используем 'date'
+                    classId = selectedClassId,
+                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                })"
+                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                    <i class="fas fa-calendar-day mr-2"></i> Текущая неделя
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+    {
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="flex">
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        @ViewBag.ErrorMessage
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="p-4 text-left font-medium w-40">Время</th>
+                    @{
+                        var days = new[] {
+                    DayOfWeek.Monday,
+                    DayOfWeek.Tuesday,
+                    DayOfWeek.Wednesday,
+                    DayOfWeek.Thursday,
+                    DayOfWeek.Friday,
+                    DayOfWeek.Saturday
+                    };
+                    }
+                    @foreach (var day in days)
+                    {
+                        var dayDate = Model.StartOfWeek.AddDays(((int)day - (int)DayOfWeek.Monday + 7) % 7); // Корректное смещение
+                        bool isToday = dayDate.Date == DateTime.Today.Date;
+
+                        <th class="p-4 text-center @(isToday ? "bg-blue-700" : "")">
+                            <div class="font-semibold">@GetShortRussianDayName(day)</div>
+                            <div class="text-sm font-normal opacity-90">@dayDate.ToString("dd.MM")</div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var lessonTimes = ViewBag.LessonTimes as Dictionary<int, string> ?? new Dictionary<int, string>();
+                    int maxLessons = lessonTimes.Keys.DefaultIfEmpty(6).Max();
+                }
+
+                @for (int lessonNum = 1; lessonNum <= maxLessons; lessonNum++)
+                {
+                    <tr class="@(lessonNum % 2 == 0 ? "bg-gray-50" : "bg-white") hover:bg-blue-50 transition">
+                        <td class="p-4 border-r border-gray-200">
+                            <div class="font-bold text-blue-600 text-lg mb-1">Урок @lessonNum</div>
+                            <div class="text-sm text-gray-600">
+                                @if (lessonTimes.ContainsKey(lessonNum))
+                                {
+                                    @lessonTimes[lessonNum]
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">Время не указано</span>
+                                }
+                            </div>
+                        </td>
+
+                        @foreach (var day in days)
+                        {
+                            <td class="p-3 border-r border-gray-200 h-24">
+                                @if (Model.ScheduleByDay != null && Model.ScheduleByDay.ContainsKey(day))
+                                {
+                                    var lesson = Model.ScheduleByDay[day].FirstOrDefault(l => l.LessonNumber == lessonNum);
+                                    if (lesson != null)
+                                    {
+                                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 h-full">
+                                            <div class="font-bold text-blue-700 text-sm">@lesson.SubjectName</div>
+                                            <div class="text-xs text-gray-600 mt-1">@lesson.TeacherFullName</div>
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-door-open mr-1"></i>Каб. @lesson.Classroom
+                                            </div>
+
+                                            @if (!string.IsNullOrEmpty(lesson.LessonTopic))
+                                            {
+                                                <div class="mt-2 pt-2 border-t border-blue-100">
+                                                    <div class="text-xs text-gray-700 font-medium">Тема:</div>
+                                                    <div class="text-xs text-gray-600 truncate">@lesson.LessonTopic</div>
+                                                </div>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(lesson.HomeworkText))
+                                            {
+                                                <div class="mt-1 pt-1 border-t border-blue-100">
+                                                    <div class="text-xs text-gray-700 font-medium">Д/З:</div>
+                                                    <div class="text-xs text-gray-600 truncate cursor-pointer hover:text-blue-500"
+                                                         onclick="openHomeworkModal(
+                                                                 @lesson.ScheduleId,
+                                                                 '@lesson.SubjectName.Replace("'", "\\'")',
+                                                                 '@lesson.Date.ToString("dd.MM.yyyy")',
+                                                                 @lesson.LessonNumber,
+                                                                 '@lesson.TeacherFullName.Replace("'", "\\'")',
+                                                                 '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
+                                                                 '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')">
+                                                        @lesson.HomeworkText
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.ScheduleByDay == null || !Model.ScheduleByDay.Any())
+        {
+            <div class="p-8 text-center text-gray-500">
+                <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                <p class="text-lg">На эту неделю расписание не составлено</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div id="homeworkModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-800" id="homeworkModalTitle">Домашнее задание</h3>
+                <button type="button" onclick="closeHomeworkModal()"
+                        class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <div class="p-6">
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500">Предмет</p>
+                            <p class="font-medium text-gray-800" id="modalSubject"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Дата</p>
+                            <p class="font-medium text-gray-800" id="modalDate"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Урок</p>
+                            <p class="font-medium text-gray-800" id="modalLessonNumber"></p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Учитель</p>
+                            <p class="font-medium text-gray-800" id="modalTeacher"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Тема урока:</label>
+                    <div class="p-3 bg-gray-50 rounded border border-gray-200">
+                        <p class="text-gray-700" id="modalLessonTopic"></p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Домашнее задание:</label>
+                    <div class="p-3 bg-gray-50 rounded border border-gray-200 min-h-[100px]">
+                        <p class="text-gray-700 whitespace-pre-wrap" id="modalHomeworkText"></p>
+                    </div>
+                </div>
+
+                <div class="mb-6 hidden" id="homeworkFilesSection">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Прикрепленные файлы:</label>
+                    <div class="space-y-2" id="homeworkFilesList">
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 pt-6">
+                    <h4 class="text-lg font-medium text-gray-800 mb-4">Отправка выполненного задания</h4>
+
+                    <form id="submitHomeworkForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="modalLessonId" name="lessonId">
+
+                        <div class="mb-4">
+                            <label for="studentAnswer" class="block text-sm font-medium text-gray-700 mb-1">Ваш ответ (текст)</label>
+                            <textarea id="studentAnswer" name="studentAnswer" rows="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Введите ваш ответ или комментарий..."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="homeworkFiles" class="block text-sm font-medium text-gray-700 mb-1">Прикрепить файл (макс. 10MB)</label>
+                            <input type="file" id="homeworkFiles" name="homeworkFiles" class="w-full text-gray-700 border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" accept=".pdf, .doc, .docx, .jpg, .png" />
+                        </div>
+
+                        <div id="submissionMessage" class="mb-4 hidden p-3 rounded-lg text-sm font-medium"></div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeHomeworkModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Отмена</button>
+                            <button type="submit" id="submitHomeworkButton" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+                                <i class="fas fa-paper-plane mr-2"></i>Отправить задание
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Уведомления -->
+<div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+@section Scripts {
+    <script>
+        // Предоставляем JavaScript необходимые URL-адреса и данные,
+        // которые генерируются на сервере Razor
+        const scheduleServerData = {
+            submitHomeworkUrl: '@Url.Action("SubmitHomework", "Schedule")',
+            scheduleIndexUrl: '@Url.Action("Index", "Schedule")',
+            todayDate: '@DateTime.Today.ToString("yyyy-MM-dd")'
+        };
+    </script>
+    <script src="~/js/schedule.js"></script>
+
+    <style>
+        
+        /* Стили для drag and drop */
+        label[for="homeworkFiles"] {
+            transition: all 0.2s ease;
+        }
+        
+        label[for="homeworkFiles"]:hover {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+        
+        /* Кастомный скроллбар */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        textarea::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+}

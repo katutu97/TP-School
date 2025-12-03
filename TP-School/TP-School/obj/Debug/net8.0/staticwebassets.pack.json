@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
+      "Id": "C:\\Users\\Ирина Сергеевна\\Desktop\\TP-School\\TP-School\\TP-School\\wwwroot\\css\\users-admin.css",
+      "PackagePath": "staticwebassets\\css\\users-admin.css"
+    },
+    {
       "Id": "C:\\Users\\Ирина Сергеевна\\Desktop\\TP-School\\TP-School\\TP-School\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },

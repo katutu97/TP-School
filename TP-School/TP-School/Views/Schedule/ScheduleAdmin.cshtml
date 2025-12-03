@@ -1,0 +1,447 @@
+﻿@model TP_School.ViewModels.ScheduleViewModel
+@using System.Globalization
+
+@{
+    ViewData["Title"] = ViewBag.IsDirector ? "Администрирование расписания" : "Расписание учителя";
+    Layout = "_Layout";
+
+    // Функция для русского названия дня недели
+    string GetRussianDayName(DayOfWeek dayOfWeek)
+    {
+        return dayOfWeek switch
+        {
+            DayOfWeek.Monday => "Пн",
+            DayOfWeek.Tuesday => "Вт",
+            DayOfWeek.Wednesday => "Ср",
+            DayOfWeek.Thursday => "Чт",
+            DayOfWeek.Friday => "Пт",
+            DayOfWeek.Saturday => "Сб",
+            _ => dayOfWeek.ToString().Substring(0, 2)
+        };
+    }
+}
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Заголовок и кнопки -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">@ViewData["Title"]</h1>
+            <p class="text-gray-600 mt-1">@ViewBag.ClassName</p>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <!-- Кнопка добавления урока -->
+            <button onclick="openAddLessonModal()"
+                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center">
+                <i class="fas fa-plus mr-2"></i>Добавить урок
+            </button>
+
+            <!-- Кнопка массового редактирования -->
+            <button onclick="openBulkEditModal()"
+                    class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition flex items-center">
+                <i class="fas fa-edit mr-2"></i>Массовое редактирование
+            </button>
+
+            <!-- Кнопка экспорта -->
+            <button onclick="exportSchedule()"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
+                <i class="fas fa-file-export mr-2"></i>Экспорт
+            </button>
+        </div>
+    </div>
+
+    <!-- Панель управления -->
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <!-- Выбор класса -->
+            @if (ViewBag.AvailableClasses != null)
+            {
+                <div class="mb-4 md:mb-0">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Класс:</label>
+                    <select id="classSelector"
+                            onchange="changeClass()"
+                            class="border border-gray-300 rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        @foreach (var schoolClass in ViewBag.AvailableClasses)
+                        {
+                            <option value="@schoolClass.ClassId" selected="@(ViewBag.SelectedClassId == schoolClass.ClassId)">
+                                @schoolClass.ClassName
+                            </option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <!-- Навигация по неделям -->
+            <div class="flex items-center space-x-4">
+                <a href="@Url.Action("Index", new {
+                    selectedDate = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"),
+                    classId = Model.SelectedClassId
+                })"
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                    <i class="fas fa-chevron-left mr-2"></i> Пред. неделя
+                </a>
+
+                <span class="text-lg font-semibold text-gray-800">
+                    @Model.StartOfWeek.ToString("dd.MM.yyyy") - @Model.StartOfWeek.AddDays(6).ToString("dd.MM.yyyy")
+                </span>
+
+                <a href="@Url.Action("Index", new {
+                    selectedDate = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd"),
+                    classId = Model.SelectedClassId
+                })"
+                   class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                    След. неделя <i class="fas fa-chevron-right ml-2"></i>
+                </a>
+
+                <a href="@Url.Action("Index", new {
+                    selectedDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                    classId = Model.SelectedClassId
+                })"
+                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
+                    <i class="fas fa-calendar-day mr-2"></i> Сегодня
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Всего уроков</div>
+            <div class="text-2xl font-bold text-blue-600">@ViewBag.LessonCount</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Уроков в день</div>
+            <div class="text-2xl font-bold text-green-600">@(Math.Ceiling(ViewBag.LessonCount / 6.0))</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Предметов</div>
+            <div class="text-2xl font-bold text-purple-600">
+                @{
+                    var subjects = new HashSet<string>();
+                    if (Model.ScheduleByDay != null)
+                    {
+                        foreach (var day in Model.ScheduleByDay.Values)
+                        {
+                            foreach (var lesson in day)
+                            {
+                                subjects.Add(lesson.SubjectName);
+                            }
+                        }
+                    }
+                    @subjects.Count
+                }
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="text-sm text-gray-500">Преподавателей</div>
+            <div class="text-2xl font-bold text-yellow-600">
+                @{
+                    var teachers = new HashSet<string>();
+                    if (Model.ScheduleByDay != null)
+                    {
+                        foreach (var day in Model.ScheduleByDay.Values)
+                        {
+                            foreach (var lesson in day)
+                            {
+                                teachers.Add(lesson.TeacherFullName);
+                            }
+                        }
+                    }
+                    @teachers.Count
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Таблица расписания с управлением -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="p-4 text-left font-medium w-32">Время</th>
+                    @{
+                        var days = new[] {
+                    DayOfWeek.Monday,
+                    DayOfWeek.Tuesday,
+                    DayOfWeek.Wednesday,
+                    DayOfWeek.Thursday,
+                    DayOfWeek.Friday,
+                    DayOfWeek.Saturday
+                    };
+                    }
+                    @foreach (var day in days)
+                    {
+                        var dayDate = Model.StartOfWeek.AddDays((int)day - 1);
+                        bool isToday = dayDate.Date == DateTime.Today.Date;
+
+                        <th class="p-4 text-center @(isToday ? "bg-blue-700" : "")">
+                            <div class="font-semibold">@GetRussianDayName(day)</div>
+                            <div class="text-sm font-normal opacity-90">@dayDate.ToString("dd.MM")</div>
+                        </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var lessonTimes = ViewBag.LessonTimes as Dictionary<int, string> ?? new Dictionary<int, string>();
+                    int maxLessons = 6;
+                }
+
+                @for (int lessonNum = 1; lessonNum <= maxLessons; lessonNum++)
+                {
+                    <tr class="@(lessonNum % 2 == 0 ? "bg-gray-50" : "bg-white")">
+                        <td class="p-4 border-r border-gray-200 font-medium text-gray-600">
+                            @if (lessonTimes.ContainsKey(lessonNum))
+                            {
+                                @lessonTimes[lessonNum]
+                            }
+                            else
+                            {
+                                <span>@lessonNum урок</span>
+                            }
+                        </td>
+
+                        @foreach (var day in days)
+                        {
+                            <td class="p-2 border-r border-gray-200 h-28">
+                                @if (Model.ScheduleByDay != null && Model.ScheduleByDay.ContainsKey(day))
+                                {
+                                    var lesson = Model.ScheduleByDay[day].FirstOrDefault(l => l.LessonNumber == lessonNum);
+                                    if (lesson != null)
+                                    {
+                                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 h-full relative group">
+                                            <!-- Основная информация -->
+                                            <div class="font-bold text-blue-700 text-sm mb-1">@lesson.SubjectName</div>
+                                            <div class="text-xs text-gray-600 mb-1">@lesson.TeacherFullName</div>
+                                            <div class="text-xs text-gray-500 mb-2">
+                                                <i class="fas fa-door-open mr-1"></i>Каб. @lesson.Classroom
+                                            </div>
+
+                                            <!-- Тема и Д/З -->
+                                            @if (!string.IsNullOrEmpty(lesson.LessonTopic))
+                                            {
+                                                <div class="text-xs text-gray-700 truncate mb-1" title="@lesson.LessonTopic">
+                                                    <i class="fas fa-book mr-1"></i>@lesson.LessonTopic
+                                                </div>
+                                            }
+
+                                            @if (!string.IsNullOrEmpty(lesson.HomeworkText))
+                                            {
+                                                <div class="text-xs text-gray-700 truncate" title="@lesson.HomeworkText">
+                                                    <i class="fas fa-tasks mr-1"></i>@lesson.HomeworkText
+                                                </div>
+                                            }
+
+                                            <!-- Кнопки управления -->
+                                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onclick="editLesson(@lesson.ScheduleId)"
+                                                        class="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-1"
+                                                        title="Редактировать">
+                                                    <i class="fas fa-edit text-xs"></i>
+                                                </button>
+                                                <button onclick="deleteLesson(@lesson.ScheduleId)"
+                                                        class="p-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                        title="Удалить">
+                                                    <i class="fas fa-trash text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <!-- Пустая ячейка - можно добавить урок -->
+                                        <div class="h-full flex items-center justify-center">
+                                            <button onclick="openAddSpecificLesson(@((int)day), @lessonNum)"
+                                                    class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                    title="Добавить урок">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <!-- Пустая ячейка -->
+                                    <div class="h-full flex items-center justify-center">
+                                        <button onclick="openAddSpecificLesson(@((int)day), @lessonNum)"
+                                                class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                title="Добавить урок">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.ScheduleByDay == null || !Model.ScheduleByDay.Any())
+        {
+            <div class="p-12 text-center">
+                <i class="fas fa-calendar-plus text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-medium text-gray-500 mb-2">Расписание пустое</h3>
+                <p class="text-gray-400 mb-6">Начните добавлять уроки, используя кнопку "Добавить урок"</p>
+                <button onclick="openAddLessonModal()"
+                        class="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                    <i class="fas fa-plus mr-2"></i>Добавить первый урок
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Модальное окно добавления урока -->
+<div id="addLessonModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-lg font-semibold text-gray-800">Добавить урок</h3>
+                <button onclick="closeAddLessonModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addLessonForm" method="post" action="@Url.Action("AddLesson", "Schedule")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ClassId" value="@Model.SelectedClassId" />
+
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Дата</label>
+                        <input type="date" name="Date" required
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Номер урока</label>
+                        <select name="LessonNumber" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @for (int i = 1; i <= 6; i++)
+                            {
+                                <option value="@i">@i урок (@(ViewBag.LessonTimes.ContainsKey(i) ? ViewBag.LessonTimes[i] : ""))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Предмет</label>
+                        <select name="SubjectId" required
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <!-- Загружаем предметы через AJAX или из ViewBag -->
+                            <option value="">Выберите предмет</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Кабинет</label>
+                        <input type="text" name="Room"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="Например: 201">
+                    </div>
+                </div>
+
+                <div class="p-6 border-t flex justify-end space-x-3">
+                    <button type="button" onclick="closeAddLessonModal()"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                        Отмена
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования урока -->
+<div id="editLessonModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+    <!-- Аналогично addLessonModal, но для редактирования -->
+</div>
+
+@section Scripts {
+    <script>
+        // Управление модальными окнами
+        function openAddLessonModal() {
+            document.getElementById('addLessonModal').classList.remove('hidden');
+        }
+
+        function closeAddLessonModal() {
+            document.getElementById('addLessonModal').classList.add('hidden');
+        }
+
+        function editLesson(lessonId) {
+            // Загружаем данные урока и открываем модальное окно редактирования
+            fetch(`@Url.Action("GetLesson", "Schedule")?id=${lessonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Заполняем форму и открываем модальное окно
+                    openEditLessonModal(data);
+                });
+        }
+
+        function deleteLesson(lessonId) {
+            if (confirm('Вы уверены, что хотите удалить этот урок?')) {
+                fetch(`@Url.Action("DeleteLesson", "Schedule")`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `id=${lessonId}`
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function changeClass() {
+            const classId = document.getElementById('classSelector').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedDate = urlParams.get('selectedDate') || '@DateTime.Today.ToString("yyyy-MM-dd")';
+
+            window.location.href = `@Url.Action("Index", "Schedule")?selectedDate=${selectedDate}&classId=${classId}`;
+        }
+
+        function openAddSpecificLesson(dayOfWeek, lessonNumber) {
+            // Вычисляем дату на основе дня недели
+            const dayIndex = dayOfWeek - 1; // Monday = 1 в C#, но 0 в JS
+            const targetDate = new Date('@Model.StartOfWeek.ToString("yyyy-MM-dd")');
+            targetDate.setDate(targetDate.getDate() + dayIndex);
+
+            // Заполняем форму и открываем модальное окно
+            const form = document.getElementById('addLessonForm');
+            form.querySelector('input[name="Date"]').value = targetDate.toISOString().split('T')[0];
+            form.querySelector('select[name="LessonNumber"]').value = lessonNumber;
+
+            openAddLessonModal();
+        }
+
+        function exportSchedule() {
+            // Экспорт в PDF или Excel
+            alert('Функция экспорта в разработке');
+        }
+
+        // Закрытие модальных окон по ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAddLessonModal();
+                closeEditLessonModal();
+            }
+        });
+
+        // Закрытие по клику вне модального окна
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+}

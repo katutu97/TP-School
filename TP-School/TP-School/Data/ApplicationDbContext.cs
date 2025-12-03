@@ -121,6 +121,12 @@ namespace TP_School.Data
 
             // Настройка внешних ключей для Homework
             modelBuilder.Entity<Homework>()
+                .HasOne(h => h.Lesson)
+                .WithMany(s => s.Homeworks)
+                .HasForeignKey(h => h.LessonId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Homework>()
                 .HasOne(h => h.Student)
                 .WithMany(u => u.Homeworks)
                 .HasForeignKey(h => h.StudentId)

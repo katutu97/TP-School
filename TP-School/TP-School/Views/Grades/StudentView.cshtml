@@ -1,0 +1,130 @@
+﻿@model TP_School.ViewModels.StudentGradesViewModel
+@{
+    ViewData["Title"] = "Успеваемость"; // Заголовок вкладки браузера остается
+}
+
+@* Блок для сортировки по периоду (сделан более компактным) *@
+<div class="bg-white rounded-lg shadow p-4 mb-4">
+    @* Уменьшены отступы p-4 и mb-4 *@
+
+    <form asp-action="Index" method="get">
+        @* Убрана лишняя обертка grid-cols-4, так как она не нужна для одного элемента *@
+        <div class="flex items-center space-x-4">
+
+            @* Фильтр по четверти (Период) *@
+            <div class="flex items-center space-x-2">
+                @* Сделано более компактно по вертикали *@
+                <label for="quarter" class="text-sm font-medium text-gray-700">Период:</label>
+                <select name="quarter" id="quarter" onchange="this.form.submit()"
+                        class="pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
+                    @* Уменьшен py-1 *@
+                    @foreach (var q in Model.AvailableQuarters)
+                    {
+                        <option value="@q" selected="@(Model.SelectedQuarter == q)">
+                            @if (q == "Итоговые оценки")
+                            {
+                                <span>@q</span>
+                            }
+                            else
+                            {
+                                <span>@q Четверть</span>
+                            }
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <input type="hidden" name="classId" value="" />
+            <input type="hidden" name="subjectId" value="" />
+        </div>
+    </form>
+</div>
+
+@* Таблица с данными *@
+<div class="bg-white rounded-lg shadow overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    №
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Предмет
+                </th>
+                @* Динамический заголовок для среднего балла *@
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @if (Model.SelectedQuarter == "Итоговые оценки")
+                    {
+                        <span>Ср. балл итоговых (Год)</span>
+                    }
+                    else
+                    {
+                        <span>Средний балл (Четверть)</span>
+                    }
+                </th>
+                @* СТОЛБЕЦ: Итоговая Оценка (ВСЕГДА отображается) *@
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    @if (Model.SelectedQuarter == "Итоговые оценки")
+                    {
+                        <span class="font-bold">Годовая Оценка</span>
+                    }
+                    else
+                    {
+                        <span class="font-bold">Итоговая Оценка</span>
+                    }
+                </th>
+
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Пропуски
+                </th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+            @if (Model.Subjects.Any())
+            {
+                var counter = 1;
+                @foreach (var item in Model.Subjects)
+                {
+                    <tr class="hover:bg-gray-100 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            @counter
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            @item.SubjectName
+                        </td>
+                        @* Отображение среднего балла (F2) *@
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold @(item.QuarterFinalGrade >= 4.0 ? "text-green-600" : (item.QuarterFinalGrade >= 3.0 ? "text-yellow-600" : "text-red-600"))">
+                            @item.AverageGrade.ToString("F2")
+                        </td>
+
+                        @* Отображение итоговой оценки (QuarterFinalGrade) *@
+                        <td class="px-6 py-4 whitespace-nowrap font-extrabold text-lg @(item.QuarterFinalGrade < 3 ? "text-red-600" : "text-green-600")">
+                            @item.QuarterFinalGrade
+                        </td>
+
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            @item.TotalAbsences
+                        </td>
+                    </tr>
+                    counter++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        Нет данных об успеваемости или вы не привязаны к классу.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('quarter').addEventListener('change', function () {
+            this.form.submit();
+        });
+    </script>
+}

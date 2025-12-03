@@ -1,0 +1,144 @@
+﻿@model TP_School.ViewModels.UserCreateViewModel
+@* Требуется jQuery и jQuery Validation для работы AJAX-формы *@
+
+<div class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-window" onclick="event.stopPropagation()">
+
+        <span class="modal-close" onclick="closeModal()">×</span>
+
+<div id="editUserFormContainer">
+    <form asp-action="Edit" method="post" id="editUserForm" data-user-id="@Model.UserId">
+        @Html.AntiForgeryToken()
+
+        @* 🔥 СКРЫТОЕ ПОЛЕ: ID пользователя для POST-запроса *@
+        <input type="hidden" asp-for="UserId" />
+
+        @* Вывод ошибок валидации на уровне модели *@
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 p-2 bg-red-50 border border-red-200 rounded"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            @* 1. ФИО *@
+            <div class="col-span-2">
+                <label asp-for="LastName" class="form-label">Фамилия <span class="text-red-500">*</span></label>
+                <input asp-for="LastName" class="form-input-field w-full" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="col-span-1">
+                <label asp-for="FirstName" class="form-label">Имя <span class="text-red-500">*</span></label>
+                <input asp-for="FirstName" class="form-input-field w-full" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="col-span-1">
+                <label asp-for="MiddleName" class="form-label">Отчество</label>
+                <input asp-for="MiddleName" class="form-input-field w-full" />
+            </div>
+
+            @* 2. Роль (Dropdown) *@
+            <div class="col-span-2">
+                <label asp-for="RoleId" class="form-label">Роль <span class="text-red-500">*</span></label>
+                @* Важно: ID должен быть уникальным в DOM, т.к. AJAX-форма вставляется в DOM *@
+                <select asp-for="RoleId" asp-items="Model.AvailableRoles" class="form-select-field w-full" id="roleSelectEdit">
+                    <option value="">-- Выберите роль --</option>
+                </select>
+                <span asp-validation-for="RoleId" class="text-danger"></span>
+            </div>
+
+            @* 3.1. Динамическое поле: Класс (для Ученика) *@
+            @* Добавляем начальный класс 'hidden', JS его покажет, если нужно *@
+            <div class="col-span-2 @(Model.RoleId != 3 ? "hidden" : "")" id="classFieldEdit">
+                <label asp-for="ClassId" class="form-label">Класс (для Ученика)</label>
+                <select asp-for="ClassId" asp-items="Model.SchoolClasses" class="form-select-field w-full">
+                    <option value="">-- Не привязан --</option>
+                </select>
+                <span asp-validation-for="ClassId" class="text-danger"></span>
+            </div>
+
+            @* 3.2. Динамическое поле: Ученики (для Родителя) *@
+            @* Добавляем начальный класс 'hidden', JS его покажет, если нужно *@
+            <div class="col-span-2 @(Model.RoleId != 4 ? "hidden" : "")" id="studentsFieldEdit">
+                <label asp-for="StudentIdsForParent" class="form-label">Привязанные дети (для Родителя)</label>
+                @* Используем Multi-Select для привязки нескольких детей *@
+                <select asp-for="StudentIdsForParent" multiple="multiple" asp-items="Model.AllStudents" class="form-select-field w-full h-40">
+                </select>
+                <div class="text-sm text-gray-500 mt-1">Используйте Ctrl/Cmd для выбора нескольких учеников.</div>
+            </div>
+
+
+            @* 4. Логин (READONLY) *@
+            <div class="col-span-2">
+                <label asp-for="Login" class="form-label">Логин (Нельзя изменить)</label>
+                @* Используем readonly, чтобы поле отправлялось в POST-запросе *@
+                <input asp-for="Login" class="form-input-field w-full bg-gray-100 cursor-not-allowed" readonly="readonly" />
+                @* Скрытое поле уже не нужно, т.к. readonly отправляется *@
+            </div>
+            @* Пароль исключен из редактирования *@
+
+            @* 5. Контактные данные и Дата рождения *@
+            <div class="col-span-1">
+                <label asp-for="BirthDate" class="form-label">Дата рождения</label>
+                <input asp-for="BirthDate" type="date" class="form-input-field w-full" />
+            </div>
+            <div class="col-span-1">
+                <label asp-for="Phone" class="form-label">Телефон</label>
+                <input asp-for="Phone" class="form-input-field w-full" />
+            </div>
+            <div class="col-span-2">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-input-field w-full" />
+            </div>
+
+            @* 6. Дополнительная информация *@
+            <div class="col-span-2">
+                <label asp-for="Info" class="form-label">Дополнительная информация (Info)</label>
+                <textarea asp-for="Info" rows="3" class="form-input-field w-full"></textarea>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-end gap-3">
+            <button type="button" class="btn-secondary-text close-modal">Отмена</button>
+            <button type="submit" class="btn-primary-blue"><i class="fas fa-save mr-2"></i> Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const roleSelect = document.getElementById('roleSelectEdit');
+        const classField = document.getElementById('classFieldEdit');
+        const studentsField = document.getElementById('studentsFieldEdit');
+
+        // ИД Ролей (предполагаемые значения: Ученик=3, Родитель=4)
+        const ROLE_STUDENT = "3";
+        const ROLE_PARENT = "4";
+
+        function toggleDynamicFields(selectedRoleId) {
+            // Сбрасываем все поля
+            classField.classList.add('hidden');
+            studentsField.classList.add('hidden');
+
+            if (selectedRoleId === ROLE_STUDENT) {
+                classField.classList.remove('hidden');
+            } else if (selectedRoleId === ROLE_PARENT) {
+                studentsField.classList.remove('hidden');
+            }
+        }
+
+        // 1. Инициализация при загрузке формы
+        toggleDynamicFields(roleSelect.value);
+
+        // 2. Обработчик изменения роли
+        roleSelect.addEventListener('change', (e) => {
+            toggleDynamicFields(e.target.value);
+        });
+
+        // 3. jQuery Validation Re-parse (повторный парсинг валидации после загрузки через AJAX)
+        // Это необходимо, чтобы Unobtrusive Validation заработала для динамически загруженной формы.
+        var form = $('#editUserForm');
+        form.removeData("validator");
+        form.removeData("unobtrusiveValidation");
+        $.validator.unobtrusive.parse(form);
+    });
+</script>
+    </div>
+</div>

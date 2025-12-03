@@ -1,0 +1,290 @@
+﻿/* ========================================================= */
+/* Стили для страницы Администрирование пользователей (Users/Index) */
+/* ========================================================= */
+
+/* --- 1. Стили для кнопки "Создать нового пользователя" --- */
+/* Стиль аналогичен кнопке "+ Новое сообщение" */
+.btn-create-user {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem; /* px-5 py-3 */
+    background-color: #3B82F6; /* primary color */
+    color: white;
+    font-weight: 600;
+    border-radius: 0.5rem; /* rounded-lg */
+    transition: background-color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); /* shadow-md */
+}
+
+    .btn-create-user i {
+        margin-right: 0.5rem;
+    }
+
+    .btn-create-user:hover {
+        background-color: #1E3A8A; /* secondary color (темнее) */
+        box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15);
+    }
+
+/* --- 2. Общие стили для полей фильтров и поиска --- */
+.form-select-field,
+.form-input-field {
+    /* Основной вид */
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB; /* border-gray-300 */
+    border-radius: 0.375rem; /* rounded-md */
+    background-color: white;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    /* Стилизация фокуса */
+    .form-select-field:focus,
+    .form-input-field:focus {
+        border-color: #3B82F6; /* primary color */
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* ring-primary */
+    }
+
+/* Кастомизация стрелки для SELECT */
+.form-select-field {
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="gray"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1.5em;
+    padding-right: 2.5rem;
+    min-width: 120px; /* Чтобы селекторы не были слишком узкими */
+}
+
+/* Стили для кнопок "Применить" и "Сброс" в фильтре */
+.btn-filter-apply {
+    /* Стили заданы инлайн в Razor, но здесь можно добавить hover */
+}
+
+.btn-filter-reset {
+    /* Стили заданы инлайн в Razor, но здесь можно добавить hover */
+    text-decoration: none;
+    color: #4B5563; /* gray-700 */
+}
+
+    .btn-filter-reset:hover {
+        color: #3B82F6; /* primary */
+    }
+
+/* --- 3. Стили для построчного списка пользователей (User List) --- */
+.user-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* space-y-2 */
+}
+
+.user-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem; /* py-4 px-5 */
+    background-color: white;
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* shadow-sm */
+    transition: box-shadow 0.2s;
+}
+
+    .user-card-row:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06); /* shadow-md */
+    }
+
+.user-info-main {
+    flex-grow: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.user-full-name {
+    font-weight: 600;
+    color: #1F2937; /* gray-800 */
+    font-size: 1.125rem; /* text-lg */
+}
+
+.user-role {
+    color: #6B7280; /* gray-500 */
+    font-size: 0.875rem; /* text-sm */
+}
+
+
+/* --- 4. Стили для кнопок действий (Редактировать, Удалить, Подробнее) --- */
+.user-actions {
+    display: flex;
+    gap: 0.75rem; /* space-x-3 */
+    flex-shrink: 0;
+}
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem; /* text-sm */
+    transition: background-color 0.2s, color 0.2s;
+    text-decoration: none;
+}
+
+.btn-edit {
+    color: #2563EB; /* blue-600 */
+}
+
+    .btn-edit:hover {
+        background-color: #EFF6FF; /* blue-50 */
+    }
+
+.btn-delete {
+    color: #DC2626; /* red-600 */
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+    .btn-delete:hover {
+        background-color: #FEE2E2; /* red-100 */
+    }
+
+.btn-details {
+    color: #4B5563; /* gray-600 */
+    background-color: #F9FAFB; /* gray-50 */
+    border: 1px solid #E5E7EB; /* gray-200 */
+}
+
+    .btn-details:hover {
+        background-color: #E5E7EB; /* gray-200 */
+    }
+
+/* --- 5. Стили модального окна (UserDetailsModal) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none; /* Скрыто по умолчанию */
+    justify-content: center;
+    align-items: center;
+    z-index: 50; /* z-50 */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content-details {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem; /* rounded-xl */
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-form-header {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 700;
+    color: #1F2937; /* gray-800 */
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.details-content-area h4 {
+    font-weight: 600;
+    color: #3B82F6; /* primary */
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.details-content-area p {
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+}
+
+.modal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn-secondary-text {
+    padding: 0.6rem 1.25rem;
+    background: none;
+    border: 1px solid #D1D5DB;
+    color: #4B5563;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.btn-primary-blue {
+    padding: 0.6rem 1.25rem;
+    background-color: #3B82F6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Анимации для модального окна */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* --- Медиа-запросы для адаптивности --- */
+@media (max-width: 768px) {
+    /* Фильтры и кнопка на мобильных устройствах */
+    .admin-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-search-form {
+        width: 100%;
+    }
+
+    .form-select-field,
+    .form-input-field {
+        width: 100% !important; /* На маленьких экранах поля занимают всю ширину */
+    }
+
+    /* Адаптация строчных карточек */
+    .user-card-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .user-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

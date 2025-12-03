@@ -1,0 +1,139 @@
+﻿@model List<TP_School.Models.SchoolClass>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    // Получаем список учителей, переданный из контроллера
+    var availableTeachers = ViewBag.AvailableTeachers as List<SelectListItem> ?? new List<SelectListItem>();
+}
+
+<h4 class="font-semibold mb-3">Список существующих классов</h4>
+
+<div class="space-y-2 max-h-60 overflow-y-auto border p-3 rounded-lg bg-gray-50">
+    @if (!Model.Any())
+    {
+        <p class="text-gray-500">Классы не найдены.</p>
+    }
+    @foreach (var schoolClass in Model)
+    {
+        <div class="flex justify-between items-center p-2 bg-white border rounded-md" id="class-item-@schoolClass.ClassId">
+            <span>
+                @schoolClass.ClassName
+                @if (schoolClass.ClassTeacher != null)
+                {
+                    <small class="text-gray-500 ml-2">(Кл. рук: @schoolClass.ClassTeacher.FullName)</small>
+                }
+            </span>
+            <button type="button" data-class-id="@schoolClass.ClassId" class="text-red-500 hover:text-red-700 delete-class-btn">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    }
+</div>
+
+<h4 class="font-semibold mt-4 mb-3 border-b pb-2 text-gray-700">Добавить новый класс и назначить руководителя</h4>
+<form id="addClassForm" class="flex flex-wrap gap-4 items-end bg-white p-4 border rounded-lg shadow-inner">
+    @Html.AntiForgeryToken()
+
+    <div class="w-full md:w-[calc(33.33%-8px)]">
+        <label for="classNumberInput" class="block text-sm font-medium text-gray-700">Номер</label>
+        <input type="number" id="classNumberInput" name="classNumber" class="form-input-field w-full border border-gray-300 p-2 rounded-md focus:ring-blue-500 focus:border-blue-500" required min="1" max="11" />
+    </div>
+    <div class="w-full md:w-[calc(33.33%-8px)]">
+        <label for="classLetterInput" class="block text-sm font-medium text-gray-700">Буква</label>
+        <input type="text" id="classLetterInput" name="classLetter" class="form-input-field w-full border border-gray-300 p-2 rounded-md focus:ring-blue-500 focus:border-blue-500" required maxlength="1" />
+    </div>
+
+    <div class="w-full md:w-[calc(33.33%-8px)]">
+        <label for="classTeacherIdInput" class="block text-sm font-medium text-gray-700">Классный руководитель <span class="text-red-500">*</span></label>
+        <select id="classTeacherIdInput" name="classTeacherId" class="form-select-field w-full border border-gray-300 p-2 rounded-md focus:ring-blue-500 focus:border-blue-500" required>
+            <option value="">-- Выберите учителя --</option>
+            @foreach (var teacher in availableTeachers)
+            {
+                <option value="@teacher.Value">@teacher.Text</option>
+            }
+        </select>
+    </div>
+
+    <div class="w-full mt-2 flex justify-end">
+        <button type="submit" class="btn-primary-blue bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-150">
+            <i class="fas fa-plus mr-1"></i> Добавить класс
+        </button>
+    </div>
+</form>
+<p id="addClassMessage" class="mt-2 text-sm hidden p-2 rounded-md border"></p>
+
+<script>
+    // ---------------------------------------------------
+    // ЛОГИКА ДОБАВЛЕНИЯ КЛАССА (Улучшенная версия)
+    // ---------------------------------------------------
+    $('#addClassForm').on('submit', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        const messageBox = $('#addClassMessage');
+
+        messageBox.removeClass('hidden text-red-500 text-green-500').text('');
+
+        $.ajax({
+            url: '@Url.Action("AddClass", "Users")',
+            type: 'POST',
+            data: $form.serialize(),
+            success: function(response) {
+                messageBox.removeClass('hidden text-red-500').addClass('text-green-500').text(`Класс ${response.className} (Кл. рук: ${response.classTeacher}) успешно добавлен.`);
+
+                // Перезагрузка страницы для обновления списков
+                setTimeout(function() {
+                     location.reload();
+                }, 1000);
+            },
+            error: function(xhr) {
+                let error;
+                try {
+                    error = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : (xhr.responseText || 'Произошла ошибка при добавлении класса.');
+                } catch {
+                    error = "Произошла неизвестная ошибка при добавлении класса.";
+                }
+                messageBox.removeClass('hidden text-green-500').addClass('text-red-500').text(error);
+            }
+        });
+    });
+
+    // ---------------------------------------------------
+    // ЛОГИКА УДАЛЕНИЯ КЛАССА
+    // ---------------------------------------------------
+    $(document).on('click', '.delete-class-btn', function() {
+        const classId = $(this).data('class-id');
+        const className = $(this).closest('div').find('span:first').text().trim().split('(')[0].trim();
+
+        if (!confirm(`Вы уверены, что хотите удалить класс "${className}"? Это действие необратимо и возможно только если в классе нет учеников.`)) {
+            return;
+        }
+
+        const messageBox = $('#addClassMessage'); // Используем то же окно для сообщений
+        messageBox.removeClass('hidden text-red-500 text-green-500').text('');
+
+        $.ajax({
+            url: '@Url.Action("DeleteClass", "Users")',
+            type: 'POST',
+            data: { classId: classId, "__RequestVerificationToken": $('[name="__RequestVerificationToken"]').val() },
+            success: function(response) {
+                // Визуально удаляем элемент списка без перезагрузки
+                $(`#class-item-${classId}`).slideUp(200, function() {
+                    $(this).remove();
+                });
+
+                messageBox.removeClass('hidden text-red-500').addClass('text-green-500').text(response.message);
+            },
+            error: function(xhr) {
+                let error;
+                try {
+                    // Парсим сообщение об ошибке, возвращенное контроллером (особенно важно для ошибки "В нем числятся ученики")
+                    const jsonResponse = JSON.parse(xhr.responseText);
+                    error = jsonResponse.message || "Не удалось удалить класс.";
+                } catch {
+                    error = "Произошла ошибка при удалении класса. Проверьте связи в базе данных.";
+                }
+                messageBox.removeClass('hidden text-green-500').addClass('text-red-500').text(error);
+            }
+        });
+    });
+</script>

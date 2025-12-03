@@ -53,9 +53,9 @@
             </a>
             @if (User.IsInRole("Учитель") || User.IsInRole("Директор"))
             {
-                var isJournalActive = currentController == "Journal"; // <-- Здесь возникала ошибка
+                var isJournalActive = currentController == "Journal"; 
                 <a href="@Url.Action("Index", "Journal")" class="menu-item group @(isJournalActive ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
-                    <i class="fas fa-book-open w-5 h-5"></i>
+                    <i class="fas fa-book w-5 h-5"></i>
                     <span>Ведение журнала</span>
                 </a>
             }
@@ -71,7 +71,7 @@
                 <i class="fas fa-chart-line w-5 h-5"></i>
                 <span>Успеваемость</span>
             </a>
-            <a href="#" class="menu-item text-gray-700 hover:bg-light-blue hover:text-primary group">
+            <a href="@Url.Action("Index", "Users")" class="menu-item group @(currentController == "Users" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-cogs w-5 h-5"></i>
                 <span>Администрирование</span>
             </a>
@@ -113,7 +113,12 @@
         <header class="mb-6 pb-4 border-b border-gray-300">
             <h1 class="text-3xl font-bold text-gray-800">@ViewData["Title"]</h1>
             <p class="text-sm text-gray-500 mt-1">
-                Приветствуем, @ViewBag.FullName! Вы вошли как @User.FindFirst(ClaimTypes.Role)?.Value.
+                Приветствуем,
+
+                <strong>@(User.Identity.Name ?? "Гость")</strong>!
+
+                Вы вошли как
+                <strong>@(User.FindFirst(ClaimTypes.Role)?.Value ?? "Пользователь")</strong>.
             </p>
         </header>
 

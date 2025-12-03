@@ -134,12 +134,16 @@ public class MessagesController : Controller
     // -------------------------------------------------------------
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(int toUserId, string messageText)
+    // 🔥 ИСПРАВЛЕНО: Теперь принимаем ViewModel, которая корректно сопоставляется с полями формы.
+    public async Task<IActionResult> Create(SendMessageViewModel model)
     {
-        // 1. Простая проверка
-        if (toUserId == 0 || string.IsNullOrWhiteSpace(messageText))
+        // 1. Проверка основных данных
+        if (model.RecipientId == 0 || string.IsNullOrWhiteSpace(model.Body))
         {
-            return BadRequest(new { success = false, message = "Некорректные данные: ID получателя или текст сообщения отсутствуют." });
+            // Используем TempData, чтобы передать ошибку на страницу Index, если редирект происходит
+            TempData["ErrorMessage"] = "Ошибка отправки: ID получателя или текст сообщения отсутствуют.";
+            // Возврат на отправленные сообщения (как запасной вариант)
+            return RedirectToAction(nameof(Index), new { filter = "sent" });
         }
 
         try
@@ -147,31 +151,38 @@ public class MessagesController : Controller
             int currentUserId = GetCurrentUserId();
 
             // 2. Дополнительная проверка, что ID получателя существует
-            if (await _context.Users.FindAsync(toUserId) == null)
+            if (await _context.Users.FindAsync(model.RecipientId) == null)
             {
-                return NotFound(new { success = false, message = "Получатель не найден в базе данных." });
+                TempData["ErrorMessage"] = "Ошибка отправки: Получатель не найден в базе данных.";
+                return RedirectToAction(nameof(Index), new { filter = "sent" });
             }
 
             // 3. Создаем и сохраняем сообщение
             var newMessage = new Message
             {
                 FromUserId = currentUserId,
-                ToUserId = toUserId,
-                MessageText = messageText,
+                ToUserId = model.RecipientId,      // Из ViewModel
+                MessageText = model.Body,          // Из ViewModel
                 SentAt = DateTime.Now,
+                // IsRead = false, // Если не нужен статус прочтения, это поле можно удалить или не инициализировать
             };
 
             _context.Messages.Add(newMessage);
             await _context.SaveChangesAsync();
 
-            // 4. Возвращаем успешный ответ (для обновления страницы через JS)
-            return Json(new { success = true, message = "Сообщение успешно отправлено." });
+            // 4. 🔥 Ключевое изменение: Перенаправление на страницу отправленных сообщений
+            TempData["SuccessMessage"] = "Сообщение успешно отправлено!";
+            return RedirectToAction(nameof(Index), new { filter = "sent" });
         }
-        catch (Exception ex)
+        catch (InvalidOperationException)
         {
-            // Логирование ошибки
-            // _logger.LogError(ex, "Ошибка при отправке сообщения."); // Если бы был инжектирован ILogger
-            return StatusCode(500, new { success = false, message = "Ошибка сервера при отправке сообщения." });
+            // Если GetCurrentUserId() выдал ошибку (нет ID)
+            return Unauthorized();
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "Произошла ошибка сервера при отправке сообщения.";
+            return RedirectToAction(nameof(Index), new { filter = "sent" });
         }
     }
 

@@ -1,0 +1,320 @@
+﻿@model TP_School.ViewModels.UserCreateViewModel
+@{
+    ViewData["Title"] = "Администрирование";
+}
+
+<style>
+    /* Убедитесь, что эти стили соответствуют вашему проекту (TailwindCSS или кастомные) */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-content-details {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-form-header {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .btn-admin-tool {
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        transition: background-color 0.2s;
+    }
+
+    .form-input-field,
+    .form-select-field {
+        /* Делаем границу видимой */
+        border: 1px solid #ccc; /* Светло-серый цвет */
+        /* Добавляем отступы */
+        padding: 0.5rem 0.75rem;
+        /* Сглаживаем углы */
+        border-radius: 0.375rem; /* 6px */
+        /* Плавный переход для фокуса */
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .form-input-field:focus,
+        .form-select-field:focus {
+            /* При фокусировке делаем границу синей и добавляем тень */
+            border-color: #3b82f6; /* Tailwind blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Полупрозрачная синяя тень */
+            outline: none; /* Убираем стандартную обводку браузера */
+        }
+</style>
+
+<div class="mb-4">
+    <a asp-action="Index" class="
+        bg-blue-500 hover:bg-blue-600 text-white
+        font-semibold py-2 px-4 rounded-lg
+        inline-flex items-center shadow-md transition duration-150
+        ">
+        <i class="fas fa-arrow-left mr-2"></i> Вернуться к списку пользователей
+    </a>
+</div>
+
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div id="success-alert" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+        <p class="font-bold">Успех!</p>
+        <p>@TempData["SuccessMessage"]</p>
+    </div>
+}
+
+<div class="user-creation-layout flex flex-wrap gap-8">
+
+    @* ------------------------------------------------------------------ *@
+    @* --- БЛОК 1: ОСНОВНАЯ ФОРМА СОЗДАНИЯ ПОЛЬЗОВАТЕЛЯ (Слева) --- *@
+    @* ------------------------------------------------------------------ *@
+    <div class="user-form-container w-full lg:w-3/5">
+        <h3 class="text-xl font-semibold mb-3">Создание нового пользователя</h3>
+        <form asp-action="Create" method="post" class="bg-white p-6 rounded-lg shadow-lg">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                @* 1. ФИО *@
+                <div class="col-span-2">
+                    <label asp-for="LastName" class="form-label">Фамилия <span class="text-red-500">*</span></label>
+                    <input asp-for="LastName" class="form-input-field w-full" />
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                <div class="col-span-1">
+                    <label asp-for="FirstName" class="form-label">Имя <span class="text-red-500">*</span></label>
+                    <input asp-for="FirstName" class="form-input-field w-full" />
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="col-span-1">
+                    <label asp-for="MiddleName" class="form-label">Отчество</label>
+                    <input asp-for="MiddleName" class="form-input-field w-full" />
+                </div>
+
+                @* 2. Роль (Dropdown) *@
+                <div class="col-span-2">
+                    <label asp-for="RoleId" class="form-label">Роль <span class="text-red-500">*</span></label>
+                    <select asp-for="RoleId" asp-items="Model.AvailableRoles" class="form-select-field w-full" id="roleSelect">
+                        <option value="">-- Выберите роль --</option>
+                    </select>
+                    <span asp-validation-for="RoleId" class="text-danger"></span>
+                </div>
+
+                @* 3. Динамические поля (Класс / Ученик для родителя) *@
+                <div class="col-span-2 hidden" id="classField">
+                    <label asp-for="ClassId" class="form-label" id="classLabel">Класс (для Ученика)</label>
+                    <select asp-for="ClassId" asp-items="Model.SchoolClasses" class="form-select-field w-full">
+                        <option value="">-- Не выбрано --</option>
+                    </select>
+                    <span asp-validation-for="ClassId" class="text-danger"></span>
+                </div>
+
+                <div class="col-span-2 hidden" id="studentField">
+                    <label asp-for="StudentIdForParent" class="form-label">Связать с учеником <span class="text-red-500">*</span></label>
+                    <select asp-for="StudentIdForParent" asp-items="Model.AllStudents" class="form-select-field w-full">
+                        <option value="">-- Выберите ученика --</option>
+                    </select>
+                    <span asp-validation-for="StudentIdForParent" class="text-danger"></span>
+                </div>
+
+                @* 4. Контактные данные и логин/пароль *@
+                <div class="col-span-1">
+                    <label asp-for="BirthDate" class="form-label">Дата рождения</label>
+                    <input asp-for="BirthDate" type="date" class="form-input-field w-full" />
+                </div>
+                <div class="col-span-1">
+                    <label asp-for="Phone" class="form-label">Телефон</label>
+                    <input asp-for="Phone" class="form-input-field w-full" />
+                </div>
+                <div class="col-span-2">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-input-field w-full" />
+                </div>
+                <div class="col-span-1">
+                    <label asp-for="Login" class="form-label">Логин <span class="text-red-500">*</span></label>
+                    <input asp-for="Login" class="form-input-field w-full" />
+                    <span asp-validation-for="Login" class="text-danger"></span>
+                </div>
+                
+                @* 5. Дополнительная информация *@
+                <div class="col-span-2">
+                    <label asp-for="Info" class="form-label">Дополнительная информация (Info)</label>
+                    <textarea asp-for="Info" rows="3" class="form-input-field w-full"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class=" bg-blue-600 hover:bg-blue-700 text-white  py-2 px-4 rounded-lg inline-flex items-center shadow-md hover:shadow-lg transition duration-150 border border ">
+                <i class="fas mr-2"></i> Создать пользователя
+            </button>
+        </form>
+    </div>
+
+    @* ------------------------------------------------------------------ *@
+    @* --- БЛОК 2: ПАНЕЛЬ АДМИНИСТРИРОВАНИЯ (Справа) --- *@
+    @* ------------------------------------------------------------------ *@
+    <div class="admin-tools-container w-full lg:w-1/3 p-6 bg-gray-100 rounded-lg shadow-lg">
+        <h3 class="text-xl font-semibold mb-4 text-gray-700"><i class="fas fa-tools mr-2"></i> Дополнительные инструменты</h3>
+
+        <p class="text-sm text-gray-600 mb-4 border-b pb-3">Управляйте классами и предметами школы.</p>
+
+        <button type="button" id="openClassModal" class="btn-admin-tool w-full mb-3 bg-indigo-600 text-white hover:bg-indigo-700">
+            <i class="fas fa-school mr-2"></i> Управление классами
+        </button>
+        <button type="button" id="openSubjectModal" class="btn-admin-tool w-full bg-indigo-600 text-white hover:bg-indigo-700">
+            <i class="fas fa-book-open mr-2"></i> Управление предметами
+        </button>
+    </div>
+</div>
+
+
+@* ------------------------------------------------------------------ *@
+@* --- МОДАЛЬНЫЕ ОКНА (AJAX) --- *@
+@* ------------------------------------------------------------------ *@
+
+@* --- МОДАЛЬНОЕ ОКНО 1: УПРАВЛЕНИЕ КЛАССАМИ --- *@
+<div id="classManagementModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details w-11/12 md:w-3/5 lg:w-1/2">
+        <h3 class="modal-form-header">Управление классами</h3>
+        <div id="classManagementContent" class="py-4">
+            <p>Загрузка данных...</p>
+        </div>
+        <div class="modal-form-actions mt-4 border-t pt-3 flex justify-end">
+            <button type="button" class="btn-secondary-text close-modal">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+@* --- МОДАЛЬНОЕ ОКНО 2: УПРАВЛЕНИЕ ПРЕДМЕТАМИ --- *@
+<div id="subjectManagementModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details w-11/12 md:w-3/5 lg:w-1/2">
+        <h3 class="modal-form-header">Управление предметами</h3>
+        <div id="subjectManagementContent" class="py-4">
+            <p>Загрузка данных...</p>
+        </div>
+        <div class="modal-form-actions mt-4 border-t pt-3 flex justify-end">
+            <button type="button" class="btn-secondary-text close-modal">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+            // Скрыть alert через 5 секунд
+            setTimeout(function() {
+                $('#success-alert').slideUp(500);
+            }, 5000);
+
+            // ---------------------------------------------------
+            // ЛОГИКА ДИНАМИЧЕСКИХ ПОЛЕЙ (Роль)
+            // ---------------------------------------------------
+            const roleSelect = $('#roleSelect');
+            const classField = $('#classField');
+            const studentField = $('#studentField');
+            const classLabel = $('#classLabel');
+
+            handleRoleChange(roleSelect.find('option:selected').text());
+
+            roleSelect.on('change', function() {
+                handleRoleChange($(this).find('option:selected').text());
+            });
+
+            function handleRoleChange(selectedRoleName) {
+                // Сброс всех полей
+                classField.addClass('hidden').find('select').prop('required', false);
+                studentField.addClass('hidden').find('select').prop('required', false);
+
+                if (selectedRoleName === 'Ученик') {
+                    classField.removeClass('hidden').find('select').prop('required', true);
+                    classLabel.text('Класс ученика');
+                } else if (selectedRoleName === 'Родитель') {
+                    studentField.removeClass('hidden').find('select').prop('required', true);
+                }
+            }
+
+            // ---------------------------------------------------
+            // ЛОГИКА МОДАЛЬНЫХ ОКОН (Классы/Предметы)
+            // ---------------------------------------------------
+
+            const classModal = $('#classManagementModal');
+            const subjectModal = $('#subjectManagementModal');
+
+            // 1. Открытие модального окна классов
+            $('#openClassModal').on('click', function() {
+                classModal.removeClass('hidden').fadeIn(300);
+                $('#classManagementContent').html('<p class="text-indigo-600"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка данных...</p>');
+
+                $.ajax({
+                    url: '@Url.Action("ManageClassesPartial", "Users")',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#classManagementContent').html(data);
+                    },
+                    error: function(xhr) {
+                        const errorMessage = xhr.status === 403 ? 'Доступ запрещен. Убедитесь, что у вас роль "Директор".' : 'Не удалось загрузить инструменты управления классами.';
+                        $('#classManagementContent').html('<p class="text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i> ' + errorMessage + '</p>');
+                    }
+                });
+            });
+
+            // 2. Открытие модального окна предметов
+            $('#openSubjectModal').on('click', function() {
+                subjectModal.removeClass('hidden').fadeIn(300);
+                $('#subjectManagementContent').html('<p class="text-teal-600"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка данных...</p>');
+
+                $.ajax({
+                    url: '@Url.Action("ManageSubjectsPartial", "Users")',
+                    type: 'GET',
+                    success: function(data) {
+                        $('#subjectManagementContent').html(data);
+                    },
+                    error: function(xhr) {
+                        const errorMessage = xhr.status === 403 ? 'Доступ запрещен. Убедитесь, что у вас роль "Директор".' : 'Не удалось загрузить инструменты управления предметами.';
+                        $('#subjectManagementContent').html('<p class="text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i> ' + errorMessage + '</p>');
+                    }
+                });
+            });
+
+            // 3. Закрытие модальных окон
+            $('.close-modal').on('click', function() {
+                $(this).closest('.modal-overlay').fadeOut(300, function() {
+                     $(this).addClass('hidden');
+                });
+            });
+
+            // Закрытие по клику вне модального окна
+            $('.modal-overlay').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).fadeOut(300, function() {
+                         $(this).addClass('hidden');
+                    });
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,362 @@
+﻿@model List<TP_School.Models.User>
+@{
+    ViewData["Title"] = "Администрирование пользователей";
+
+    // Получаем текущие фильтры
+    string currentRoleFilter = ViewBag.RoleFilter as string;
+    int? currentClassFilter = ViewBag.ClassFilter as int?;
+    string currentSearchTerm = ViewBag.SearchTerm as string;
+
+    // Получаем ID текущего авторизованного пользователя для JS
+    string currentAuthUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+}
+
+@* Подключение стилей *@
+<link rel="stylesheet" href="~/css/users-admin.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+
+<div class="admin-page-content">
+    
+    @* --- БЛОК УПРАВЛЕНИЯ (Кнопка и Фильтры) --- *@
+    <div class="admin-header-bar flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+
+        @* Кнопка "Создать нового пользователя" (Видна только Директору) *@
+        @if (User.IsInRole("Директор"))
+        {
+            <a href="@Url.Action("Create", "Users")" class="btn-create-user flex items-center bg-primary text-white px-5 py-3 rounded-lg font-semibold hover:bg-secondary transition-colors shadow-md flex-shrink-0">
+                <i class="fas fa-plus mr-2"></i> Расширенное администрирование
+            </a>
+        }
+
+        @* Панель Фильтров и Поиска *@
+        <form asp-action="Index" method="get" class="filter-search-form flex flex-wrap items-center gap-3">
+
+            @* Фильтр по Роли *@
+            <select name="roleFilter" class="form-select-field filter-field w-auto">
+                <option value="">Все роли</option>
+                @if (ViewBag.AvailableRoles is IEnumerable<TP_School.Models.Role> rolesFromDb)
+                {
+                    foreach (var role in rolesFromDb.OrderBy(r => r.RoleName))
+                    {
+                        <option value="@role.RoleName" selected="@(currentRoleFilter == role.RoleName)">@role.RoleName</option>
+                    }
+                }
+            </select>
+
+            @* Фильтр по Классу *@
+            <select name="classFilter" class="form-select-field filter-field w-auto">
+                <option value="">Все классы</option>
+                @if (ViewBag.SchoolClasses != null)
+                {
+                    foreach (var schoolClass in ViewBag.SchoolClasses as List<TP_School.Models.SchoolClass>)
+                    {
+                        <option value="@schoolClass.ClassId" selected="@(currentClassFilter == schoolClass.ClassId)">
+                            @schoolClass.ClassName
+                        </option>
+                    }
+                }
+            </select>
+
+            @* Поиск по ФИО *@
+            <input type="text" name="searchTerm" value="@currentSearchTerm"
+                   placeholder="Поиск по ФИО..." class="form-input-field search-field w-40" />
+
+            <button type="submit" class="btn-filter-apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">Применить</button>
+            <a href="@Url.Action("Index", "Users")" class="btn-filter-reset text-gray-600 px-4 py-2 hover:text-primary transition-colors">Сброс</a>
+        </form>
+    </div>
+
+    @* --- СПИСОК ПОЛЬЗОВАТЕЛЕЙ --- *@
+    <div class="user-list-container">
+        @if (!Model.Any())
+        {
+            <p class="empty-list-message">Пользователи не найдены по заданным критериям.</p>
+        }
+        else
+        {
+            @foreach (var user in Model)
+            {
+                <div class="user-card-row">
+
+                    <div class="user-info-main">
+                        <span class="user-full-name">@user.FullName</span>
+                        <span class="user-role">@user.Role.RoleName</span>
+                    </div>
+
+                    <div class="user-actions">
+                        @if (User.IsInRole("Директор"))
+                        {
+                            <button type="button" class="btn-action btn-edit js-edit-user" data-id="@user.UserId">
+                                Редактировать
+                            </button>
+
+                            <button type="button" class="btn-action btn-delete js-delete-user" data-id="@user.UserId" data-name="@user.FullName">
+                                Удалить
+                            </button>
+                        }
+
+                        <button type="button" class="btn-action btn-details" data-user-id="@user.UserId" data-user-name="@user.FullName">
+                            Подробнее
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@* --- МОДАЛЬНОЕ ОКНО "ПОДРОБНАЯ ИНФОРМАЦИЯ" (скрыто по умолчанию) --- *@
+<div id="userDetailsModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details">
+        <div class="modal-form-header">
+            Подробная информация о пользователе
+        </div>
+
+        @* Здесь будет загружаться контент с помощью AJAX *@
+        <div id="userDetailsContent" class="details-content-area">
+            Загрузка...
+        </div>
+
+        <div class="modal-form-actions">
+            <button type="button" id="closeDetailsModal" class="btn-secondary-text">Закрыть</button>
+
+            @* Кнопка "Написать сообщение" - будет показана/скрыта JS *@
+            <button type="button" id="sendMessageDetailsBtn" class="btn-primary-blue hidden" data-recipient-id="" data-recipient-name="">
+                <i class="fas fa-paper-plane mr-2"></i> Написать сообщение
+            </button>
+        </div>
+    </div>
+</div>
+
+@* --- МОДАЛЬНОЕ ОКНО "НОВОЕ СООБЩЕНИЕ" --- *@
+<div id="newMessageModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details">
+        <h3 class="modal-form-header" id="messageModalHeader">Новое сообщение</h3>
+
+        <form id="messageForm" action="@Url.Action("Create", "Messages")" method="post">
+            @Html.AntiForgeryToken()
+            @* Скрытое поле для ID получателя *@
+            <input type="hidden" name="RecipientId" id="recipientIdInput" />
+
+            <div class="mb-4">
+                <label for="messageBody" class="block text-sm font-medium text-gray-700 mb-2">Текст сообщения</label>
+                <textarea id="messageBody" name="Body" rows="5" required
+                          class="form-input-field w-full resize-none"
+                          placeholder="Введите ваше сообщение..."></textarea>
+            </div>
+
+            <div class="modal-form-actions">
+                <button type="button" id="closeMessageModal" class="btn-secondary-text">Отмена</button>
+                <button type="submit" class="btn-primary-blue">Отправить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@* ------------------------------------------------------------------ *@
+@* --- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ --- *@
+@* ------------------------------------------------------------------ *@
+<div id="editUserModal" class="modal-overlay hidden" style="display: none;">
+    <div class="modal-content-details w-11/12 md:w-3/5 lg:w-1/2">
+        <h3 class="modal-form-header">Редактирование пользователя</h3>
+        <div id="editUserContent" class="py-4">
+            <p>Загрузка данных...</p>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        // --- Константы и переменные ---
+        const detailsModal = document.getElementById('userDetailsModal');
+        const closeDetailsBtn = document.getElementById('closeDetailsModal');
+        const detailsContent = document.getElementById('userDetailsContent');
+        const sendMessageDetailsBtn = document.getElementById('sendMessageDetailsBtn');
+        const currentAuthUserId = '@currentAuthUserId'; // ID текущего пользователя (string)
+
+        const messageModal = document.getElementById('newMessageModal');
+        const closeMessageBtn = document.getElementById('closeMessageModal');
+        const messageModalHeader = document.getElementById('messageModalHeader');
+        const recipientIdInput = document.getElementById('recipientIdInput');
+        const messageBodyInput = document.getElementById('messageBody');
+
+
+        // --- ФУНКЦИИ УПРАВЛЕНИЯ МОДАЛЬНЫМИ ОКНАМИ ---
+
+        // 1. Показать модальное окно деталей
+        function showUserDetails(userId) {
+            detailsContent.innerHTML = 'Загрузка...';
+            detailsModal.style.display = 'flex';
+            detailsModal.classList.remove('hidden');
+
+            // Настройка кнопки "Написать сообщение"
+            const userName = document.querySelector(`.btn-details[data-user-id="${userId}"]`).getAttribute('data-user-name');
+
+            if (userId && userId !== currentAuthUserId) {
+                sendMessageDetailsBtn.classList.remove('hidden');
+                sendMessageDetailsBtn.setAttribute('data-recipient-id', userId);
+                sendMessageDetailsBtn.setAttribute('data-recipient-name', userName);
+            } else {
+                sendMessageDetailsBtn.classList.add('hidden');
+            }
+
+            // AJAX-запрос
+            $.ajax({
+                url: '@Url.Action("GetUserDetails", "Users")',
+                type: 'GET',
+                data: { id: userId },
+                success: function(html) {
+                    detailsContent.innerHTML = html;
+                },
+                error: function() {
+                    detailsContent.innerHTML = '<p class="text-red-500">Не удалось загрузить данные пользователя.</p>';
+                }
+            });
+        }
+
+        // 2. Показать модальное окно сообщения
+        function showMessageModal(recipientId, recipientName) {
+            // Заполняем форму
+            recipientIdInput.value = recipientId;
+            messageModalHeader.textContent = `Новое сообщение для ${recipientName}`;
+            messageBodyInput.value = '';
+
+            // Показываем окно
+            messageModal.style.display = 'flex';
+            messageModal.classList.remove('hidden');
+        }
+
+
+        // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+
+        // 1. Открытие модального окна "Подробнее"
+        document.querySelectorAll('.btn-details').forEach(button => {
+            button.onclick = function() {
+                showUserDetails(this.getAttribute('data-user-id'));
+            };
+        });
+
+        // 2. Закрытие модального окна "Подробнее"
+        closeDetailsBtn.onclick = function() {
+            detailsModal.style.display = 'none';
+            detailsModal.classList.add('hidden');
+        }
+        window.onclick = function(event) {
+            if (event.target === detailsModal) {
+                detailsModal.style.display = 'none';
+                detailsModal.classList.add('hidden');
+            }
+        }
+
+        // 3. Нажатие на кнопку "Написать сообщение" в модальном окне "Подробнее"
+        sendMessageDetailsBtn.onclick = function() {
+            const recipientId = this.getAttribute('data-recipient-id');
+            const recipientName = this.getAttribute('data-recipient-name');
+
+            // Скрываем окно деталей и показываем окно сообщения
+            detailsModal.style.display = 'none';
+            detailsModal.classList.add('hidden');
+
+            showMessageModal(recipientId, recipientName);
+        }
+
+        // 4. Закрытие модального окна "Сообщение"
+        closeMessageBtn.onclick = function() {
+            messageModal.style.display = 'none';
+            messageModal.classList.add('hidden');
+        }
+        messageModal.onclick = function(event) {
+            if (event.target === messageModal) {
+                messageModal.style.display = 'none';
+                messageModal.classList.add('hidden');
+            }
+        }
+                // Открытие модального окна редактирования
+        $(document).on('click', '.js-edit-user', function() {
+            var userId = $(this).data('id');
+            var modal = $('#editUserModal');
+            var content = $('#editUserContent');
+
+            modal.removeClass('hidden').fadeIn(300);
+            content.html('<p class="text-blue-600 p-4"><i class="fas fa-spinner fa-spin mr-2"></i> Загрузка данных...</p>');
+
+            // AJAX-запрос для получения частичного представления с формой
+            $.ajax({
+                url: '@Url.Action("EditPartial", "Users")',
+                type: 'GET',
+                data: { id: userId },
+                success: function(data) {
+                    content.html(data);
+                    // Re-parse Unobtrusive Validation for the new form content
+                    $.validator.unobtrusive.parse("#editUserForm");
+                },
+                error: function() {
+                    content.html('<p class="text-red-500 p-4">Ошибка загрузки формы.</p>');
+                }
+            });
+        });
+
+        // Обработка отправки формы внутри модального окна
+        $(document).on('submit', '#editUserForm', function(e) {
+            e.preventDefault();
+            var form = $(this);
+
+            if (form.valid()) { // Проверяем валидность формы
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            // Успех: закрываем модалку и обновляем страницу (или Toastr)
+                            $('.close-modal').click();
+                            alert(response.message);
+                            window.location.reload(); // Перезагружаем список
+                        } else {
+                            // Ошибка: если контроллер вернул PartialView с ошибками ModelState
+                            $('#editUserContent').html(response);
+                            // Re-parse validation again
+                            $.validator.unobtrusive.parse("#editUserForm");
+                        }
+                    },
+                    error: function(xhr) {
+                        alert("Ошибка сервера при сохранении.");
+                    }
+                });
+            }
+        });
+
+        // Функция для закрытия модальных окон (если ее еще нет)
+        $(document).on('click', '.close-modal', function() {
+            $(this).closest('.modal-overlay').fadeOut(300, function() {
+                 $(this).addClass('hidden');
+            });
+        });
+                // Удаление пользователя через AJAX
+        $(document).on('click', '.js-delete-user', function () {
+            const userId = $(this).data('id');
+            const userName = $(this).data('name');
+
+            if (!confirm(`Вы уверены, что хотите удалить пользователя ${userName}?`))
+                return;
+
+            $.ajax({
+                url: '@Url.Action("Delete", "Users")',
+                method: 'POST',
+                data: {
+                    id: userId,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+                },
+                success: function () {
+                    // Просто перезагружаем эту же страницу
+                    location.reload();
+                },
+                error: function () {
+                    alert("Ошибка при удалении пользователя.");
+                }
+            });
+        });
+    </script>
+}

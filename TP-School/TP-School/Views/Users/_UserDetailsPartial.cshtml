@@ -1,0 +1,92 @@
+﻿@model TP_School.Models.User
+@using TP_School.Models
+@using Microsoft.EntityFrameworkCore
+@inject TP_School.Data.ApplicationDbContext _context
+
+<div class="user-details-body">
+    @* Используем вычисляемое свойство FullName, которое вы определили *@
+    <h3 class="detail-full-name">@Model.FullName</h3>
+    <p><strong>Роль:</strong> @Model.Role.RoleName</p> 
+    <p><strong>Электронная почта:</strong> @Model.Email</p>
+    <p><strong>Телефон:</strong> @Model.Phone</p>
+
+    @* --- Логин и Пароль (Видит только Директор) --- *@
+    @if (User.IsInRole("Директор"))
+    {
+        <h4 class="mt-4">Учетные данные:</h4>
+        <p><strong>Логин:</strong> @Model.Login</p>
+        @* Пароль лучше не выводить в явном виде, даже директору, если он хранится в хеше *@
+        <p><strong>Пароль (хеш):</strong> @Model.Password</p>
+        @* Если вам абсолютно необходимо увидеть сам пароль (что опасно), используйте: @Model.Password *@
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Info))
+    {
+        <p><strong>Дополнительная информация:</strong> @Model.Info</p>
+    }
+
+    @* --- Логика для УЧЕНИКА --- *@
+    @* ИСПРАВЛЕНО: Сравниваем со строкой RoleName *@
+    @if (Model.Role.RoleName == "Ученик" && Model.StudentClasses.Any())
+    {
+        var studentClassLink = Model.StudentClasses.FirstOrDefault();
+        var studentClass = studentClassLink?.Class;
+
+        @if (studentClass != null)
+        {
+            <h4>Класс и руководители</h4>
+            <p><strong>Класс:</strong> @studentClass.ClassName</p>
+
+            @* Поиск классного руководителя (Учитель, который ClassTeacherId в этом классе) *@
+            var classTeacher = await _context.Users
+            .Include(u => u.Role) // Нужно для RoleName
+            .FirstOrDefaultAsync(u =>
+            u.UserId == studentClass.ClassTeacherId && u.Role.RoleName == "Учитель");
+
+            @if (classTeacher != null)
+            {
+                <p>
+                    <strong>Классный руководитель:</strong>
+                    <a href="@Url.Action("Details", "Users", new { id = classTeacher.UserId })">@classTeacher.FullName</a>
+                </p>
+            }
+        }
+
+        @* Поиск родителей *@
+        @if (Model.StudentParentsAsStudent != null && Model.StudentParentsAsStudent.Any())
+        {
+            <h4>Родители</h4>
+            @foreach (var studentParentLink in Model.StudentParentsAsStudent)
+            {
+                var parent = studentParentLink.Parent;
+                <p>
+                    <a href="#" class="link-to-parent-profile" data-user-id="@parent.UserId">@parent.FullName</a>
+                </p>
+            }
+        }
+    }
+
+    @* --- Логика для УЧИТЕЛЯ --- *@
+    @* ИСПРАВЛЕНО: Сравниваем со строкой RoleName *@
+    @if (Model.Role.RoleName == "Учитель" && Model.ClassesAsTeacher.Any())
+    {
+        var primaryClass = Model.ClassesAsTeacher.FirstOrDefault();
+        if (primaryClass != null)
+        {
+            <p><strong>Классное руководство:</strong> @primaryClass.ClassName</p>
+        }
+    }
+
+    @* --- Логика для РОДИТЕЛЯ --- *@
+    @if (Model.Role.RoleName == "Родитель" && Model.StudentParentsAsParent.Any())
+    {
+        <h4>Дети</h4>
+        @foreach (var studentParentLink in Model.StudentParentsAsParent)
+        {
+            var student = studentParentLink.Student;
+            <p>
+                <a href="@Url.Action("Details", "Users", new { id = student.UserId })">@student.FullName</a>
+            </p>
+        }
+    }
+</div>

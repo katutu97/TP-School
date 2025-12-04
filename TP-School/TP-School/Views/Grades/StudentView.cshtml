@@ -1,23 +1,16 @@
 ﻿@model TP_School.ViewModels.StudentGradesViewModel
 @{
-    ViewData["Title"] = "Успеваемость"; // Заголовок вкладки браузера остается
+    ViewData["Title"] = "Успеваемость";
 }
 
-@* Блок для сортировки по периоду (сделан более компактным) *@
+@* Блок для сортировки по периоду *@
 <div class="bg-white rounded-lg shadow p-4 mb-4">
-    @* Уменьшены отступы p-4 и mb-4 *@
-
     <form asp-action="Index" method="get">
-        @* Убрана лишняя обертка grid-cols-4, так как она не нужна для одного элемента *@
         <div class="flex items-center space-x-4">
-
-            @* Фильтр по четверти (Период) *@
             <div class="flex items-center space-x-2">
-                @* Сделано более компактно по вертикали *@
                 <label for="quarter" class="text-sm font-medium text-gray-700">Период:</label>
                 <select name="quarter" id="quarter" onchange="this.form.submit()"
                         class="pl-3 pr-10 py-1 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-md">
-                    @* Уменьшен py-1 *@
                     @foreach (var q in Model.AvailableQuarters)
                     {
                         <option value="@q" selected="@(Model.SelectedQuarter == q)">
@@ -33,11 +26,24 @@
                     }
                 </select>
             </div>
-
             <input type="hidden" name="classId" value="" />
             <input type="hidden" name="subjectId" value="" />
         </div>
     </form>
+</div>
+
+@* Информация об ученике *@
+<div class="bg-white rounded-lg shadow p-4 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <p class="text-sm text-gray-600">Ученик:</p>
+            <p class="text-lg font-semibold">@Model.StudentFullName</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-600">Класс:</p>
+            <p class="text-lg font-semibold">@Model.ClassName</p>
+        </div>
+    </div>
 </div>
 
 @* Таблица с данными *@
@@ -51,7 +57,6 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Предмет
                 </th>
-                @* Динамический заголовок для среднего балла *@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     @if (Model.SelectedQuarter == "Итоговые оценки")
                     {
@@ -62,7 +67,6 @@
                         <span>Средний балл (Четверть)</span>
                     }
                 </th>
-                @* СТОЛБЕЦ: Итоговая Оценка (ВСЕГДА отображается) *@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     @if (Model.SelectedQuarter == "Итоговые оценки")
                     {
@@ -73,7 +77,6 @@
                         <span class="font-bold">Итоговая Оценка</span>
                     }
                 </th>
-
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Пропуски
                 </th>
@@ -92,18 +95,179 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             @item.SubjectName
                         </td>
-                        @* Отображение среднего балла (F2) *@
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold @(item.QuarterFinalGrade >= 4.0 ? "text-green-600" : (item.QuarterFinalGrade >= 3.0 ? "text-yellow-600" : "text-red-600"))">
-                            @item.AverageGrade.ToString("F2")
+
+                        @* Ячейка со средним баллом и тултипом *@
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold relative group
+                                @(item.QuarterFinalGrade >= 4.0 ? "text-green-600" : (item.QuarterFinalGrade >= 3.0 ? "text-yellow-600" : "text-red-600"))">
+                            <div class="cursor-help hover:underline transition-colors inline-block">
+                                @item.AverageGrade.ToString("F2")
+                                @if (item.GradeCount > 0)
+                                {
+                                    <span class="text-xs text-gray-400 ml-1">(наведите для деталей)</span>
+                                }
+                            </div>
+
+                            @* Тултип с детализацией оценок *@
+                            @if (item.GradeCount > 0)
+                            {
+                                <div class="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm rounded-lg px-4 py-3 shadow-xl min-w-[300px] transform -translate-x-1/2 left-1/2 mt-2">
+                                    <div class="font-semibold mb-2 border-b pb-1">Детализация оценок:</div>
+
+                                    <div class="mb-2">
+                                        <div class="text-gray-300 mb-1">Всего оценок: <span class="font-bold text-white">@item.GradeCount</span></div>
+                                        <div class="text-sm text-gray-400">Все оценки: <span class="font-bold">[@item.AllGradesString]</span></div>
+                                    </div>
+
+                                    <div class="space-y-2 mb-3">
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <span class="w-4 h-4 bg-green-500 rounded mr-2"></span>
+                                                <span>Отлично (5):</span>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="font-bold">@item.GradeCount5</span>
+                                                <span class="text-xs text-gray-400">(@item.Percent5.ToString("F1")%)</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <span class="w-4 h-4 bg-blue-500 rounded mr-2"></span>
+                                                <span>Хорошо (4):</span>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="font-bold">@item.GradeCount4</span>
+                                                <span class="text-xs text-gray-400">(@item.Percent4.ToString("F1")%)</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                                                <span>Удовлетворительно (3):</span>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="font-bold">@item.GradeCount3</span>
+                                                <span class="text-xs text-gray-400">(@item.Percent3.ToString("F1")%)</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <div class="flex items-center">
+                                                <span class="w-4 h-4 bg-red-500 rounded mr-2"></span>
+                                                <span>Неудовлетворительно (2):</span>
+                                            </div>
+                                            <div class="flex items-center space-x-3">
+                                                <span class="font-bold">@item.GradeCount2</span>
+                                                <span class="text-xs text-gray-400">(@item.Percent2.ToString("F1")%)</span>
+                                            </div>
+                                        </div>
+                                        @if (item.GradeCount1 > 0)
+                                        {
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center">
+                                                    <span class="w-4 h-4 bg-red-700 rounded mr-2"></span>
+                                                    <span>Очень плохо (1):</span>
+                                                </div>
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="font-bold">@item.GradeCount1</span>
+                                                    <span class="text-xs text-gray-400">(@item.Percent1.ToString("F1")%)</span>
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (item.GradeCount0 > 0)
+                                        {
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center">
+                                                    <span class="w-4 h-4 bg-gray-700 rounded mr-2"></span>
+                                                    <span>Нулевые (0):</span>
+                                                </div>
+                                                <div class="flex items-center space-x-3">
+                                                    <span class="font-bold">@item.GradeCount0</span>
+                                                    <span class="text-xs text-gray-400">(@item.Percent0.ToString("F1")%)</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="mt-3 pt-2 border-t border-gray-700">
+                                        <div class="flex justify-between font-semibold">
+                                            <span>Средний балл:</span>
+                                            <span class="text-lg @(item.AverageGrade >= 4.0 ? "text-green-400" : (item.AverageGrade >= 3.0 ? "text-yellow-400" : "text-red-400"))">
+                                                @item.AverageGrade.ToString("F2")
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between mt-1">
+                                            <span>Итоговая оценка:</span>
+                                            <span class="font-bold @(item.QuarterFinalGrade < 3 ? "text-red-400" : "text-green-400")">
+                                                @item.QuarterFinalGrade
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-gray-800"></div>
+                                </div>
+                            }
                         </td>
 
-                        @* Отображение итоговой оценки (QuarterFinalGrade) *@
                         <td class="px-6 py-4 whitespace-nowrap font-extrabold text-lg @(item.QuarterFinalGrade < 3 ? "text-red-600" : "text-green-600")">
                             @item.QuarterFinalGrade
                         </td>
 
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @item.TotalAbsences
+                        @* Ячейка с пропусками и тултипом *@
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 relative group">
+                            <div class="cursor-help hover:text-blue-600 transition-colors inline-block">
+                                @item.TotalAbsences
+                                @if (item.TotalAbsences > 0)
+                                {
+                                    <span class="text-xs text-gray-400 ml-1">(наведите для деталей)</span>
+                                }
+                            </div>
+
+                            @* Тултип с детализацией пропусков *@
+                            @if (item.TotalAbsences > 0)
+                            {
+                                <div class="absolute z-50 hidden group-hover:block bg-gray-800 text-white text-sm rounded-lg px-4 py-3 shadow-xl min-w-[250px] transform -translate-x-1/2 left-1/2 mt-2">
+                                    <div class="font-semibold mb-2 border-b pb-1">Детализация пропусков:</div>
+
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between">
+                                            <span class="text-red-300">Неуважительные (Н):</span>
+                                            <span class="font-bold">@item.AbsentTypeH</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-yellow-300">Уважительные (У):</span>
+                                            <span class="font-bold">@item.AbsentTypeU</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-blue-300">Болезнь (Б):</span>
+                                            <span class="font-bold">@item.AbsentTypeB</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 pt-2 border-t border-gray-700">
+                                        <div class="flex justify-between">
+                                            <span>Всего пропусков:</span>
+                                            <span class="font-bold">@item.TotalAbsences</span>
+                                        </div>
+                                        @if (item.TotalLessonsInPeriod > 0)
+                                        {
+                                            <div class="flex justify-between mt-1">
+                                                <span>Всего уроков:</span>
+                                                <span class="font-bold">@item.TotalLessonsInPeriod</span>
+                                            </div>
+                                            <div class="flex justify-between mt-1">
+                                                <span>Посещаемость:</span>
+                                                <span class="font-bold">
+                                                    @{
+                                                        var attendanceRate = 100 - ((double)item.TotalAbsences / item.TotalLessonsInPeriod * 100);
+                                                        @($"{attendanceRate:F1}%")
+                                                    }
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-gray-800"></div>
+                                </div>
+                            }
                         </td>
                     </tr>
                     counter++;
@@ -126,5 +290,16 @@
         document.getElementById('quarter').addEventListener('change', function () {
             this.form.submit();
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(e) {
+                const tooltips = document.querySelectorAll('.absolute.z-50');
+                if (!e.target.closest('.relative.group')) {
+                    tooltips.forEach(tooltip => {
+                        tooltip.classList.add('hidden');
+                    });
+                        }
+                    });
+                });
     </script>
 }

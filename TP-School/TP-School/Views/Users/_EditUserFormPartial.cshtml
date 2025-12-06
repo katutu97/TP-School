@@ -191,9 +191,12 @@
         // Отправка формы редактирования
         $('#editUserForm').on('submit', function(e) {
             e.preventDefault();
+
             const $form = $(this);
             const messageBox = $('#editUserMessage');
             const submitBtn = $form.find('button[type="submit"]');
+
+            console.log('Форма отправляется... URL: /Users/EditUser');
 
             // Сброс сообщений
             messageBox.removeClass('hidden text-red-500 text-green-500 bg-red-50 bg-green-50')
@@ -203,24 +206,48 @@
             submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Сохранение...');
 
             $.ajax({
-                url: '@Url.Action("Edit", "Users")',
+                url: '/Users/EditUser',
                 type: 'POST',
                 data: $form.serialize(),
-                success: function(response) {
-                    if (response.success) {
-                        messageBox.addClass('text-green-500 bg-green-50')
-                                 .html('<i class="fas fa-check-circle mr-2"></i>' + response.message);
+                // УБЕРИТЕ dataType: 'json' - пусть jQuery сам определит тип
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                success: function(response, status, xhr) {
+                    console.log('Статус ответа:', status);
+                    console.log('Тип ответа:', typeof response);
+                    console.log('Content-Type:', xhr.getResponseHeader('Content-Type'));
+                    console.log('Данные формы:', $form.serialize());
 
-                        // Обновление данных на странице после успешного сохранения
-                        setTimeout(function() {
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        // Если вернули HTML с ошибками (валидация)
+                    // Если Content-Type говорит, что это HTML
+                    var contentType = xhr.getResponseHeader('Content-Type') || '';
+                    if (contentType.includes('text/html')) {
+                        // Это HTML форма с ошибками валидации
+                        console.log('Получена HTML форма (ошибки валидации)');
                         $('#editUserModalContent').html(response);
+
+                        // Инициализируем валидацию для новой формы
+                        if ($.validator && $.validator.unobtrusive) {
+                            $.validator.unobtrusive.parse("#editUserForm");
+                        }
+                    }
+                    // Если это JSON объект
+                    else if (response && typeof response === 'object') {
+                        if (response.success) {
+                            messageBox.addClass('text-green-500 bg-green-50')
+                                     .html('<i class="fas fa-check-circle mr-2"></i>' + response.message);
+
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            messageBox.addClass('text-red-500 bg-red-50')
+                                     .html('<i class="fas fa-exclamation-triangle mr-2"></i>' + (response.message || 'Ошибка сохранения'));
+                        }
                     }
                 },
-                error: function(xhr) {
+                error: function(xhr, status, error) {
+                    console.log('Ошибка AJAX:', status, error);
+                    console.log('Ответ сервера:', xhr.responseText);
+
                     let errorMessage = 'Произошла ошибка при сохранении.';
                     try {
                         const errorData = JSON.parse(xhr.responseText);
@@ -233,9 +260,10 @@
                              .html('<i class="fas fa-exclamation-triangle mr-2"></i>' + errorMessage);
                 },
                 complete: function() {
+                    // Всегда разблокируем кнопку
                     submitBtn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Сохранить изменения');
                 }
-            });
+            }); 
         });
 
         // Закрытие по клику вне модального окна

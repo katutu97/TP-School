@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TP-School")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+289272acb14fc5c9736ac2b61cd47c7b10ed03dd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bbd8232c4934f1dcaf37a2e87ae757653b5eaf52")]
 [assembly: System.Reflection.AssemblyProductAttribute("TP-School")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TP-School")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

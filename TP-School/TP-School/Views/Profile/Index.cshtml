@@ -143,6 +143,20 @@
                         <p class="text-lg">@Model.ClassInfo</p>
                     </div>
                 }
+                @{
+                    string homeroomTeacher = ViewBag.HomeroomTeacher;
+                }
+                @if (Model.RoleName == "Ученик" || Model.RoleName == "Родитель")
+                {
+                    @* Проверяем, что ViewBag содержит данные *@
+                    @if (!string.IsNullOrEmpty(homeroomTeacher))
+                    {
+                        <div class="field-item">
+                            <span class="font-medium text-gray-800">Классный руководитель:</span>
+                            <p class="text-lg">@homeroomTeacher</p>
+                        </div>
+                    }
+                }
                 @if (!string.IsNullOrEmpty(Model.StudentInfo))
                 {
                     <div class="field-item">
@@ -223,16 +237,14 @@
             messageValidationMessage.text('');
 
             messagePanel.slideDown(300).removeClass('hidden'); // Плавное появление
-            toggleMessagePanelBtn.text('Скрыть форму'); // Меняем текст кнопки, чтобы дать понять, что она скрывает форму
-            toggleMessagePanelBtn.find('i').removeClass('fa-envelope').addClass('fa-times');
+            toggleMessagePanelBtn.html('<i class="fas fa-times mr-2"></i> Скрыть форму');
         }
 
         function hideMessagePanel() {
             messagePanel.slideUp(300, function() {
                 $(this).addClass('hidden'); // Плавное скрытие
             });
-            toggleMessagePanelBtn.text('Написать Директору'); // Возвращаем исходный текст
-            toggleMessagePanelBtn.find('i').removeClass('fa-times').addClass('fa-envelope');
+            toggleMessagePanelBtn.html('<i class="fas fa-envelope mr-2"></i> Написать Директору');
         }
 
         // --- ОБРАБОТЧИКИ СОБЫТИЙ ---

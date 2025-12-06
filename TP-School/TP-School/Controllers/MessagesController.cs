@@ -134,7 +134,7 @@ public class MessagesController : Controller
     // -------------------------------------------------------------
     [HttpPost]
     [ValidateAntiForgeryToken]
-    // 🔥 ИСПРАВЛЕНО: Теперь принимаем ViewModel, которая корректно сопоставляется с полями формы.
+    
     public async Task<IActionResult> Create(SendMessageViewModel model)
     {
         // 1. Проверка основных данных
@@ -170,7 +170,7 @@ public class MessagesController : Controller
             _context.Messages.Add(newMessage);
             await _context.SaveChangesAsync();
 
-            // 4. 🔥 Ключевое изменение: Перенаправление на страницу отправленных сообщений
+            // 4. Перенаправление на страницу отправленных сообщений
             TempData["SuccessMessage"] = "Сообщение успешно отправлено!";
             return RedirectToAction(nameof(Index), new { filter = "sent" });
         }

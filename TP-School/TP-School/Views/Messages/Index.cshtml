@@ -14,6 +14,20 @@
 
 <div class="messages-page-content">
 
+    @* Отображение сообщений TempData после редиректа (успех/ошибка) *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert-error">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
     <a href="#" id="openNewMessageModal" class="btn-new-message">
         <i class="fas fa-plus"></i> Новое сообщение
     </a>
@@ -45,7 +59,6 @@
                 @foreach (var message in Model)
                 {
                     // Определяем данные для ответа (получатель ответа - это отправитель текущего сообщения)
-                    // Эта переменная используется только в блоке 'Ответить', который теперь условный.
                     var replyUserId = message.FromUser.UserId;
                     var replyUserName = message.FromUser.FullName;
 
@@ -72,7 +85,7 @@
                             }
 
                             <form asp-action="Delete" asp-route-id="@message.MessageId" method="post" class="inline-form-delete">
-                                @* Добавляем токен анти-подделки (если его нет в шаблоне) *@
+                                @* Добавляем токен анти-подделки *@
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-action btn-delete" title="Удалить сообщение"
                                         onclick="return confirm('Вы уверены, что хотите удалить это сообщение?');">
@@ -95,7 +108,10 @@
         </div>
 
         <form id="messageForm" method="post" asp-action="Create" asp-controller="Messages">
-            <input type="hidden" name="ToUserId" id="hiddenToUserId" required />
+            @Html.AntiForgeryToken() @* Обязательный токен для защиты формы *@
+
+            @* 🔥 ИСПРАВЛЕНО: name="ToUserId" заменено на name="RecipientId" *@
+            <input type="hidden" name="RecipientId" id="hiddenToUserId" required />
 
             <select id="recipientRole" class="form-select-field recipient-input" required>
                 <option value="" disabled selected>Выберите роль получателя</option>
@@ -111,7 +127,8 @@
                    disabled required>
             <div id="recipientValidationMessage" class="validation-message"></div>
 
-            <textarea id="messageText" name="MessageText"
+            @* 🔥 ИСПРАВЛЕНО: name="MessageText" заменено на name="Body" *@
+            <textarea id="messageText" name="Body"
                       class="form-textarea-field"
                       placeholder="Текст сообщения"
                       rows="6" required></textarea>
@@ -234,7 +251,7 @@
                                     return {
                                         label: item.fullName + ' (' + role + ')', // Отображаемое значение в списке
                                         value: item.fullName, // Значение, которое подставится в поле
-                                        userId: item.userId     // ID пользователя
+                                        userId: item.userId      // ID пользователя
                                     };
                                 }));
                             } else {
@@ -263,69 +280,10 @@
             });
         }
 
-        // --- ОБРАБОТЧИК ОТПРАВКИ ФОРМЫ (AJAX) ---
+        // 🔥 УДАЛЕН АЯКС-ОБРАБОТЧИК:
+        // messageForm.onsubmit = async function(e) { e.preventDefault(); ... }
+        // Теперь форма отправляется стандартно и вызывает редирект на сервере.
 
-        messageForm.onsubmit = async function(e) {
-            e.preventDefault(); // <-- ОСТАНАВЛИВАЕМ СТАНДАРТНЫЙ ПЕРЕХОД
-
-            if (sendButton.disabled) return;
-
-            const toUserId = hiddenToUserId.value;
-            const messageText = messageTextarea.value;
-
-            // Защита от двойной отправки
-            sendButton.disabled = true;
-            validationMsg.textContent = 'Отправка...';
-            validationMsg.className = 'validation-message text-gray-500';
-
-            try {
-                // Собираем данные формы
-                const formData = new URLSearchParams({
-                    ToUserId: toUserId,
-                    MessageText: messageText
-                });
-
-                // Добавляем токен анти-подделки из скрытого поля формы
-                // (Предполагается, что в вашей Razor-форме есть @Html.AntiForgeryToken())
-                const token = $('input[name="__RequestVerificationToken"]').val();
-                if (token) {
-                    formData.append('__RequestVerificationToken', token);
-                }
-
-
-                const response = await fetch(messageForm.action, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-
-                // Обработка ответа
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    // Успешная отправка
-                    alert('Сообщение успешно отправлено!');
-                    modal.style.display = 'none';
-                    // !!! ПЕРЕЗАГРУЗКА ТЕКУЩЕЙ СТРАНИЦЫ !!!
-                    window.location.reload();
-                } else {
-                    // Ошибка (может быть 400, 500 или success: false)
-                    const errorMsg = result.message || 'Произошла неизвестная ошибка.';
-                    alert('Ошибка отправки: ' + errorMsg);
-                    validationMsg.textContent = 'Ошибка отправки: ' + errorMsg;
-                    validationMsg.className = 'validation-message text-red-500';
-                }
-            } catch (error) {
-                alert('Ошибка сети или сервера.');
-                console.error(error);
-                validationMsg.textContent = 'Ошибка сети или сервера.';
-                validationMsg.className = 'validation-message text-red-500';
-            } finally {
-                sendButton.disabled = false;
-            }
-    };
 
         // --- Обработчики событий ---
 

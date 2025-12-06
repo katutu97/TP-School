@@ -55,7 +55,7 @@
             {
                 <p>
                     <strong>Классный руководитель:</strong>
-                    <a href="@Url.Action("Details", "Users", new { id = classTeacher.UserId })">@classTeacher.FullName</a>
+                    @classTeacher.FullName
                 </p>
             }
         }
@@ -68,7 +68,7 @@
             {
                 var parent = studentParentLink.Parent;
                 <p>
-                    <a href="#" class="link-to-parent-profile" data-user-id="@parent.UserId">@parent.FullName</a>
+                    @parent.FullName
                 </p>
             }
         }
@@ -93,7 +93,7 @@
         {
             var student = studentParentLink.Student;
             <p>
-                <a href="@Url.Action("Details", "Users", new { id = student.UserId })">@student.FullName</a>
+                @student.FullName
             </p>
         }
     }

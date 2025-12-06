@@ -7,6 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ШкЭД</title>
 
+    <!-- Убедитесь, что jQuery идет ПЕРВЫМ -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Затем jQuery Validation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
     <!-- Подключение Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -16,7 +22,7 @@
             theme: {
                 extend: {
                     colors: {
-                        'primary': '#3B82F6', // Синий, используемый в вашем дизайне
+                        'primary': '#3B82F6', // Синий
                         'secondary': '#1E3A8A', // Темно-синий
                         'light-blue': '#BFDBFE',
                         'bg-gray': '#F3F4F6', // Фон
@@ -46,15 +52,15 @@
             <!-- Пункты меню (иконки Font Awesome) -->
             @{
                 var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+                var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
             }
-            <a href="@Url.Action("Index", "Home")" class="menu-item group @(ViewData["Title"] == "Главная" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+            <a href="@Url.Action("Index", "Home")" class="menu-item group @(currentController == "Home" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-home w-5 h-5"></i>
                 <span>Главная</span>
             </a>
             @if (User.IsInRole("Учитель") || User.IsInRole("Директор"))
             {
-                var isJournalActive = currentController == "Journal"; 
-                <a href="@Url.Action("Index", "Journal")" class="menu-item group @(isJournalActive ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+                <a href="@Url.Action("Index", "Journal")" class="menu-item group @(currentController == "Journal" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                     <i class="fas fa-book w-5 h-5"></i>
                     <span>Ведение журнала</span>
                 </a>
@@ -64,7 +70,7 @@
                 <span>Сообщения</span>
             </a>
             <a href="@Url.Action("Index", "Schedule")"
-               class="menu-item group @(ViewData["Title"] == "Расписание" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+               class="menu-item group @(currentController == "Schedule" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-calendar-alt w-5 h-5"></i>
                 <span>Расписание</span>
             </a>
@@ -75,11 +81,7 @@
             @if (User.IsInRole("Учитель"))
             {
                 <a href="@Url.Action("Review", "Homework")" class="menu-item group @(currentController == "Homework" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
-                   
-  
                     <i class="fas fa-clipboard-list w-5 h-5"></i>
-
-                    @* Текст ссылки: Используем общие классы *@
                     <span>Проверка ДЗ</span>
                 </a>
             }
@@ -94,8 +96,8 @@
             <!-- Разделитель -->
             <div class="border-t border-gray-200 pt-4"></div>
 
-            <!-- Профиль и Выход -->
-            <a href="@Url.Action("Index", "Profile")" class="menu-item group @(currentController == "Users" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
+            <!-- Профиль -->
+            <a href="@Url.Action("Index", "Profile")" class="menu-item group @(currentController == "Profile" ? "bg-light-blue text-primary font-semibold" : "text-gray-700 hover:bg-light-blue hover:text-primary")">
                 <i class="fas fa-user-circle w-5 h-5"></i>
                 <span>Профиль</span>
             </a>
@@ -124,7 +126,7 @@
 
     <!-- 2. Основное содержимое (Main Content) -->
     <main class="flex-grow p-8">
-        <!-- Заголовок страницы (Хлебные крошки/Заголовок) -->
+        <!-- Заголовок страницы -->
         <header class="mb-6 pb-4 border-b border-gray-300">
             <h1 class="text-3xl font-bold text-gray-800">@ViewData["Title"]</h1>
             <p class="text-sm text-gray-500 mt-1">

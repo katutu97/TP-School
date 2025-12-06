@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using TP_School.Models;
-using TP_School.Data;
-using TP_School.ViewModels;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using TP_School.Data;
+using TP_School.Models;
+using TP_School.ViewModels;
 
 namespace TP_School.Controllers
 {
@@ -13,10 +14,12 @@ namespace TP_School.Controllers
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, ILogger<UsersController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 
@@ -120,8 +123,9 @@ namespace TP_School.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(UserCreateViewModel model)
         {
-            ModelState.Remove(nameof(model.SchoolClasses));
+            ModelState.Remove(nameof(model.AvailableRoles));
             ModelState.Remove(nameof(model.AllStudents));
+            ModelState.Remove(nameof(model.SchoolClasses));
 
             if (!ModelState.IsValid)
             {
@@ -297,6 +301,9 @@ namespace TP_School.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditUser(UserCreateViewModel model)
         {
+            Console.WriteLine("=== EDIT USER ===");
+            Console.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+
             // Получаем TeacherClassId из формы
             var teacherClassIdStr = Request.Form["TeacherClassId"];
             int? teacherClassId = null;
@@ -305,12 +312,24 @@ namespace TP_School.Controllers
                 teacherClassId = tempId;
             }
 
+            // Вывод всех ошибок валидации (только для отладки)
             if (!ModelState.IsValid)
             {
+                Console.WriteLine("Ошибки валидации:");
+                foreach (var key in ModelState.Keys)
+                {
+                    var state = ModelState[key];
+                    if (state.Errors.Count > 0)
+                    {
+                        Console.WriteLine($"  {key}: {string.Join(", ", state.Errors.Select(e => e.ErrorMessage))}");
+                    }
+                }
+
+                // Загружаем списки для отображения формы с ошибками
                 await LoadSelectListsForEdit(model);
 
                 // Загружаем данные учителя для ViewBag
-                if (model.RoleId != 0) // Проверяем на 0 вместо HasValue
+                if (model.RoleId != 0)
                 {
                     var role = await _context.Roles.FindAsync(model.RoleId);
                     if (role?.RoleName == "Учитель")
@@ -333,6 +352,7 @@ namespace TP_School.Controllers
                     }
                 }
 
+                // Возвращаем форму с ошибками
                 return PartialView("_EditUserFormPartial", model);
             }
 
@@ -347,10 +367,10 @@ namespace TP_School.Controllers
 
                 if (userToUpdate == null)
                 {
-                    return NotFound();
+                    return Json(new { success = false, message = "Пользователь не найден." });
                 }
 
-                // Обновление основных полей (роль не меняем!)
+                // Обновление основных полей
                 userToUpdate.LastName = model.LastName ?? "";
                 userToUpdate.FirstName = model.FirstName ?? "";
                 userToUpdate.MiddleName = model.MiddleName ?? "";
@@ -372,8 +392,15 @@ namespace TP_School.Controllers
                 }
                 else if (userToUpdate.Role.RoleName == "Учитель")
                 {
-                    // Обновление классного руководства
-                    await UpdateTeacherClass(userToUpdate, teacherClassId);
+                    if (teacherClassId.HasValue)
+                    {
+                        await UpdateTeacherClass(userToUpdate, teacherClassId);
+                    }
+                    else
+                    {
+                        // если класс не выбран — снимаем руководство
+                        await UpdateTeacherClass(userToUpdate, null);
+                    }
                 }
 
                 await _context.SaveChangesAsync();
@@ -386,7 +413,14 @@ namespace TP_School.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Ошибка: {ex.Message}" });
+                // Логируем ошибку
+                _logger.LogError(ex, "Ошибка при обновлении пользователя");
+
+                return Json(new
+                {
+                    success = false,
+                    message = $"Ошибка при сохранении: {ex.Message}"
+                });
             }
         }
 
@@ -431,11 +465,10 @@ namespace TP_School.Controllers
 
             if (currentClass != null)
             {
-                currentClass.ClassTeacherId = 0;
                 teacher.ClassesAsTeacher.Remove(currentClass);
             }
 
-            if (newClassId != 0)
+            if (newClassId.HasValue)
             {
                 var newClass = await _context.SchoolClasses
                     .FirstOrDefaultAsync(c => c.ClassId == newClassId.Value);

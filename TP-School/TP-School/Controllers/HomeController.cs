@@ -3,19 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // Для работы с EF
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims; // Для работы с User Claims
+using System.Security.Claims; 
 using TP_School.Data;
-using TP_School.Models; // Ваши модели
+using TP_School.Models; 
 using TP_School.ViewModels;
 
-// Контроллер главной страницы. Доступ только для аутентифицированных пользователей.
+
 [Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ApplicationDbContext _context; // Предполагается, что это ваш контекст БД
+    private readonly ApplicationDbContext _context; 
 
-    // Обновленный конструктор с инжекцией DbContext
+    
     public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
     {
         _logger = logger;
@@ -37,16 +37,52 @@ public class HomeController : Controller
 
     // Вспомогательный метод для получения ClassId текущего учителя
     // Учитель может быть классным руководителем только одного класса.
-    private async Task<int?> GetClassIdForCurrentTeacherAsync()
+    private async Task<int?> GetClassIdForCurrentUserAsync()
     {
-        int teacherId = GetCurrentUserId();
+        int userId = GetCurrentUserId();
 
-        // Ищем класс, где текущий пользователь является ClassTeacherId
-        var schoolClass = await _context.SchoolClasses
-            .Where(c => c.ClassTeacherId == teacherId)
-            .FirstOrDefaultAsync();
+        if (User.IsInRole("Учитель"))
+        {
+            // Логика для Учителя (Классный руководитель): ищем класс, где он является ClassTeacherId
+            var schoolClass = await _context.SchoolClasses
+                .Where(c => c.ClassTeacherId == userId)
+                .Select(c => (int?)c.ClassId)
+                .FirstOrDefaultAsync();
+            return schoolClass;
+        }
+        else if (User.IsInRole("Ученик"))
+        {
+            // Логика для Ученика: ищем его ClassId через таблицу StudentClass (многие ко многим)
+            var studentClass = await _context.StudentClasses
+                .Where(sc => sc.StudentId == userId)
+                .Select(sc => (int?)sc.ClassId)
+                .FirstOrDefaultAsync(); // Берем ClassId первого найденного класса
+            return studentClass;
+        }
+        else if (User.IsInRole("Родитель"))
+        {
+            // Логика для Родителя:
+            // 1. Ищем ID всех детей, привязанных к этому родителю через StudentParents
+            var studentIds = await _context.StudentParentses
+                .Where(sp => sp.ParentId == userId)
+                .Select(sp => sp.StudentId)
+                .ToListAsync();
 
-        return schoolClass?.ClassId;
+            if (studentIds.Any())
+            {
+                // 2. Ищем ClassId, к которому привязан один из этих студентов (если их несколько, берем первый)
+                var classIdFromStudent = await _context.StudentClasses
+                    .Where(sc => studentIds.Contains(sc.StudentId))
+                    .Select(sc => (int?)sc.ClassId)
+                    .FirstOrDefaultAsync();
+                return classIdFromStudent;
+            }
+
+            return null;
+        }
+
+        // Для других ролей или не привязанных пользователей
+        return null;
     }
 
     //---------------------------------------------------------
@@ -61,7 +97,7 @@ public class HomeController : Controller
         DateTime cutoffDate = DateTime.Now.AddDays(-7);
 
         // 1. Получаем ID класса для текущего учителя
-        var classId = await GetClassIdForCurrentTeacherAsync();
+        var classId = await GetClassIdForCurrentUserAsync();
 
         // 2. Загружаем объявления только для этого класса
         if (classId.HasValue)
@@ -105,7 +141,7 @@ public class HomeController : Controller
         try
         {
             // 1. Получаем ID класса, к которому привязано объявление
-            var classId = await GetClassIdForCurrentTeacherAsync();
+            var classId = await GetClassIdForCurrentUserAsync();
 
             if (!classId.HasValue)
             {

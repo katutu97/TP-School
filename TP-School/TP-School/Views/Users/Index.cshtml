@@ -86,9 +86,7 @@
                     <div class="user-actions">
                         @if (User.IsInRole("Директор"))
                         {
-                            <button type="button" class="btn-action btn-edit js-edit-user **btn-edit-user**" data-id="@user.UserId">
-                                Редактировать
-                            </button>
+                            
                             <button type="button" class="btn-action btn-delete js-delete-user" data-id="@user.UserId" data-name="@user.FullName">
                                 Удалить
                             </button>
@@ -280,7 +278,7 @@
                 messageModal.classList.add('hidden');
             }
         }
-                // Открытие модального окна редактирования
+                
                 // Открытие модального окна редактирования пользователя
         $(document).on('click', '.btn-edit-user', function() {
             const userId = $(this).data('user-id');
@@ -335,36 +333,54 @@
                 });
             }
         });
-
         // Обработка отправки формы внутри модального окна
         $(document).on('submit', '#editUserForm', function(e) {
             e.preventDefault();
             var form = $(this);
 
-            if (form.valid()) { // Проверяем валидность формы
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: form.serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            // Успех: закрываем модалку и обновляем страницу (или Toastr)
-                            $('.close-modal').click();
-                            alert(response.message);
-                            window.location.reload(); // Перезагружаем список
-                        } else {
-                            // Ошибка: если контроллер вернул PartialView с ошибками ModelState
-                            $('#editUserContent').html(response);
-                            // Re-parse validation again
-                            $.validator.unobtrusive.parse("#editUserForm");
-                        }
-                    },
-                    error: function(xhr) {
-                        alert("Ошибка сервера при сохранении.");
-                    }
-                });
+            // ВАЖНО: проверяем, существует ли метод valid
+            // и инициализируем валидацию если нужно
+            if ($.fn.valid) {
+                // Если форма еще не валидируется, инициализируем
+                if (!form.data("validator")) {
+                    form.validate();
+                }
+
+                if (form.valid()) { // Проверяем валидность формы
+                    sendFormData(form);
+                }
+            } else {
+                // Если jQuery Validation не подключен, отправляем без проверки
+                sendFormData(form);
             }
         });
+
+        // Вынесем отправку в отдельную функцию
+        function sendFormData(form) {
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Успех: закрываем модалку и обновляем страницу
+                        $('.close-modal').click();
+                        alert(response.message);
+                        window.location.reload(); // Перезагружаем список
+                    } else {
+                        // Ошибка: если контроллер вернул PartialView с ошибками
+                        $('#editUserContent').html(response);
+                        // Re-parse validation again
+                        if ($.validator && $.validator.unobtrusive) {
+                            $.validator.unobtrusive.parse("#editUserForm");
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    alert("Ошибка сервера при сохранении.");
+                }
+            });
+        }
 
         // Функция для закрытия модальных окон (если ее еще нет)
         $(document).on('click', '.close-modal', function() {

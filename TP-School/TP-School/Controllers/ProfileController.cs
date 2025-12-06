@@ -25,50 +25,100 @@ public class ProfileController : Controller
             return NotFound("Пользователь не авторизован или ID недействителен.");
         }
 
-        // Загружаем пользователя и все необходимые связи
+        
         var user = await _context.Users
             .Include(u => u.Role)
-            .Include(u => u.ClassesAsTeacher) // Для учителя
-            .Include(u => u.StudentClasses) // Для ученика
-            .Include(u => u.StudentParentsAsParent) // Для родителя (чтобы получить детей)
-                .ThenInclude(sp => sp.Student) // Если StudentParents имеет навигацию к Student
+            .Include(u => u.ClassesAsTeacher)
+            // Для ученика: StudentClasses -> Class (для ClassInfo)
+            .Include(u => u.StudentClasses)
+                .ThenInclude(sc => sc.Class)
+            // Для родителя: StudentParentsAsParent
+            .Include(u => u.StudentParentsAsParent)
             .FirstOrDefaultAsync(u => u.UserId == currentUserId);
 
-        if (user == null)
-        {
-            return NotFound("Данные профиля не найдены.");
-        }
+        if (user == null) { return NotFound("Данные профиля не найдены."); }
 
         var model = new ProfileViewModel
         {
             UserId = user.UserId,
+
             LastName = user.LastName,
+
             FirstName = user.FirstName,
+
             MiddleName = user.MiddleName,
+
             Login = user.Login,
+
             Email = user.Email,
+
             Phone = user.Phone,
+
             BirthDate = user.BirthDate,
+
             RoleName = user.Role.RoleName,
+
             Info = user.Info
+            
         };
 
-        // Логика для динамических полей
+        // Строка, в которой будет храниться ФИО классного руководителя
+        string homeroomTeacherName = null;
+
+        // Логика для динамических полей и поиска классного руководителя 
+
         if (model.RoleName == "Ученик")
         {
-            // Берем SchoolClass из StudentClasses (если это связь многие-ко-многим, берем первый)
-            model.ClassInfo = user.StudentClasses.FirstOrDefault()?.Class?.ClassName ?? "Не определен";
+            var studentClass = user.StudentClasses.FirstOrDefault();
+            model.ClassInfo = studentClass?.Class?.ClassName ?? "Не определен";
+
+            
+            if (studentClass?.Class != null)
+            {
+                
+                var teacher = await _context.Users
+                    .FirstOrDefaultAsync(u => u.UserId == studentClass.Class.ClassTeacherId);
+                homeroomTeacherName = teacher?.FullName;
+            }
         }
         else if (model.RoleName == "Учитель")
         {
-            // Классное руководство
             model.ClassInfo = user.ClassesAsTeacher.FirstOrDefault()?.ClassName ?? "Нет классного руководства";
         }
         else if (model.RoleName == "Родитель")
         {
-            // Берем имя первого ребенка из StudentParentsAsParent
-            model.StudentInfo = user.StudentParentsAsParent.FirstOrDefault()?.Student?.FullName ?? "Нет привязанного ученика";
+            var studentParent = user.StudentParentsAsParent.FirstOrDefault();
+
+            if (studentParent != null)
+            {
+                int studentId = studentParent.StudentId;
+
+                
+                var studentClass = await _context.StudentClasses
+                    .Where(sc => sc.StudentId == studentId)
+                    .Include(sc => sc.Class) 
+                    .FirstOrDefaultAsync();
+
+                if (studentClass?.Class != null)
+                {
+                    
+                    var teacher = await _context.Users
+                        .FirstOrDefaultAsync(u => u.UserId == studentClass.Class.ClassTeacherId);
+                    homeroomTeacherName = teacher?.FullName;
+
+                    
+                    var studentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == studentId);
+                    model.StudentInfo = studentUser?.FullName ?? "Ученик не найден";
+                }
+                else
+                {
+                    model.StudentInfo = "Нет привязанного ученика";
+                }
+            }
         }
+
+        //  ИМЯ КЛАССНОГО РУКОВОДИТЕЛЯ ЧЕРЕЗ VIEWBAG
+        ViewBag.HomeroomTeacher = homeroomTeacherName;
 
         // Получение ID Директора для кнопки сообщения
         ViewBag.DirectorId = await GetDirectorIdAsync();
@@ -110,10 +160,10 @@ public class ProfileController : Controller
 
         var message = new Message
         {
-            FromUserId = senderId, // <-- ИСПОЛЬЗУЕМ ВАШЕ СВОЙСТВО
-            ToUserId = directorId.Value, // <-- ИСПОЛЬЗУЕМ ВАШЕ СВОЙСТВО
-            MessageText = body, // <-- ИСПОЛЬЗУЕМ ВАШЕ СВОЙСТВО
-            SentAt = DateTime.Now // <-- ИСПОЛЬЗУЕМ ВАШЕ СВОЙСТВО
+            FromUserId = senderId, 
+            ToUserId = directorId.Value,
+            MessageText = body, 
+            SentAt = DateTime.Now 
         };
 
         _context.Messages.Add(message);

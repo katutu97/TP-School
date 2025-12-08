@@ -45,9 +45,12 @@ namespace TP_School.ViewModels
         public string SelectedQuarter { get; set; }
         public string StudentFullName { get; set; }
         public string ClassName { get; set; }
+
+        // Свойство для родительского просмотра
+        public bool IsParentView { get; set; } = false;
     }
 
-    // Для учителя - переименовал классы
+    // Для учителя
     public class TeacherStudentGradeItem
     {
         public int StudentId { get; set; }

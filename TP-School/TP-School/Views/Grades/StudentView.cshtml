@@ -1,6 +1,6 @@
 ﻿@model TP_School.ViewModels.StudentGradesViewModel
 @{
-    ViewData["Title"] = "Успеваемость";
+    ViewData["Title"] = Model.IsParentView ? "Успеваемость ребенка" : "Моя успеваемость";
 }
 
 <style>
@@ -97,7 +97,7 @@
 <div class="bg-white rounded-lg shadow p-4 mb-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-            <p class="text-sm text-gray-600">Ученик:</p>
+            <p class="text-sm text-gray-600">@(Model.IsParentView ? "Ваш ребенок" : "Ученик"):</p>
             <p class="text-lg font-semibold">@Model.StudentFullName</p>
         </div>
         <div>

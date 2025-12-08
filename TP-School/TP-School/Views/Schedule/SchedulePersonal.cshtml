@@ -5,7 +5,6 @@
     ViewData["Title"] = "Расписание";
     Layout = "_Layout";
 
-    // Функция для русского названия дня недели
     string GetRussianDayName(DayOfWeek dayOfWeek)
     {
         return dayOfWeek switch
@@ -21,7 +20,6 @@
         };
     }
 
-    // Функция для сокращенного названия дня
     string GetShortRussianDayName(DayOfWeek dayOfWeek)
     {
         return dayOfWeek switch
@@ -37,9 +35,8 @@
         };
     }
 
-    // *** ИСПРАВЛЕНИЕ: Получаем ID контекста для навигации ***
-    var selectedChildId = ViewBag.SelectedChildId as int?;
-    var selectedClassId = ViewBag.SelectedClassId as int?;
+    var isParent = ViewBag.IsParent as bool? ?? false;
+    var studentName = ViewBag.SelectedChildName as string;
 }
 
 <div class="container mx-auto px-4 py-8">
@@ -55,31 +52,27 @@
                         <p class="text-gray-600">@ViewBag.ClassName</p>
                     </div>
                 </div>
-            </div>
-
-            @if (ViewBag.IsParent && ViewBag.Children != null)
-            {
-                <div class="mt-4 md:mt-0">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Выберите ребенка:</label>
-                    <div class="flex items-center space-x-2">
-                        <select id="childSelector"
-                                class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[200px]">
-                            @foreach (var child in ViewBag.Children)
-                            {
-                                <option value="@child.StudentId"
-                                        selected="@(ViewBag.SelectedChildId == child.StudentId)"
-                                        data-name="@child.FullName">
-                                    @child.FullName
-                                </option>
-                            }
-                        </select>
-                        <button onclick="switchChild()"
-                                class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition flex items-center">
-                            <i class="fas fa-sync-alt mr-2"></i>Перейти
-                        </button>
+                @if (!string.IsNullOrEmpty(studentName))
+                {
+                    <div class="flex items-center mt-2">
+                        <div class="bg-green-100 p-2 rounded-lg mr-3">
+                            <i class="fas fa-user-graduate text-green-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-700">
+                                @if (isParent)
+                                {
+                                    <text>Ребенок: <span class="font-semibold">@studentName</span></text>
+                                }
+                                else
+                                {
+                                    <text>Ученик: <span class="font-semibold">@studentName</span></text>
+                                }
+                            </p>
+                        </div>
                     </div>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 
@@ -87,11 +80,7 @@
         <div class="flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
 
-                <a href="@Url.Action("Index", new {
-                    date = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"),
-                    classId = selectedClassId,
-                    childId = selectedChildId
-                })"
+                <a href="@Url.Action("Index", new { date = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd") })"
                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                     <i class="fas fa-chevron-left mr-2"></i> Пред. неделя
                 </a>
@@ -100,22 +89,14 @@
                     @Model.StartOfWeek.ToString("dd.MM.yyyy") - @Model.StartOfWeek.AddDays(6).ToString("dd.MM.yyyy")
                 </span>
 
-                <a href="@Url.Action("Index", new {
-                    date = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd"),
-                    classId = selectedClassId,
-                    childId = selectedChildId
-                })"
+                <a href="@Url.Action("Index", new { date = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd") })"
                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                     След. неделя <i class="fas fa-chevron-right ml-2"></i>
                 </a>
             </div>
 
             <div>
-                <a href="@Url.Action("Index", new {
-                    date = DateTime.Today.ToString("yyyy-MM-dd"),
-                    classId = selectedClassId,
-                    childId = selectedChildId
-                })"
+                <a href="@Url.Action("Index", new { date = DateTime.Today.ToString("yyyy-MM-dd") })"
                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                     <i class="fas fa-calendar-day mr-2"></i> Текущая неделя
                 </a>
@@ -135,30 +116,6 @@
             </div>
         </div>
     }
-
-    <!-- Отладочная информация (удалить после отладки) -->
-    @{
-        int totalLessons = 0;
-        int lessonsWithGrades = 0;
-        if (Model.ScheduleByDay != null)
-        {
-            foreach (var day in Model.ScheduleByDay)
-            {
-                foreach (var lesson in day.Value)
-                {
-                    totalLessons++;
-                    if (lesson.Grade.HasValue && lesson.Grade.Value > 0)
-                    {
-                        lessonsWithGrades++;
-                    }
-                }
-            }
-        }
-    }
-
-    <div id="debugInfo" style="display: none;">
-        Всего уроков: @totalLessons, Уроков с оценками: @lessonsWithGrades
-    </div>
 
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <table class="w-full">
@@ -226,7 +183,7 @@
                                                 <i class="fas fa-door-open mr-1"></i>Каб. @lesson.Classroom
                                             </div>
 
-                                            <!-- БЛОК ОЦЕНКИ - добавляем сюда -->
+                                            <!-- БЛОК ОЦЕНКИ -->
                                             @if (lesson.Grade.HasValue)
                                             {
                                                 <div class="mt-2">
@@ -261,17 +218,22 @@
                                             {
                                                 <div class="mt-1 pt-1 border-t border-blue-100">
                                                     <div class="text-xs text-gray-700 font-medium">Д/З:</div>
-                                                    <div class="text-xs text-gray-600 truncate cursor-pointer hover:text-blue-500"
-                                                         onclick="openHomeworkModal(
-                         @lesson.ScheduleId,
-                         '@lesson.SubjectName.Replace("'", "\\'")',
-                         '@lesson.Date.ToString("dd.MM.yyyy")',
-                         @lesson.LessonNumber,
-                         '@lesson.TeacherFullName.Replace("'", "\\'")',
-                         '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
-                         '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')">
+                                                    <div class="text-xs text-gray-600 @(isParent ? "" : "cursor-pointer hover:text-blue-500")"
+                                                    @if (!isParent)
+                                                    {
+                                                        <text>
+                                                                                     onclick="openHomeworkModal(
+                                                            @lesson.ScheduleId,
+                                                                                         '@lesson.SubjectName.Replace("'", "\\'")',
+                                                                                         '@lesson.Date.ToString("dd.MM.yyyy")',
+                                                            @lesson.LessonNumber,
+                                                                                         '@lesson.TeacherFullName.Replace("'", "\\'")',
+                                                                                         '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
+                                                                                         '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')"
+                                                        </text>
+                                                    }>
                                                         @lesson.HomeworkText
-                                                    </div>
+                                                                        </div>
                                                 </div>
                                             }
                                         </div>
@@ -294,11 +256,21 @@
     </div>
 </div>
 
+<!-- Модальное окно домашнего задания -->
 <div id="homeworkModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
             <div class="flex justify-between items-center p-6 border-b border-gray-200">
-                <h3 class="text-xl font-semibold text-gray-800" id="homeworkModalTitle">Домашнее задание</h3>
+                <h3 class="text-xl font-semibold text-gray-800" id="homeworkModalTitle">
+                    @if (isParent)
+                    {
+                        <text>Просмотр домашнего задания</text>
+                    }
+                    else
+                    {
+                        <text>Домашнее задание</text>
+                    }
+                </h3>
                 <button type="button" onclick="closeHomeworkModal()"
                         class="text-gray-400 hover:text-gray-600 transition">
                     <i class="fas fa-times text-xl"></i>
@@ -341,39 +313,56 @@
                     </div>
                 </div>
 
-                <div class="mb-6 hidden" id="homeworkFilesSection">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Прикрепленные файлы:</label>
-                    <div class="space-y-2" id="homeworkFilesList">
+                @if (!isParent)
+                {
+                    <!-- Форма отправки ТОЛЬКО для учеников -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <h4 class="text-lg font-medium text-gray-800 mb-4">Отправка выполненного задания</h4>
+
+                        <form id="submitHomeworkForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" id="modalLessonId" name="lessonId">
+
+                            <div class="mb-4">
+                                <label for="studentAnswer" class="block text-sm font-medium text-gray-700 mb-1">Ваш ответ (текст)</label>
+                                <textarea id="studentAnswer" name="studentAnswer" rows="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Введите ваш ответ или комментарий..."></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="homeworkFiles" class="block text-sm font-medium text-gray-700 mb-1">Прикрепить файл (макс. 10MB)</label>
+                                <input type="file" id="homeworkFiles" name="homeworkFiles" class="w-full text-gray-700 border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" accept=".pdf, .doc, .docx, .jpg, .png" />
+                            </div>
+
+                            <div id="submissionMessage" class="mb-4 hidden p-3 rounded-lg text-sm font-medium"></div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" onclick="closeHomeworkModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Отмена</button>
+                                <button type="submit" id="submitHomeworkButton" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+                                    <i class="fas fa-paper-plane mr-2"></i>Отправить задание
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
-
-                <div class="border-t border-gray-200 pt-6">
-                    <h4 class="text-lg font-medium text-gray-800 mb-4">Отправка выполненного задания</h4>
-
-                    <form id="submitHomeworkForm">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" id="modalLessonId" name="lessonId">
-
-                        <div class="mb-4">
-                            <label for="studentAnswer" class="block text-sm font-medium text-gray-700 mb-1">Ваш ответ (текст)</label>
-                            <textarea id="studentAnswer" name="studentAnswer" rows="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Введите ваш ответ или комментарий..."></textarea>
+                }
+                else
+                {
+                    <!-- Для родителей - информационное сообщение -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center">
+                                <div class="mr-3">
+                                    <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-blue-800 font-medium">Информация</p>
+                                    <p class="text-blue-700 text-sm mt-1">
+                                        Для отправки домашнего задания необходимо войти в систему под учетной записью ученика.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="mb-4">
-                            <label for="homeworkFiles" class="block text-sm font-medium text-gray-700 mb-1">Прикрепить файл (макс. 10MB)</label>
-                            <input type="file" id="homeworkFiles" name="homeworkFiles" class="w-full text-gray-700 border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" accept=".pdf, .doc, .docx, .jpg, .png" />
-                        </div>
-
-                        <div id="submissionMessage" class="mb-4 hidden p-3 rounded-lg text-sm font-medium"></div>
-
-                        <div class="flex justify-end space-x-3">
-                            <button type="button" onclick="closeHomeworkModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Отмена</button>
-                            <button type="submit" id="submitHomeworkButton" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
-                                <i class="fas fa-paper-plane mr-2"></i>Отправить задание
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -384,27 +373,160 @@
 
 @section Scripts {
     <script>
-        // Предоставляем JavaScript необходимые URL-адреса и данные,
-        // которые генерируются на сервере Razor
+        // Предоставляем JavaScript необходимые URL-адреса и данные
         const scheduleServerData = {
             submitHomeworkUrl: '@Url.Action("SubmitHomework", "Schedule")',
             scheduleIndexUrl: '@Url.Action("Index", "Schedule")',
-            todayDate: '@DateTime.Today.ToString("yyyy-MM-dd")'
-        };
+            todayDate: '@DateTime.Today.ToString("yyyy-MM-dd")',
+            isParent: @isParent.ToString().ToLower()
+                };
 
-        // Отладочная информация
+        // Функция открытия модального окна с домашним заданием
+        function openHomeworkModal(lessonId, subject, date, lessonNumber, teacher, topic, homework) {
+            // Заполняем поля модального окна
+            document.getElementById('modalSubject').textContent = subject;
+            document.getElementById('modalDate').textContent = date;
+            document.getElementById('modalLessonNumber').textContent = `Урок ${lessonNumber}`;
+            document.getElementById('modalTeacher').textContent = teacher;
+            document.getElementById('modalLessonTopic').textContent = topic || 'Не указана';
+            document.getElementById('modalHomeworkText').textContent = homework || 'Не задано';
+            document.getElementById('modalLessonId').value = lessonId;
+
+            // Очищаем форму отправки (если она есть)
+            const studentAnswer = document.getElementById('studentAnswer');
+            const homeworkFiles = document.getElementById('homeworkFiles');
+            const submissionMessage = document.getElementById('submissionMessage');
+
+            if (studentAnswer) {
+                studentAnswer.value = '';
+                submissionMessage.classList.add('hidden');
+                submissionMessage.textContent = '';
+            }
+
+            if (homeworkFiles) {
+                homeworkFiles.value = '';
+            }
+
+            // Показываем модальное окно
+            const modal = document.getElementById('homeworkModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('block');
+
+            // Блокируем прокрутку страницы
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Функция закрытия модального окна
+        function closeHomeworkModal() {
+            const modal = document.getElementById('homeworkModal');
+            modal.classList.remove('block');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+
+            const bgColor = type === 'success' ? 'bg-green-500' :
+                type === 'error' ? 'bg-red-500' :
+                    type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+
+            notification.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg transform transition-transform duration-300 translate-x-full`;
+            notification.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-${type === 'success' ? 'check-circle' :
+                    type === 'error' ? 'exclamation-circle' :
+                        type === 'warning' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+                                <span>${message}</span>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 10);
+
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Обработка отправки домашнего задания
         document.addEventListener('DOMContentLoaded', function () {
-            var debugInfo = document.getElementById('debugInfo');
-            if (debugInfo) {
-                console.log('Отладочная информация о расписании:');
-                console.log(debugInfo.textContent);
+            const submitHomeworkForm = document.getElementById('submitHomeworkForm');
+
+            if (submitHomeworkForm) {
+                submitHomeworkForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const submitButton = document.getElementById('submitHomeworkButton');
+                    const originalText = submitButton.innerHTML;
+                    const messageDiv = document.getElementById('submissionMessage');
+
+                    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Отправка...';
+                    submitButton.disabled = true;
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('lessonId', document.getElementById('modalLessonId').value);
+                        formData.append('studentAnswer', document.getElementById('studentAnswer').value);
+
+                        const fileInput = document.getElementById('homeworkFiles');
+                        if (fileInput.files.length > 0) {
+                            formData.append('homeworkFiles', fileInput.files[0]);
+                        }
+
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                        const response = await fetch(scheduleServerData.submitHomeworkUrl, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'RequestVerificationToken': token
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            showNotification(result.message, 'success');
+                            closeHomeworkModal();
+                        } else {
+                            messageDiv.textContent = result.message;
+                            messageDiv.className = 'p-3 rounded-lg text-sm font-medium bg-red-100 text-red-800';
+                            messageDiv.classList.remove('hidden');
+                            showNotification(result.message, 'error');
+                        }
+                    } catch (error) {
+                        messageDiv.textContent = 'Ошибка сети. Пожалуйста, попробуйте позже.';
+                        messageDiv.className = 'p-3 rounded-lg text-sm font-medium bg-red-100 text-red-800';
+                        messageDiv.classList.remove('hidden');
+                        showNotification('Ошибка сети. Пожалуйста, попробуйте позже.', 'error');
+                    } finally {
+                        submitButton.innerHTML = originalText;
+                        submitButton.disabled = false;
+                    }
+                });
             }
         });
     </script>
-    <script src="~/js/schedule.js"></script>
 
     <style>
-        /* Стили для drag and drop */
         label[for="homeworkFiles"] {
             transition: all 0.2s ease;
         }
@@ -414,7 +536,6 @@
                 background-color: #f0f9ff;
             }
 
-        /* Кастомный скроллбар */
         textarea::-webkit-scrollbar {
             width: 8px;
         }
@@ -433,7 +554,6 @@
                 background: #a8a8a8;
             }
 
-        /* Стили для оценок */
         .grade-badge {
             transition: all 0.2s ease;
         }

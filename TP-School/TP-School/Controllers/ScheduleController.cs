@@ -30,7 +30,7 @@ namespace TP_School.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int? classId, DateTime? date, int? childId)
+        public async Task<IActionResult> Index(DateTime? date)
         {
             try
             {
@@ -55,11 +55,11 @@ namespace TP_School.Controllers
 
                 if (userRole == "Ученик" || userRole == "Родитель")
                 {
-                    return await GetPersonalSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate, childId);
+                    return await GetPersonalSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate);
                 }
                 else if (userRole == "Учитель" || userRole == "Директор")
                 {
-                    return await GetAdminSchedule(userId, userRole, classId, startOfWeek, endOfWeek, selectedDate);
+                    return await GetAdminSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate);
                 }
                 else
                 {
@@ -71,26 +71,25 @@ namespace TP_School.Controllers
                 Console.WriteLine($"Ошибка в Index методе: {ex.Message}");
                 Console.WriteLine($"StackTrace: {ex.StackTrace}");
 
-                // Возвращаем пользователю простое сообщение об ошибке
                 ViewBag.ErrorMessage = "Произошла ошибка при загрузке расписания. Пожалуйста, попробуйте позже.";
                 return View("SchedulePersonal", CreateEmptyScheduleModel(DateTime.Today, DateTime.Today, true, false));
             }
         }
 
-        private async Task<IActionResult> GetPersonalSchedule(int userId, string role, DateTime startOfWeek, DateTime endOfWeek, DateTime date, int? childId = null)
+        private async Task<IActionResult> GetPersonalSchedule(int userId, string role, DateTime startOfWeek, DateTime endOfWeek, DateTime date)
         {
             try
             {
-                int studentUserId = userId; // Это UserId из таблицы Users
                 int studentIdForGrades = userId; // Для поиска в таблице Grades
                 string studentName = "";
-                int selectedContextId = userId;
+                bool isParent = (role == "Родитель");
 
+                ViewBag.IsParent = isParent;
+
+                // Если родитель, находим его ребенка
                 if (role == "Родитель")
                 {
-                    int requestedChildId = childId ?? 0;
-
-                    var children = await _context.StudentParentses
+                    var student = await _context.StudentParentses
                         .Where(sp => sp.ParentId == userId)
                         .Include(sp => sp.Student)
                         .Select(sp => new {
@@ -98,22 +97,17 @@ namespace TP_School.Controllers
                             sp.Student.FullName,
                             sp.Student.UserId
                         })
-                        .ToListAsync();
+                        .FirstOrDefaultAsync();
 
-                    if (!children.Any())
+                    if (student == null)
                     {
                         ViewBag.ErrorMessage = "У вас нет привязанных учеников.";
                         return View("SchedulePersonal", CreateEmptyScheduleModel(date, startOfWeek, true, false));
                     }
 
-                    var selectedChild = children.FirstOrDefault(c => c.StudentId == requestedChildId) ?? children.First();
-                    studentUserId = selectedChild.StudentId; // Это StudentId из StudentParents
-                    studentIdForGrades = selectedChild.UserId; // Это UserId для поиска в Grades
-                    studentName = selectedChild.FullName;
-                    selectedContextId = studentUserId;
+                    studentIdForGrades = student.UserId;
+                    studentName = student.FullName;
 
-                    ViewBag.Children = children;
-                    ViewBag.SelectedChildId = selectedContextId;
                     ViewBag.SelectedChildName = studentName;
                 }
                 else if (role == "Ученик")
@@ -126,28 +120,15 @@ namespace TP_School.Controllers
                         studentName = student.FullName;
                         ViewBag.SelectedChildName = studentName;
                     }
-                    ViewBag.SelectedChildId = userId;
-
-                    // Для ученика используем UserId для поиска оценок
-                    studentIdForGrades = userId;
-                    studentUserId = userId;
                 }
 
-                // Находим класс ученика через таблицу StudentClasses
-                // Ищем по StudentId (который из StudentParents) или UserId
+                // Находим класс ученика
                 var studentClassEntry = await _context.StudentClasses
                     .Include(sc => sc.Class)
                     .Include(sc => sc.Student)
-                    .FirstOrDefaultAsync(sc => sc.StudentId == studentUserId);
-
-                if (studentClassEntry == null)
-                {
-                    // Попробуем найти по UserId, если не нашли по StudentId
-                    studentClassEntry = await _context.StudentClasses
-                        .Include(sc => sc.Class)
-                        .Include(sc => sc.Student)
-                        .FirstOrDefaultAsync(sc => sc.Student.UserId == studentUserId);
-                }
+                    .FirstOrDefaultAsync(sc =>
+                        (role == "Ученик" && sc.Student.UserId == userId) ||
+                        (role == "Родитель" && sc.Student.UserId == studentIdForGrades));
 
                 if (studentClassEntry == null)
                 {
@@ -183,7 +164,6 @@ namespace TP_School.Controllers
 
                     try
                     {
-                        // ВАЖНО: Ищем оценки по StudentId, который в таблице Grades ссылается на UserId
                         var grades = await _context.Grades
                             .Where(g => g.StudentId == studentIdForGrades && lessonIds.Contains(g.LessonId))
                             .Select(g => new
@@ -194,43 +174,21 @@ namespace TP_School.Controllers
                             })
                             .ToListAsync();
 
-                        // Отладочная информация
-                        Console.WriteLine("=== ДЕБАГ: ПОИСК ОЦЕНОК ===");
-                        Console.WriteLine($"Роль пользователя: {role}");
-                        Console.WriteLine($"UserId из claims: {userId}");
-                        Console.WriteLine($"StudentId для Grades (UserId): {studentIdForGrades}");
-                        Console.WriteLine($"StudentId для StudentClasses: {studentUserId}");
-                        Console.WriteLine($"Найдено уроков: {scheduleEntries.Count}");
-                        Console.WriteLine($"Найдено оценок: {grades.Count}");
-
                         foreach (var grade in grades)
                         {
                             studentGrades[grade.LessonId] = (grade.GradeValue, grade.Comment);
-                            var lesson = scheduleEntries.FirstOrDefault(s => s.LessonId == grade.LessonId);
-                            Console.WriteLine($"Урок {grade.LessonId} ({lesson?.Date:dd.MM.yyyy}, {lesson?.Subject?.SubjectName}): оценка {grade.GradeValue}");
-                        }
-
-                        if (grades.Count == 0)
-                        {
-                            Console.WriteLine("Оценки не найдены. Проверьте:");
-                            Console.WriteLine($"1. Есть ли оценки в таблице Grades для StudentId = {studentIdForGrades}");
-                            Console.WriteLine($"2. Совпадают ли LessonId из Grades с LessonId из Schedules");
                         }
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Ошибка при получении оценок: {ex.Message}");
-                        Console.WriteLine($"StackTrace: {ex.StackTrace}");
-                        // Продолжаем без оценок
                     }
                 }
 
                 ViewBag.ClassName = className;
                 ViewBag.ClassTeacher = classTeacher?.FullName ?? "Не назначен";
                 ViewBag.ClassId = classId;
-                ViewBag.IsParent = (role == "Родитель");
                 ViewBag.StudentName = studentName;
-                ViewBag.IsStudent = (role == "Ученик");
                 ViewBag.LessonTimes = LessonTimeMap;
 
                 var model = CreateScheduleModel(scheduleEntries, date, startOfWeek, true, false, studentGrades);
@@ -248,7 +206,7 @@ namespace TP_School.Controllers
             }
         }
 
-        private async Task<IActionResult> GetAdminSchedule(int userId, string role, int? selectedClassId, DateTime startOfWeek, DateTime endOfWeek, DateTime date)
+        private async Task<IActionResult> GetAdminSchedule(int userId, string role, DateTime startOfWeek, DateTime endOfWeek, DateTime date)
         {
             List<SchoolClass> availableClasses;
 
@@ -277,7 +235,7 @@ namespace TP_School.Controllers
                 return View("ScheduleAdmin", CreateEmptyScheduleModel(date, startOfWeek, false, true));
             }
 
-            int classId = selectedClassId ?? availableClasses.First().ClassId;
+            int classId = availableClasses.First().ClassId;
             ViewBag.SelectedClassId = classId;
 
             ViewBag.AvailableClasses = availableClasses;
@@ -309,7 +267,7 @@ namespace TP_School.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Ученик, Родитель")]
+        [Authorize(Roles = "Ученик")] // Только для учеников
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(52428800)]
         public async Task<IActionResult> SubmitHomework(int lessonId, string studentAnswer, IFormFileCollection homeworkFiles)
@@ -487,7 +445,6 @@ namespace TP_School.Controllers
                             Classroom = s.Room,
                             LessonTopic = s.LessonTopic,
                             HomeworkText = s.HomeworkText,
-                            // Получаем оценку и комментарий из словаря
                             Grade = studentGrades != null && studentGrades.ContainsKey(s.LessonId)
                                 ? studentGrades[s.LessonId].GradeValue
                                 : null,

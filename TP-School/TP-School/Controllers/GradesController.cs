@@ -45,9 +45,13 @@ namespace TP_School.Controllers
                 quarter = GetCurrentQuarter();
             }
 
-            if (userRole == "Ученик")
+            if (userRole == "Родитель")
             {
-                return await StudentView(quarter);
+                return await ParentView(quarter);
+            }
+            else if (userRole == "Ученик")
+            {
+                return await StudentView(GetCurrentUserId(), quarter, false);
             }
             else if (userRole == "Учитель" || userRole == "Директор")
             {
@@ -57,15 +61,38 @@ namespace TP_School.Controllers
             return Forbid();
         }
 
-        // --- МЕТОД ДЛЯ УЧЕНИКА ---
-        private async Task<IActionResult> StudentView(string quarter)
+        // --- МЕТОД ДЛЯ РОДИТЕЛЯ ---
+        private async Task<IActionResult> ParentView(string quarter)
         {
-            var studentId = GetCurrentUserId();
+            var parentId = GetCurrentUserId();
+
+            // Получаем первого привязанного ребенка родителя
+            var childRelation = await _context.StudentParentses
+                .Where(ps => ps.ParentId == parentId)
+                .Select(ps => new { ps.StudentId, ps.Student.FullName })
+                .FirstOrDefaultAsync();
+
+            if (childRelation == null)
+            {
+                // Если детей нет, показываем сообщение
+                return View("NoChild");
+            }
+
+            var childId = childRelation.StudentId;
+            var childName = childRelation.FullName;
+
+            // Прямой вызов метода StudentView с флагом isParentView = true
+            return await StudentView(childId, quarter, true);
+        }
+
+        // --- МЕТОД ДЛЯ ПРОСМОТРА УСПЕВАЕМОСТИ (общий для ученика и родителя) ---
+        private async Task<IActionResult> StudentView(int studentId, string quarter, bool isParentView)
+        {
             var studentData = await _context.Users.FindAsync(studentId);
 
             if (quarter == "Итоговые оценки")
             {
-                return await CalculateYearGrades(studentId, studentData.FullName, "Итоговые оценки");
+                return await CalculateYearGrades(studentId, studentData.FullName, "Итоговые оценки", isParentView);
             }
 
             var (startDate, endDate) = GetQuarterDates(quarter);
@@ -78,7 +105,9 @@ namespace TP_School.Controllers
             {
                 return View("StudentView", new StudentGradesViewModel
                 {
-                    AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" }
+                    AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
+                    StudentFullName = studentData.FullName,
+                    IsParentView = isParentView
                 });
             }
 
@@ -164,7 +193,8 @@ namespace TP_School.Controllers
                 ClassName = studentClass.Class.ClassName,
                 Subjects = subjectItems.OrderBy(s => s.SubjectName).ToList(),
                 SelectedQuarter = quarter,
-                AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" }
+                AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
+                IsParentView = isParentView
             };
 
             return View("StudentView", viewModel);
@@ -257,7 +287,7 @@ namespace TP_School.Controllers
                     u.UserId,
                     u.FullName
                 })
-                .ToListAsync(); // Сначала получаем данные без сортировки
+                .ToListAsync();
 
             // Сортируем на клиенте
             var sortedStudents = students.OrderBy(s => s.FullName).ToList();
@@ -305,8 +335,8 @@ namespace TP_School.Controllers
             return View("TeacherView", viewModel);
         }
 
-        // --- МЕТОД: Расчет годовых оценок (используется для режима "Итоговые оценки") ---
-        private async Task<IActionResult> CalculateYearGrades(int studentId, string studentFullName, string quarterName)
+        // --- МЕТОД: Расчет годовых оценок ---
+        private async Task<IActionResult> CalculateYearGrades(int studentId, string studentFullName, string quarterName, bool isParentView)
         {
             var allQuarters = new List<string> { "I", "II", "III", "IV" };
             var yearFinalGrades = new Dictionary<string, List<int>>();
@@ -375,11 +405,11 @@ namespace TP_School.Controllers
                     if (!yearAbsences.ContainsKey(item.SubjectName))
                     {
                         yearAbsences.Add(item.SubjectName, new Dictionary<string, int>
-                {
-                    { "Н", 0 },
-                    { "У", 0 },
-                    { "Б", 0 }
-                });
+                        {
+                            { "Н", 0 },
+                            { "У", 0 },
+                            { "Б", 0 }
+                        });
                     }
 
                     if (yearAbsences[item.SubjectName].ContainsKey(item.Status))
@@ -458,7 +488,8 @@ namespace TP_School.Controllers
                 ClassName = studentClass?.Class.ClassName,
                 Subjects = finalYearItems.OrderBy(s => s.SubjectName).ToList(),
                 SelectedQuarter = quarterName,
-                AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" }
+                AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
+                IsParentView = isParentView
             };
 
             return View("StudentView", viewModel);

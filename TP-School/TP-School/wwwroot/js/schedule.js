@@ -4,7 +4,6 @@
 let currentHomeworkData = null;
 
 function openHomeworkModal(lessonId, subject, date, lessonNumber, teacher, lessonTopic, homeworkText) {
-    // Сохраняем данные
     currentHomeworkData = {
         lessonId: lessonId,
         subject: subject,
@@ -15,7 +14,6 @@ function openHomeworkModal(lessonId, subject, date, lessonNumber, teacher, lesso
         homeworkText: homeworkText
     };
 
-    // Заполняем модальное окно
     document.getElementById('modalSubject').textContent = subject;
     document.getElementById('modalDate').textContent = date;
     document.getElementById('modalLessonNumber').textContent = 'Урок ' + lessonNumber;
@@ -24,10 +22,6 @@ function openHomeworkModal(lessonId, subject, date, lessonNumber, teacher, lesso
     document.getElementById('modalHomeworkText').textContent = homeworkText;
     document.getElementById('modalLessonId').value = lessonId;
 
-    // Загружаем файлы (если есть) - закомментировано в оригинале
-    // loadHomeworkFiles(lessonId);
-
-    // Показываем модальное окно
     document.getElementById('homeworkModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
@@ -36,15 +30,11 @@ function closeHomeworkModal() {
     document.getElementById('homeworkModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
 
-    // Очищаем форму
     document.getElementById('studentAnswer').value = '';
     document.getElementById('homeworkFiles').value = '';
     document.getElementById('fileList').innerHTML = '';
     currentHomeworkData = null;
 }
-
-// Загрузка файлов домашнего задания (для примера, если бы fetch был активен)
-// async function loadHomeworkFiles(lessonId) { ... }
 
 // Обработка выбора файлов
 document.getElementById('homeworkFiles').addEventListener('change', function (e) {
@@ -116,7 +106,6 @@ document.getElementById('submitHomeworkForm').addEventListener('submit', async f
         return;
     }
 
-    // Показываем индикатор загрузки
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     const originalDisabled = submitBtn.disabled;
@@ -125,7 +114,6 @@ document.getElementById('submitHomeworkForm').addEventListener('submit', async f
     submitBtn.disabled = true;
 
     try {
-        // Здесь AJAX запрос на сервер, используем переданный URL
         const response = await fetch(scheduleServerData.submitHomeworkUrl, {
             method: 'POST',
             body: formData
@@ -136,7 +124,6 @@ document.getElementById('submitHomeworkForm').addEventListener('submit', async f
         if (result.success) {
             showNotification('Задание успешно отправлено!', 'success');
 
-            // Закрываем модальное окно через 1.5 секунды
             setTimeout(() => {
                 closeHomeworkModal();
             }, 1500);
@@ -181,13 +168,11 @@ function showNotification(message, type = 'info') {
 
     container.appendChild(notification);
 
-    // Анимация появления
     setTimeout(() => {
         notification.classList.remove('translate-x-full');
         notification.classList.add('translate-x-0');
     }, 10);
 
-    // Автоматически скрыть через 4 секунды
     setTimeout(() => {
         notification.classList.remove('translate-x-0');
         notification.classList.add('translate-x-full');
@@ -199,44 +184,24 @@ function showNotification(message, type = 'info') {
     }, 4000);
 }
 
-// Закрытие по ESC
-document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !document.getElementById('homeworkModal').classList.contains('hidden')) {
-        closeHomeworkModal();
-    }
-});
-
-// Закрытие по клику вне модального окна
-document.getElementById('homeworkModal').addEventListener('click', function (e) {
-    if (e.target === this) {
-        closeHomeworkModal();
-    }
-});
-
 // Переключение между детьми (для родителей)
 function switchChild() {
     const childSelector = document.getElementById('childSelector');
     const selectedChildId = childSelector.value;
     const selectedChildName = childSelector.options[childSelector.selectedIndex].getAttribute('data-name');
 
-    // Получаем текущие параметры URL
     const urlParams = new URLSearchParams(window.location.search);
-    // Используем todayDate из серверных данных как запасной вариант
     const selectedDate = urlParams.get('selectedDate') || scheduleServerData.todayDate;
 
-    // Формируем новый URL с параметром childId
     const newUrl = scheduleServerData.scheduleIndexUrl +
         '?selectedDate=' + encodeURIComponent(selectedDate) +
         '&childId=' + selectedChildId;
 
-    // Показываем загрузку
     showLoading('Загружаем расписание для ' + selectedChildName + '...');
-
     window.location.href = newUrl;
 }
 
 function showLoading(message) {
-    // Создаем overlay загрузки
     const overlay = document.createElement('div');
     overlay.id = 'loadingOverlay';
     overlay.className = 'fixed inset-0 bg-white bg-opacity-90 z-50 flex flex-col items-center justify-center';
@@ -248,7 +213,7 @@ function showLoading(message) {
     document.body.appendChild(overlay);
 }
 
-// Удаляем overlay при загрузке страницы, инициализируем Drag and Drop
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('loadingOverlay');
     if (overlay) overlay.remove();
@@ -257,7 +222,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const dropArea = document.querySelector('label[for="homeworkFiles"]');
 
     if (dropArea) {
-        // Предотвращаем стандартное поведение браузера
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
         });
@@ -267,7 +231,6 @@ document.addEventListener('DOMContentLoaded', function () {
             e.stopPropagation();
         }
 
-        // Подсветка области при наведении
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, highlight, false);
         });
@@ -284,7 +247,6 @@ document.addEventListener('DOMContentLoaded', function () {
             dropArea.classList.remove('border-blue-500', 'bg-blue-50');
         }
 
-        // Обработка сброса файлов
         dropArea.addEventListener('drop', handleDrop, false);
 
         function handleDrop(e) {
@@ -293,7 +255,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const input = document.getElementById('homeworkFiles');
             input.files = files;
-            // Принудительно вызываем событие 'change' для обновления списка файлов
             input.dispatchEvent(new Event('change'));
         }
     }

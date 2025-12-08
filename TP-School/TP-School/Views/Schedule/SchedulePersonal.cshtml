@@ -88,9 +88,9 @@
             <div class="flex items-center space-x-4 mb-4 md:mb-0">
 
                 <a href="@Url.Action("Index", new {
-                    date = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"), // Используем 'date'
+                    date = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd"),
                     classId = selectedClassId,
-                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                    childId = selectedChildId
                 })"
                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                     <i class="fas fa-chevron-left mr-2"></i> Пред. неделя
@@ -101,9 +101,9 @@
                 </span>
 
                 <a href="@Url.Action("Index", new {
-                    date = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd"), // Используем 'date'
+                    date = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd"),
                     classId = selectedClassId,
-                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                    childId = selectedChildId
                 })"
                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                     След. неделя <i class="fas fa-chevron-right ml-2"></i>
@@ -112,9 +112,9 @@
 
             <div>
                 <a href="@Url.Action("Index", new {
-                    date = DateTime.Today.ToString("yyyy-MM-dd"), // Используем 'date'
+                    date = DateTime.Today.ToString("yyyy-MM-dd"),
                     classId = selectedClassId,
-                    childId = selectedChildId // <--- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
+                    childId = selectedChildId
                 })"
                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                     <i class="fas fa-calendar-day mr-2"></i> Текущая неделя
@@ -136,6 +136,30 @@
         </div>
     }
 
+    <!-- Отладочная информация (удалить после отладки) -->
+    @{
+        int totalLessons = 0;
+        int lessonsWithGrades = 0;
+        if (Model.ScheduleByDay != null)
+        {
+            foreach (var day in Model.ScheduleByDay)
+            {
+                foreach (var lesson in day.Value)
+                {
+                    totalLessons++;
+                    if (lesson.Grade.HasValue && lesson.Grade.Value > 0)
+                    {
+                        lessonsWithGrades++;
+                    }
+                }
+            }
+        }
+    }
+
+    <div id="debugInfo" style="display: none;">
+        Всего уроков: @totalLessons, Уроков с оценками: @lessonsWithGrades
+    </div>
+
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <table class="w-full">
             <thead class="bg-blue-600 text-white">
@@ -153,7 +177,7 @@
                     }
                     @foreach (var day in days)
                     {
-                        var dayDate = Model.StartOfWeek.AddDays(((int)day - (int)DayOfWeek.Monday + 7) % 7); // Корректное смещение
+                        var dayDate = Model.StartOfWeek.AddDays(((int)day - (int)DayOfWeek.Monday + 7) % 7);
                         bool isToday = dayDate.Date == DateTime.Today.Date;
 
                         <th class="p-4 text-center @(isToday ? "bg-blue-700" : "")">
@@ -192,15 +216,38 @@
                                 @if (Model.ScheduleByDay != null && Model.ScheduleByDay.ContainsKey(day))
                                 {
                                     var lesson = Model.ScheduleByDay[day].FirstOrDefault(l => l.LessonNumber == lessonNum);
-                                    if (lesson != null)
+                                    @if (lesson != null)
                                     {
                                         <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 h-full">
+                                            <!-- Информация об уроке -->
                                             <div class="font-bold text-blue-700 text-sm">@lesson.SubjectName</div>
                                             <div class="text-xs text-gray-600 mt-1">@lesson.TeacherFullName</div>
                                             <div class="text-xs text-gray-500 mt-1">
                                                 <i class="fas fa-door-open mr-1"></i>Каб. @lesson.Classroom
                                             </div>
 
+                                            <!-- БЛОК ОЦЕНКИ - добавляем сюда -->
+                                            @if (lesson.Grade.HasValue)
+                                            {
+                                                <div class="mt-2">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="text-xs text-gray-700 font-medium">Оценка:</div>
+                                                        <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold
+                         @(lesson.Grade.Value >= 4 ? "bg-green-100 text-green-800" :
+                           lesson.Grade.Value == 3 ? "bg-yellow-100 text-yellow-800" :
+                           "bg-red-100 text-red-800")">
+                                                            @lesson.Grade.Value
+                                                            @if (!string.IsNullOrEmpty(lesson.GradeComment))
+                                                            {
+                                                                <i class="fas fa-info-circle ml-1"
+                                                                   title="@lesson.GradeComment"></i>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- Тема урока -->
                                             @if (!string.IsNullOrEmpty(lesson.LessonTopic))
                                             {
                                                 <div class="mt-2 pt-2 border-t border-blue-100">
@@ -209,19 +256,20 @@
                                                 </div>
                                             }
 
+                                            <!-- Домашнее задание -->
                                             @if (!string.IsNullOrEmpty(lesson.HomeworkText))
                                             {
                                                 <div class="mt-1 pt-1 border-t border-blue-100">
                                                     <div class="text-xs text-gray-700 font-medium">Д/З:</div>
                                                     <div class="text-xs text-gray-600 truncate cursor-pointer hover:text-blue-500"
                                                          onclick="openHomeworkModal(
-                                                                 @lesson.ScheduleId,
-                                                                 '@lesson.SubjectName.Replace("'", "\\'")',
-                                                                 '@lesson.Date.ToString("dd.MM.yyyy")',
-                                                                 @lesson.LessonNumber,
-                                                                 '@lesson.TeacherFullName.Replace("'", "\\'")',
-                                                                 '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
-                                                                 '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')">
+                         @lesson.ScheduleId,
+                         '@lesson.SubjectName.Replace("'", "\\'")',
+                         '@lesson.Date.ToString("dd.MM.yyyy")',
+                         @lesson.LessonNumber,
+                         '@lesson.TeacherFullName.Replace("'", "\\'")',
+                         '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
+                         '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')">
                                                         @lesson.HomeworkText
                                                     </div>
                                                 </div>
@@ -343,38 +391,55 @@
             scheduleIndexUrl: '@Url.Action("Index", "Schedule")',
             todayDate: '@DateTime.Today.ToString("yyyy-MM-dd")'
         };
+
+        // Отладочная информация
+        document.addEventListener('DOMContentLoaded', function () {
+            var debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                console.log('Отладочная информация о расписании:');
+                console.log(debugInfo.textContent);
+            }
+        });
     </script>
     <script src="~/js/schedule.js"></script>
 
     <style>
-        
         /* Стили для drag and drop */
         label[for="homeworkFiles"] {
             transition: all 0.2s ease;
         }
-        
-        label[for="homeworkFiles"]:hover {
-            border-color: #3b82f6;
-            background-color: #f0f9ff;
-        }
-        
+
+            label[for="homeworkFiles"]:hover {
+                border-color: #3b82f6;
+                background-color: #f0f9ff;
+            }
+
         /* Кастомный скроллбар */
         textarea::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         textarea::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
-        
+
         textarea::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 4px;
         }
-        
-        textarea::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+
+            textarea::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+
+        /* Стили для оценок */
+        .grade-badge {
+            transition: all 0.2s ease;
         }
+
+            .grade-badge:hover {
+                transform: scale(1.1);
+            }
     </style>
 }

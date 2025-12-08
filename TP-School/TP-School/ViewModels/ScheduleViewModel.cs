@@ -35,5 +35,7 @@ namespace TP_School.ViewModels
         public string LessonTopic { get; set; }
         public string HomeworkText { get; set; }
         public DateTime Date { get; set; }
+        public int? Grade { get; set; }
+        public string GradeComment { get; set; }
     }
 }

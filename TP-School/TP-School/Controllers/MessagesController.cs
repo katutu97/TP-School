@@ -40,19 +40,26 @@ public class MessagesController : Controller
     {
         int currentUserId = GetCurrentUserId();
         IQueryable<Message> messagesQuery;
-
+        // Определяем, какие сообщения показывать
         if (filter.ToLower() == "inbox")
         {
-            // Входящие: сообщения, где ToUserId - это текущий пользователь
             messagesQuery = _context.Messages
-                .Where(m => m.ToUserId == currentUserId)
-                .OrderByDescending(m => m.SentAt);
+                .Where(m => m.ToUserId == currentUserId && m.Status != MessageStatus.Archived)
+                .OrderBy(m => m.Status)
+                .ThenByDescending(m => m.SentAt);
         }
         else if (filter.ToLower() == "sent")
         {
             // Отправленные: сообщения, где FromUserId - это текущий пользователь
             messagesQuery = _context.Messages
                 .Where(m => m.FromUserId == currentUserId)
+                .OrderByDescending(m => m.SentAt);
+        }
+        else if (filter.ToLower() == "archive")
+        {
+            // Архив: сообщения, где ToUserId - текущий пользователь И в архиве
+            messagesQuery = _context.Messages
+                .Where(m => m.ToUserId == currentUserId && m.Status == MessageStatus.Archived)
                 .OrderByDescending(m => m.SentAt);
         }
         else
@@ -66,15 +73,13 @@ public class MessagesController : Controller
             .Include(m => m.ToUser)
             .ToListAsync();
 
-        // --- ДОБАВЛЕНИЕ ЛОГИКИ ПОЛУЧЕНИЯ РОЛЕЙ ИЗ БД ---
+        // Получаем роли для модального окна
         var roles = await _context.Roles
             .Select(r => r.RoleName)
             .OrderBy(name => name)
             .ToListAsync();
 
         ViewBag.RecipientRoles = roles;
-        // ---------------------------------------------
-
         ViewBag.Filter = filter;
         return View(messages);
     }
@@ -164,7 +169,8 @@ public class MessagesController : Controller
                 ToUserId = model.RecipientId,      // Из ViewModel
                 MessageText = model.Body,          // Из ViewModel
                 SentAt = DateTime.Now,
-                // IsRead = false, // Если не нужен статус прочтения, это поле можно удалить или не инициализировать
+                Status = MessageStatus.New,
+                
             };
 
             _context.Messages.Add(newMessage);
@@ -202,27 +208,102 @@ public class MessagesController : Controller
 
         int currentUserId = GetCurrentUserId();
 
-        // Проверка: сообщение может удалить только отправитель (sent) или получатель (inbox)
-        if (message.FromUserId != currentUserId && message.ToUserId != currentUserId)
+        // Удалить можно ТОЛЬКО из ОТПРАВЛЕННЫХ, И ТОЛЬКО если статус "Новое"
+        if (message.FromUserId == currentUserId && message.Status == MessageStatus.New)
         {
-            return Forbid(); // Запрещаем удаление, если пользователь не имеет отношения к сообщению
+            try
+            {
+                _context.Messages.Remove(message);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index), new { filter = "sent" });
+            }
+            catch (Exception)
+            {
+                TempData["ErrorMessage"] = "Произошла ошибка при удалении сообщения.";
+                return RedirectToAction(nameof(Index), new { filter = "sent" });
+            }
+        }
+        else if (message.FromUserId == currentUserId)
+        {
+            // Если не новое, но отправитель
+            TempData["ErrorMessage"] = "Можно удалить только отправленное сообщение со статусом 'Новое'.";
+            return RedirectToAction(nameof(Index), new { filter = "sent" });
         }
 
-        try
-        {
-            _context.Messages.Remove(message);
-            await _context.SaveChangesAsync();
-
-            // Определяем, откуда удалено сообщение, чтобы перенаправить пользователя
-            string filter = (message.ToUserId == currentUserId) ? "inbox" : "sent";
-
-            // Перенаправляем обратно на страницу сообщений
-            return RedirectToAction(nameof(Index), new { filter = filter });
-        }
-        catch (Exception ex)
-        {
-            // Логирование
-            return StatusCode(500, "Произошла ошибка при удалении сообщения.");
-        }
+        // Если пользователь не является отправителем (а значит получатель), или не соответствует условиям
+        return Forbid();
     }
+    // -------------------------------------------------------------
+    // POST: /Messages/MarkAsRead/{id} (Пометить как прочитанное) - ВОССТАНОВЛЕНО
+    // -------------------------------------------------------------
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkAsRead(int id)
+    {
+        int currentUserId = GetCurrentUserId();
+
+        var message = await _context.Messages
+            .FirstOrDefaultAsync(m => m.MessageId == id && m.ToUserId == currentUserId && m.Status == MessageStatus.New);
+
+        if (message == null)
+            return NotFound();
+
+        message.Status = MessageStatus.Read;
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Сообщение помечено как прочитанное.";
+        return RedirectToAction(nameof(Index), new { filter = "inbox" });
+    }
+    // -------------------------------------------------------------
+    // POST: /Messages/Archive/{id} (Архивация входящего сообщения) 
+    // -------------------------------------------------------------
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Archive(int id)
+    {
+        int currentUserId = GetCurrentUserId();
+
+        // Ищем сообщение, которое адресовано текущему пользователю И не в архиве
+        var message = await _context.Messages
+            .FirstOrDefaultAsync(m => m.MessageId == id && m.ToUserId == currentUserId && m.Status != MessageStatus.Archived);
+
+        if (message == null)
+            return NotFound();
+
+        // Если было New, оно становится Read, прежде чем архивироваться. 
+        // Но так как кнопка появляется только для Read, достаточно просто установить Archived.
+        message.Status = MessageStatus.Archived;
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Сообщение архивировано.";
+        return RedirectToAction(nameof(Index), new { filter = "inbox" });
+    }
+
+    // -------------------------------------------------------------
+    // POST: /Messages/Restore/{id} (Восстановление из архива)
+    // -------------------------------------------------------------
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(int id)
+    {
+        int currentUserId = GetCurrentUserId();
+
+        // Ищем сообщение, которое адресовано текущему пользователю И в архиве
+        var message = await _context.Messages
+            .FirstOrDefaultAsync(m => m.MessageId == id && m.ToUserId == currentUserId && m.Status == MessageStatus.Archived);
+
+        if (message == null)
+            return NotFound();
+
+        // Возвращаем из архива в статус Прочитано
+        message.Status = MessageStatus.Read;
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Сообщение восстановлено из архива.";
+        return RedirectToAction(nameof(Index), new { filter = "inbox" });
+    }
+
 }

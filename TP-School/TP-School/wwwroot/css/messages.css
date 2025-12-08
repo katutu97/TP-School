@@ -92,11 +92,12 @@
 .message-list-header {
     display: grid;
     /* Адаптация колонок под дизайн: ФИО (фиксированная) | Сообщение (оставшееся) | Действия (для выравнивания) */
-    grid-template-columns: 200px 1fr 150px;
-    gap: 30px;
+    grid-template-columns: 200px 1fr 200px 100px;
+    gap: 20px;
     font-weight: 600;
     color: #333;
     padding: 5px 10px;
+    white-space: nowrap;
 }
 
     .message-list-header > div {
@@ -112,8 +113,8 @@
 /* Строка сообщения */
 .message-row {
     display: grid;
-    gap: 30px;
-    grid-template-columns: 200px 1fr 150px;
+    gap: 20px;
+    grid-template-columns: 200px 1fr 200px 100px;
     padding: 10px;
     border-bottom: 1px solid #eee; /* Очень светлая граница между строками */
     align-items: center;
@@ -155,8 +156,17 @@
 /* --- Стили для Действий (Кнопок) в списке --- */
 
 .message-actions {
+    display: flex;
+    justify-content: flex-end; /* Выравнивание кнопок по правому краю колонки */
+    gap: 5px; /* Небольшой отступ между кнопками */
     white-space: nowrap;
-    text-align: right;
+    text-align: right; /* Сохраняем, но flex-end важнее */
+}
+
+.inline-form-action {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
 }
 
 .btn-action {
@@ -169,6 +179,8 @@
     margin-left: 5px;
     transition: color 0.2s;
     border-radius: 4px;
+    white-space: nowrap;
+    margin-left: 0;
 }
 
     .btn-action:hover {
@@ -382,4 +394,31 @@
     border-color: #f0f8ff;
     color: #3b90d3;
     text-decoration: none;
+}
+.message-status {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Новое */
+.status-new {
+    color: #2563eb;
+}
+
+/* Прочитано */
+.status-read {
+    color: #16a34a;
+}
+
+/* Архив */
+.status-archived {
+    color: #6b7280;
+}
+
+.btn-read {
+    background: #16a34a;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
 }

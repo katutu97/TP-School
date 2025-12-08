@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TP_School.Data;
-using TP_School.Models; // Здесь должен быть доступен Schedule, Homework, Grade и т.д.
+using TP_School.Models; 
 using TP_School.ViewModels;
 
 namespace TP_School.Controllers

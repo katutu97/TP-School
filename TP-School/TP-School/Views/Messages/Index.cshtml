@@ -7,10 +7,7 @@
 }
 
 <link rel="stylesheet" href="~/css/messages.css" asp-append-version="true" />
-@* --- ДОБАВЛЯЕМ ССЫЛКИ НА jQuery UI --- *@
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
-@* jQuery и jQuery UI скрипты добавим в конце файла в @section Scripts для лучшей производительности *@
-@* ------------------------------------ *@
 
 <div class="messages-page-content">
 
@@ -40,58 +37,114 @@
 
             <a href="@Url.Action("Index", new { filter = "sent" })"
                class="message-tab @(filter == "sent" ? "active" : "")">Отправленные</a>
+
+            <a href="@Url.Action("Index", new { filter = "archive" })" @* 👈 НОВАЯ ВКЛАДКА АРХИВ *@
+               class="message-tab @(filter == "archive" ? "active" : "")">Архив</a>
         </div>
 
         <div class="message-list-container">
 
             @if (!Model.Any())
             {
-                <p class="empty-list-message">Нет @(filter == "inbox" ? "входящих" : "отправленных") сообщений.</p>
+                <p class="empty-list-message">Нет @(filter == "inbox" ? "входящих" : filter == "sent" ? "отправленных" : "архивированных") сообщений.</p>
             }
             else
             {
                 <div class="message-list-header">
-                    <div class="message-header-fio">@(filter == "inbox" ? "Отправитель" : "Получатель")</div>
+                    <div class="message-header-fio">@(filter == "inbox" || filter == "archive" ? "Отправитель" : "Получатель")</div>
                     <div class="message-header-text">Сообщение</div>
+                    <div class="message-header-status">Статус</div>
                     <div class="message-header-actions">Действия</div>
                 </div>
 
                 @foreach (var message in Model)
                 {
                     // Определяем данные для ответа (получатель ответа - это отправитель текущего сообщения)
-                    var replyUserId = message.FromUser.UserId;
-                    var replyUserName = message.FromUser.FullName;
+                    var replyUserId = message.FromUser?.UserId ?? 0;
+                    var replyUserName = message.FromUser?.FullName ?? "Неизвестно";
 
-                    <div class="message-row">
+                    <div class="message-row @(message.Status == TP_School.Models.MessageStatus.New && filter == "inbox" ? "is-new" : "")">
+                        @* Класс для визуального выделения нового *@
 
                         <div class="message-user">
-                            @(filter == "inbox" ? message.FromUser.FullName : message.ToUser.FullName)
+                            @(filter == "inbox" || filter == "archive" ? message.FromUser?.FullName : message.ToUser?.FullName)
                         </div>
 
                         <div class="message-snippet" title="@message.MessageText">
                             @message.MessageText
                         </div>
+                        <div class="message-status">
+                            @if (message.Status == TP_School.Models.MessageStatus.New)
+                            {
+                                <span class="status-new">Новое</span>
+                            }
+                            else if (message.Status == TP_School.Models.MessageStatus.Read)
+                            {
+                                <span class="status-read">Прочитано</span>
+                            }
+                            else // MessageStatus.Archived
+                            {
+                                <span class="status-archived">Архив</span>
+                            }
+                        </div>
 
                         <div class="message-actions">
 
-                            @if (filter == "inbox") // Условное отображение: только для ВХОДЯЩИХ
+                            @if (filter == "inbox") // Только для ВХОДЯЩИХ
                             {
-                                // Кнопка "Ответить"
+                                // Кнопка "Ответить" всегда
                                 <button type="button" class="btn-action btn-reply"
                                         data-user-id="@replyUserId"
                                         data-user-name="@replyUserName">
                                     Ответить
                                 </button>
+
+                                @* 1. Кнопка "Прочитано" -> только если статус НОВЫЙ *@
+                                @if (message.Status == TP_School.Models.MessageStatus.New)
+                                {
+                                    <form asp-action="MarkAsRead" asp-route-id="@message.MessageId" method="post" class="inline-form-action">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-action btn-read">
+                                            Прочитано
+                                        </button>
+                                    </form>
+                                }
+
+                                @* 2. Кнопка "Архивировать" -> только если статус ПРОЧИТАНО *@
+                                else if (message.Status == TP_School.Models.MessageStatus.Read)
+                                {
+                                    <form asp-action="Archive" asp-route-id="@message.MessageId" method="post" class="inline-form-action">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-action btn-archive">
+                                            Архивировать
+                                        </button>
+                                    </form>
+                                }
                             }
 
-                            <form asp-action="Delete" asp-route-id="@message.MessageId" method="post" class="inline-form-delete">
-                                @* Добавляем токен анти-подделки *@
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-action btn-delete" title="Удалить сообщение"
-                                        onclick="return confirm('Вы уверены, что хотите удалить это сообщение?');">
-                                    Удалить
-                                </button>
-                            </form>
+                            @* Логика удаления (только для отправленных и только Новое) *@
+                            @if (filter == "sent" && message.Status == TP_School.Models.MessageStatus.New)
+                            {
+                                <form asp-action="Delete" asp-route-id="@message.MessageId" method="post" class="inline-form-action">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-action btn-delete" title="Удалить сообщение"
+                                            onclick="return confirm('Вы уверены, что хотите удалить это сообщение?');">
+                                        Удалить
+                                    </button>
+                                </form>
+                            }
+
+                            @* Логика восстановления из архива (только в архиве) *@
+                            @if (filter == "archive")
+                            {
+                                <form asp-action="Restore" asp-route-id="@message.MessageId" method="post" class="inline-form-action">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-action btn-restore" title="Восстановить из архива">
+                                        Восстановить
+                                    </button>
+                                </form>
+                            }
+
                         </div>
                     </div>
                 }
@@ -99,6 +152,8 @@
         </div>
     </div>
 </div>
+
+@* ... (Модальное окно newMessageModal - без изменений) ... *@
 
 <div id="newMessageModal" class="modal-overlay">
     <div class="modal-content-form">
@@ -110,7 +165,6 @@
         <form id="messageForm" method="post" asp-action="Create" asp-controller="Messages">
             @Html.AntiForgeryToken() @* Обязательный токен для защиты формы *@
 
-            @* 🔥 ИСПРАВЛЕНО: name="ToUserId" заменено на name="RecipientId" *@
             <input type="hidden" name="RecipientId" id="hiddenToUserId" required />
 
             <select id="recipientRole" class="form-select-field recipient-input" required>
@@ -127,7 +181,6 @@
                    disabled required>
             <div id="recipientValidationMessage" class="validation-message"></div>
 
-            @* 🔥 ИСПРАВЛЕНО: name="MessageText" заменено на name="Body" *@
             <textarea id="messageText" name="Body"
                       class="form-textarea-field"
                       placeholder="Текст сообщения"
@@ -174,7 +227,7 @@
 
             // Уничтожаем Autocomplete при открытии модального окна для "Новое сообщение"
             if ($(searchInput).data('ui-autocomplete')) {
-                 $(searchInput).autocomplete('destroy');
+                $(searchInput).autocomplete('destroy');
             }
 
             if (isReply) {
@@ -271,7 +324,7 @@
                 select: function(event, ui) {
                     // Обработка выбора элемента из списка
                     hiddenToUserId.value = ui.item.userId; // Сохраняем ID
-                    searchInput.value = ui.item.value;     // Устанавливаем полное ФИО
+                    searchInput.value = ui.item.value;      // Устанавливаем полное ФИО
                     validationMsg.textContent = 'Получатель найден: ' + ui.item.value;
                     validationMsg.className = 'validation-message text-green-500';
                     checkFormValidity();
@@ -279,11 +332,6 @@
                 }
             });
         }
-
-        // 🔥 УДАЛЕН АЯКС-ОБРАБОТЧИК:
-        // messageForm.onsubmit = async function(e) { e.preventDefault(); ... }
-        // Теперь форма отправляется стандартно и вызывает редирект на сервере.
-
 
         // --- Обработчики событий ---
 

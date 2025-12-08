@@ -9,6 +9,9 @@
         public byte[] FilePath { get; set; }
         public int StudentId { get; set; }
 
+        // 🆕 НОВОЕ: Статус (соответствует полю в БД)
+        public int Status { get; set; }
+
         public Schedule Lesson { get; set; }
         public User Student { get; set; }
         public ICollection<Grade> Grades { get; set; }

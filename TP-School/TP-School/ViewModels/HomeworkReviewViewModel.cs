@@ -23,6 +23,24 @@ namespace TP_School.ViewModels
         public int? GradeId { get; set; } // ID записи в Grade для обновления
         public int? CurrentGradeValue { get; set; }
         public string CurrentTeacherComment { get; set; }
+        public int StatusId { get; set; }
+        // 🆕 НОВОЕ: Вычисляемое свойство для отображения статуса и стилей
+        public string ReviewStatus
+        {
+            get
+            {
+                // Используем StatusId: 1 = Ожидает проверки, 2 = Проверено
+                return StatusId == 2 ? "Проверено" : "Ожидает проверки";
+            }
+        }
+
+        public string StatusCssClass
+        {
+            get
+            {
+                return StatusId == 2 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800";
+            }
+        }
     }
 
     // Основная модель представления

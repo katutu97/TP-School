@@ -7,7 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TP_School.Data;
-using TP_School.Models; // Предполагается, что здесь находятся Grade, Homework, SchoolClass, ClassSubjectTeacher
+using TP_School.Models; // Здесь должен быть доступен Schedule, Homework, Grade и т.д.
 using TP_School.ViewModels;
 
 namespace TP_School.Controllers
@@ -74,7 +74,7 @@ namespace TP_School.Controllers
             // 3. Загрузка данных
             var submissionsQuery = _context.Homeworks
                 .Include(h => h.Student)
-                .Include(h => h.Lesson)
+                .Include(h => h.Lesson) // Lesson имеет тип Schedule
                     .ThenInclude(l => l.Class)
                 .Include(h => h.Lesson)
                     .ThenInclude(l => l.Subject)
@@ -100,7 +100,7 @@ namespace TP_School.Controllers
             }
 
             var submissions = await submissionsQuery
-                // ИСПРАВЛЕНИЕ: Сортировка по SubmissionDate
+                // Сортировка по SubmissionDate
                 .OrderByDescending(x => x.Homework.Date)
                 .Select(x => new HomeworkReviewItem
                 {
@@ -112,15 +112,20 @@ namespace TP_School.Controllers
                     SubjectName = x.Homework.Lesson.Subject.SubjectName,
                     LessonDate = x.Homework.Lesson.Date,
                     LessonNumber = x.Homework.Lesson.LessonNumber,
-                    // ИСПРАВЛЕНИЕ: Использование SubmissionDate
+                    // Использование SubmissionDate
                     SubmissionDate = x.Homework.Date,
                     StudentAnswer = x.Homework.Text,
                     HasFile = x.Homework.FilePath != null && x.Homework.FilePath.Length > 0,
+                    StatusId = x.Homework.Status,
+
+                    // 🛠️ ИСПРАВЛЕНИЕ: Используем CurrentTeacherComment для временного хранения текста задания с урока.
+                    // Теперь мы точно знаем поле: HomeworkText из модели Schedule.
+                    CurrentTeacherComment = x.Homework.Lesson.HomeworkText,
 
                     // Данные из Grade
-                    GradeId = x.Grade.GradeId,
-                    CurrentGradeValue = x.Grade.GradeValue,
-                    CurrentTeacherComment = x.Grade.Comment
+                    GradeId = x.Grade != null ? x.Grade.GradeId : (int?)null,
+                    CurrentGradeValue = x.Grade != null ? x.Grade.GradeValue : (int?)null,
+                    // Мы не можем использовать x.Grade.Comment здесь, так как CurrentTeacherComment занят текстом задания.
                 })
                 .ToListAsync();
 
@@ -194,6 +199,12 @@ namespace TP_School.Controllers
             gradeEntry.GradeValue = request.gradeValue;
             gradeEntry.Comment = request.comment?.Trim();
             gradeEntry.Date = DateTime.Now;
+
+            // Если запись Grade была создана/обновлена, значит, задание проверено.
+            if (homework.Status != 2)
+            {
+                homework.Status = 2; // Устанавливаем статус "Проверено"
+            }
 
             try
             {

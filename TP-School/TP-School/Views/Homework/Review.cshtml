@@ -12,10 +12,10 @@
                 <span>Текущий класс: @Model.SelectedClassName</span>
             }
         </h2>
-        
+
         <div class="flex items-center space-x-2">
             <label for="classSelector" class="text-sm font-medium text-gray-700 whitespace-nowrap">Сортировка по классу:</label>
-            <select id="classSelector" 
+            <select id="classSelector"
                     class="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-[150px]"
                     onchange="filterByClass()">
                 @if (Model.AvailableClasses != null && Model.AvailableClasses.Any())
@@ -65,7 +65,9 @@ else
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ФИО Ученика</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Предмет | Урок</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Задание</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Дата сдачи</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Просмотр ДЗ</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">Комментарий учителя</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Оценка</th>
@@ -84,13 +86,33 @@ else
                             @item.SubjectName
                             <div class="text-xs text-gray-400">@item.LessonDate.ToString("dd.MM") | Урок @item.LessonNumber</div>
                         </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            @if (!string.IsNullOrEmpty(item.CurrentTeacherComment))
+                            {
+                                // Кнопка для просмотра полного текста. Показываем первые 50 символов
+                                <button onclick="viewAssignmentText('@item.SubjectName.Replace("'", "\\'").Replace("\"", "")', '@item.CurrentTeacherComment.Replace("'", "\\'").Replace("\n", "\\n")')"
+                                        class="text-gray-600 hover:text-gray-800 text-left">
+                                    <i class="fas fa-book-open mr-1"></i>
+                                    @((item.CurrentTeacherComment.Length > 50 ? item.CurrentTeacherComment.Substring(0, 50) + "..." : item.CurrentTeacherComment))
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-gray-400">Не задано</span>
+                            }
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             @item.SubmissionDate.ToString("dd.MM.yyyy HH:mm")
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span id="status-badge-@item.HomeworkId" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium @item.StatusCssClass">
+                                @item.ReviewStatus
+                            </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             @if (!string.IsNullOrEmpty(item.StudentAnswer))
                             {
-                                <button onclick="viewTextHomework(@item.HomeworkId, '@item.StudentFullName.Replace("'", "\\'").Replace("\"", "")', '@item.StudentAnswer.Replace("'", "\\'")')"
+                                <button onclick="viewTextHomework(@item.HomeworkId, '@item.StudentFullName.Replace("'", "\\'").Replace("\"", "")', '@item.StudentAnswer.Replace("'", "\\'").Replace("\n", "\\n")', '@(item.CurrentGradeValue.HasValue ? item.CurrentGradeValue.Value.ToString() : "Н/О")')"
                                         class="text-blue-600 hover:text-blue-900 mr-2">
                                     <i class="fas fa-file-alt"></i> Текст
                                 </button>
@@ -104,8 +126,9 @@ else
                             }
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
-                            <textarea id="comment-@item.HomeworkId" rows="2" 
-                                      class="form-textarea mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">@item.CurrentTeacherComment</textarea>
+                            <textarea id="comment-@item.HomeworkId" rows="2"
+                                      class="form-textarea mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"></textarea>
+                            <input type="hidden" id="originalcomment-@item.HomeworkId" value="@item.CurrentTeacherComment" />
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             <select id="grade-@item.HomeworkId" class="border border-gray-300 rounded-lg p-2 w-full">
@@ -143,8 +166,12 @@ else
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            
+
             <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700">Текущая оценка:</label>
+                    <p id="modalCurrentGrade" class="text-2xl font-bold text-blue-600 mt-1">Н/О</p>
+                </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Текст ответа:</label>
                     <div class="p-4 bg-gray-50 rounded border border-gray-200 min-h-[150px] whitespace-pre-wrap">
@@ -156,96 +183,137 @@ else
     </div>
 </div>
 
+<div id="assignmentModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-800" id="assignmentModalTitle">Задание с урока</h3>
+                <button type="button" onclick="closeAssignmentModal()"
+                        class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Текст задания:</label>
+                    <div class="p-4 bg-gray-50 rounded border border-gray-200 min-h-[150px] whitespace-pre-wrap">
+                        <p id="modalAssignmentText" class="text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
-<script>
-    // Получаем токен для безопасности
-    const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    <script>
+        // Получаем токен для безопасности
+        const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
-    // Функция для фильтрации по классу
-    function filterByClass() {
-        const selectedClassId = document.getElementById('classSelector').value;
-        if (selectedClassId) {
-            // Переходим на страницу Review нового контроллера Homework
-            window.location.href = '@Url.Action("Review", "Homework")' + '?classId=' + selectedClassId;
-        }
-    }
-
-    // Функция для открытия модального окна текстового ответа
-    function viewTextHomework(homeworkId, studentName, answerText) {
-        document.getElementById('textModalTitle').innerText = 'Ответ ученика: ' + studentName;
-        // Заменяем \\n на реальные переносы строк для корректного отображения
-        const formattedText = answerText.replace(/\\n/g, '\n'); 
-        document.getElementById('modalAnswerText').innerText = formattedText;
-        document.getElementById('textModal').classList.remove('hidden');
-    }
-
-    // Функция для закрытия модального окна
-    function closeTextModal() {
-        document.getElementById('textModal').classList.add('hidden');
-    }
-
-    // Функция для сохранения оценки и комментария
-    async function saveReview(homeworkId) {
-        if (!antiForgeryToken) {
-            alert('Ошибка безопасности: Токен не найден.');
-            return;
+        // Функция для фильтрации по классу
+        function filterByClass() {
+            const selectedClassId = document.getElementById('classSelector').value;
+            if (selectedClassId) {
+                window.location.href = '@Url.Action("Review", "Homework")' + '?classId=' + selectedClassId;
+            }
         }
 
-        const gradeElement = document.getElementById(`grade-${homeworkId}`);
-        const commentElement = document.getElementById(`comment-${homeworkId}`);
-        const gradeIdElement = document.getElementById(`gradeid-${homeworkId}`);
+        // Функция для открытия модального окна текстового ответа ученика
+        function viewTextHomework(homeworkId, studentName, answerText, currentGrade) {
+            document.getElementById('textModalTitle').innerText = 'Ответ ученика: ' + studentName;
+            document.getElementById('modalCurrentGrade').innerText = currentGrade;
 
-        // Преобразуем "Н/О" (пустую строку) в null
-        const gradeValue = gradeElement.value === "" ? null : parseInt(gradeElement.value);
-        const comment = commentElement.value;
-        const existingGradeId = gradeIdElement.value === "" ? null : parseInt(gradeIdElement.value);
+            // Заменяем \\n на реальные переносы строк для корректного отображения
+            const formattedText = answerText.replace(/\\n/g, '\n');
+            document.getElementById('modalAnswerText').innerText = formattedText;
+            document.getElementById('textModal').classList.remove('hidden');
+        }
 
-        try {
-            const response = await fetch('@Url.Action("SaveReview", "Homework")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Добавляем токен
-                    'RequestVerificationToken': antiForgeryToken
-                },
-                body: JSON.stringify({
-                    homeworkId: homeworkId,
-                    gradeValue: gradeValue,
-                    comment: comment,
-                    existingGradeId: existingGradeId
-                })
-            });
+        // Функция для закрытия модального окна текстового ответа ученика
+        function closeTextModal() {
+            document.getElementById('textModal').classList.add('hidden');
+        }
 
-            const result = await response.json();
+        // Функция для открытия модального окна текста задания
+        function viewAssignmentText(subjectName, assignmentText) {
+            document.getElementById('assignmentModalTitle').innerText = 'Задание по предмету: ' + subjectName;
+            const formattedText = assignmentText.replace(/\\n/g, '\n');
+            document.getElementById('modalAssignmentText').innerText = formattedText;
+            document.getElementById('assignmentModal').classList.remove('hidden');
+        }
 
-            const row = document.getElementById(`row-${homeworkId}`);
-            
-            if (result.success) {
-                // Если был создан новый Grade, обновляем скрытое поле GradeId
-                if (result.newGradeId) {
-                    gradeIdElement.value = result.newGradeId;
-                }
-                
-                // Визуальное подтверждение сохранения
-                row.style.transition = 'background-color 0.3s';
-                row.style.backgroundColor = '#d1fae5'; // Светло-зеленый
-                
-                setTimeout(() => {
-                    row.style.backgroundColor = ''; // Сброс
-                }, 1500);
-            } else {
-                row.style.transition = 'background-color 0.3s';
-                row.style.backgroundColor = '#fee2e2'; // Светло-красный
-                alert('Ошибка: ' + result.message);
-                setTimeout(() => {
-                    row.style.backgroundColor = ''; // Сброс
-                }, 1500);
+        // Функция для закрытия модального окна текста задания
+        function closeAssignmentModal() {
+            document.getElementById('assignmentModal').classList.add('hidden');
+        }
+
+        // Функция для сохранения оценки и комментария
+        async function saveReview(homeworkId) {
+            if (!antiForgeryToken) {
+                alert('Ошибка безопасности: Токен не найден.');
+                return;
             }
 
-        } catch (error) {
-            console.error('Ошибка сохранения:', error);
-            alert('Произошла ошибка сети или сервера.');
+            const gradeElement = document.getElementById(`grade-${homeworkId}`);
+            const commentElement = document.getElementById(`comment-${homeworkId}`);
+            const gradeIdElement = document.getElementById(`gradeid-${homeworkId}`);
+
+            // Преобразуем "Н/О" (пустую строку) в null
+            const gradeValue = gradeElement.value === "" ? null : parseInt(gradeElement.value);
+            const comment = commentElement.value; // Новый комментарий, введенный учителем
+            const existingGradeId = gradeIdElement.value === "" ? null : parseInt(gradeIdElement.value);
+
+            try {
+                const response = await fetch('@Url.Action("SaveReview", "Homework")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': antiForgeryToken
+                    },
+                    body: JSON.stringify({
+                        homeworkId: homeworkId,
+                        gradeValue: gradeValue,
+                        comment: comment,
+                        existingGradeId: existingGradeId
+                    })
+                });
+
+                const result = await response.json();
+
+                const row = document.getElementById(`row-${homeworkId}`);
+
+                if (result.success) {
+                    if (result.newGradeId) {
+                        gradeIdElement.value = result.newGradeId;
+                    }
+
+                    const statusBadge = document.getElementById(`status-badge-${homeworkId}`);
+                    if (statusBadge && statusBadge.innerText !== 'Проверено') {
+                        statusBadge.innerText = 'Проверено';
+                        statusBadge.classList.remove('bg-yellow-100', 'text-yellow-800');
+                        statusBadge.classList.add('bg-green-100', 'text-green-800');
+                    }
+
+                    // Визуальное подтверждение сохранения
+                    row.style.transition = 'background-color 0.3s';
+                    row.style.backgroundColor = '#d1fae5'; // Светло-зеленый
+
+                    setTimeout(() => {
+                        row.style.backgroundColor = ''; // Сброс
+                    }, 1500);
+                } else {
+                    row.style.transition = 'background-color 0.3s';
+                    row.style.backgroundColor = '#fee2e2'; // Светло-красный
+                    alert('Ошибка: ' + result.message);
+                    setTimeout(() => {
+                        row.style.backgroundColor = ''; // Сброс
+                    }, 1500);
+                }
+
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                alert('Произошла ошибка сети или сервера.');
+            }
         }
-    }
-</script>
+    </script>
 }

@@ -26,11 +26,11 @@ namespace TP_School.ViewModels
         public int SubjectId { get; set; }
         public int TeacherId { get; set; }
         public string LessonTime { get; set; }
-        // -----------------------------
+        
 
         public string SubjectName { get; set; }
         public string TeacherFullName { get; set; }
-        public string Classroom { get; set; } // Должно быть Classroom, а не Room
+        public string Classroom { get; set; } 
         public int LessonNumber { get; set; }
         public string LessonTopic { get; set; }
         public string HomeworkText { get; set; }

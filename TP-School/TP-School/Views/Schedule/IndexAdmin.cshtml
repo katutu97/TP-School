@@ -1,0 +1,143 @@
+﻿@model TP_School.ViewModels.AdminScheduleViewModel
+@using TP_School.Extensions   
+@using TP_School.ViewModels   
+@using System.Linq
+@using System.Collections.Generic
+
+@{
+    ViewData["Title"] = "Расписание (Администратор/Учитель)";
+    // Получение текущего пути для навигации
+    string currentPath = Context.Request.Path + Context.Request.QueryString;
+}
+
+<h2>📅 Расписание</h2>
+
+<div class="schedule-controls">
+    
+    <div class="week-navigation">
+        @{
+            var prevWeek = Model.StartOfWeek.AddDays(-7).ToString("yyyy-MM-dd");
+            var nextWeek = Model.StartOfWeek.AddDays(7).ToString("yyyy-MM-dd");
+            var currentWeekDisplay = $"{Model.StartOfWeek:dd.MM.yyyy} - {Model.StartOfWeek.AddDays(4):dd.MM.yyyy}"; // Только рабочие дни
+        }
+        <a href="@Url.Action("IndexAdmin", new { date = prevWeek, filterType = Model.FilterType, selectedId = (Model.SelectedTeacherId ?? Model.SelectedClassId) })" class="btn btn-secondary">
+            <i class="fas fa-chevron-left"></i> Неделя
+        </a>
+        <span>@currentWeekDisplay</span>
+        <a href="@Url.Action("IndexAdmin", new { date = nextWeek, filterType = Model.FilterType, selectedId = (Model.SelectedTeacherId ?? Model.SelectedClassId) })" class="btn btn-secondary">
+            Неделя <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+
+    <div class="schedule-filters">
+        <form id="filterForm" asp-action="IndexAdmin" method="get">
+            <input type="hidden" name="date" value="@Model.StartOfWeek.ToString("yyyy-MM-dd")" />
+
+            <label for="filterType">Просмотр:</label>
+            <select name="filterType" id="filterType" onchange="this.form.submit()">
+                <option value="Teacher" selected="@(Model.FilterType == "Teacher")">По преподавателю</option>
+                <option value="Class" selected="@(Model.FilterType == "Class")">По классу</option>
+            </select>
+            
+            @if (Model.FilterType == "Teacher")
+            {
+                <label for="selectedId">Учитель:</label>
+                <select name="selectedId" id="selectedId" onchange="this.form.submit()">
+                    @foreach (var teacher in Model.AvailableTeachers)
+                    {
+                        <option value="@teacher.UserId" selected="@(Model.SelectedTeacherId == teacher.UserId)">
+                            @teacher.FullName
+                        </option>
+                    }
+                </select>
+            }
+            else if (Model.FilterType == "Class")
+            {
+                <label for="selectedId">Класс:</label>
+                <select name="selectedId" id="selectedId" onchange="this.form.submit()">
+                    @foreach (var schoolClass in Model.AvailableClasses)
+                    {
+                        <option value="@schoolClass.ClassId" selected="@(Model.SelectedClassId == schoolClass.ClassId)">
+                            @schoolClass.ClassName
+                        </option>
+                    }
+                </select>
+            }
+        </form>
+    </div>
+</div>
+
+<hr />
+
+<div class="schedule-table-container">
+    <table class="schedule-table admin-schedule-table">
+        <thead>
+            <tr>
+                <th>Время / День</th>
+                @for (int i = 0; i < 5; i++) 
+                {
+                    DayOfWeek day = (DayOfWeek)((i + 1) % 7); // Пн=1, Вт=2... Пт=5
+                    DateTime currentDate = Model.StartOfWeek.AddDays(i);
+                    <th>@day.ToRussianDayName() (@currentDate:dd.MM)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @* Предполагаем 6 уроков в день *@
+            @for (int lessonNum = 1; lessonNum <= 6; lessonNum++)
+            {
+                <tr>
+                    <td>@Model.ScheduleByDay.Values.SelectMany(l => l).FirstOrDefault(l => l.LessonNumber == lessonNum)?.LessonTime ?? $"Урок {lessonNum}"</td>
+                    
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        DayOfWeek currentDay = (DayOfWeek)((i + 1) % 7);
+                        // Находим все уроки для этого дня
+                        var lessonsForDay = Model.ScheduleByDay.GetValueOrDefault(currentDay, new List<AdminScheduleItemViewModel>());
+                        // Находим конкретный урок для этого номера
+                        var lesson = lessonsForDay.FirstOrDefault(l => l.LessonNumber == lessonNum);
+
+                        <td class="lesson-cell @(lesson?.IsCustomLesson == true ? "custom-change" : "")">
+                            @if (lesson != null)
+                            {
+                                @* Отображение урока: *@
+                                <div class="lesson-info">
+                                    <span class="subject">@lesson.SubjectName</span> 
+                                    <span class="room">(@lesson.Classroom)</span>
+                                </div>
+                                <div class="details">
+                                    @if (Model.FilterType == "Teacher")
+                                    {
+                                        <span class="class-name">@lesson.ClassName</span>
+                                    }
+                                    else // FilterType == "Class"
+                                    {
+                                        <span class="teacher-name">@lesson.TeacherFullName</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="no-lesson">—</span>
+                            }
+
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <button type="button" class="btn-edit-lesson" 
+                                        data-day-of-week="@((int)currentDay)"
+                                        data-lesson-num="@lessonNum"
+                                        data-date="@Model.StartOfWeek.AddDays(i).ToString("yyyy-MM-dd")"
+                                        data-schedule-id="@lesson?.ScheduleId"
+                                        title="Редактировать расписание">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@await Html.PartialAsync("_EditLessonModal")

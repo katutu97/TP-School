@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using TP_School.Data;
 using TP_School.Models;
 using TP_School.ViewModels;
+using TP_School.Extensions;
 
 namespace TP_School.Controllers
 {
@@ -59,7 +60,11 @@ namespace TP_School.Controllers
                 }
                 else if (userRole == "Учитель" || userRole == "Директор")
                 {
-                    return await GetAdminSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate);
+                    // Получаем параметры фильтрации из строки запроса
+                    var filterType = HttpContext.Request.Query["filterType"].ToString();
+                    int? selectedId = HttpContext.Request.Query.ContainsKey("selectedId") && int.TryParse(HttpContext.Request.Query["selectedId"], out int idValue) ? idValue : (int?)null;
+
+                    return await GetAdminSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate, filterType, selectedId);
                 }
                 else
                 {
@@ -206,64 +211,280 @@ namespace TP_School.Controllers
             }
         }
 
-        private async Task<IActionResult> GetAdminSchedule(int userId, string role, DateTime startOfWeek, DateTime endOfWeek, DateTime date)
+        private async Task<IActionResult> GetAdminSchedule(int userId, string role, DateTime startOfWeek, DateTime endOfWeek, DateTime date, string filterType, int? selectedId)
         {
-            List<SchoolClass> availableClasses;
-
-            if (role == "Директор")
+            try
             {
-                availableClasses = await _context.SchoolClasses
+                // 1. Определение типа фильтрации и ID по умолчанию
+                if (string.IsNullOrEmpty(filterType))
+                {
+                    // По умолчанию отображаем расписание текущего учителя/директора
+                    filterType = role == "Учитель" ? "Teacher" : "Class";
+                }
+
+                if (selectedId == null)
+                {
+                    // Если ID не передан, устанавливаем значение по умолчанию
+                    if (filterType == "Teacher" && role == "Учитель")
+                    {
+                        selectedId = userId;
+                    }
+                    else if (filterType == "Class")
+                    {
+                        // Для класса берем первый доступный класс (для директора - любой, для учителя - свой)
+                        if (role == "Директор")
+                        {
+                            selectedId = await _context.SchoolClasses.Select(c => (int?)c.ClassId).FirstOrDefaultAsync();
+                        }
+                        else // Учитель
+                        {
+                            selectedId = await _context.ClassSubjectTeachers
+                                .Where(cst => cst.TeacherId == userId)
+                                .Select(cst => (int?)cst.ClassId)
+                                .FirstOrDefaultAsync();
+                        }
+                    }
+                }
+
+                // 2. Загрузка справочников для фильтров
+                var availableTeachers = await _context.Users
+                    .Where(u => u.Role.RoleName == "Учитель" || u.Role.RoleName == "Директор") 
+                    .OrderBy(u => u.FullName)
+                    .ToListAsync();
+
+                var availableClasses = await _context.SchoolClasses
                     .OrderBy(c => c.ClassNumber)
                     .ThenBy(c => c.ClassLetter)
                     .ToListAsync();
+
+                // 3. Загрузка и объединение данных (Schedule + ScheduleTemplate)
+                // Вызов нового вспомогательного метода LoadScheduleItemsAsync
+                var scheduleItems = await LoadScheduleItemsAsync(startOfWeek, endOfWeek, filterType, selectedId, LessonTimeMap);
+
+                // 4. Построение ViewModel
+                var viewModel = new AdminScheduleViewModel
+                {
+                    StartOfWeek = startOfWeek,
+                    FilterType = filterType,
+                    SelectedTeacherId = filterType == "Teacher" ? selectedId : null,
+                    SelectedClassId = filterType == "Class" ? selectedId : null,
+                    AvailableTeachers = availableTeachers.Where(u => u.Role.RoleName == "Учитель").ToList(), // Показываем только учителей
+                    AvailableClasses = availableClasses,
+                    ScheduleByDay = scheduleItems
+                        .GroupBy(i => i.DayOfWeek)
+                        .ToDictionary(g => g.Key, g => g.OrderBy(i => i.LessonNumber).ToList())
+                };
+
+                // Добавляем пустые дни недели в словарь
+                var days = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
+                foreach (var day in days)
+                {
+                    if (!viewModel.ScheduleByDay.ContainsKey(day))
+                    {
+                        viewModel.ScheduleByDay.Add(day, new List<AdminScheduleItemViewModel>());
+                    }
+                }
+
+                return View("ScheduleAdmin", viewModel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка в GetAdminSchedule: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                ViewBag.ErrorMessage = $"Произошла ошибка при загрузке расписания: {ex.Message}";
+
+                // Возврат пустой модели для административного представления
+                return View("ScheduleAdmin", new AdminScheduleViewModel
+                {
+                    StartOfWeek = startOfWeek,
+                    ScheduleByDay = new Dictionary<DayOfWeek, List<AdminScheduleItemViewModel>>(),
+                    AvailableTeachers = new List<User>(),
+                    AvailableClasses = new List<SchoolClass>()
+                });
+            }
+        }
+        // -----------------------------------------------------------------------
+        // --- Вспомогательный метод загрузки и объединения данных (Schedule + Template) ---
+        // -----------------------------------------------------------------------
+        private async Task<List<AdminScheduleItemViewModel>> LoadScheduleItemsAsync(
+            DateTime startOfWeek,
+            DateTime endOfWeek,
+            string filterType,
+            int? selectedId,
+            Dictionary<int, string> lessonTimes)
+        {
+            if (!selectedId.HasValue)
+            {
+                return new List<AdminScheduleItemViewModel>();
+            }
+
+            // 1. Загрузка индивидуальных записей (Schedule) за неделю
+            var customLessonsQuery = _context.Schedules
+                .Include(s => s.Class)
+                .Include(s => s.Subject)
+                .Include(s => s.Teacher)
+                .Where(s => s.Date >= startOfWeek && s.Date <= endOfWeek);
+
+            // Применяем фильтр к индивидуальным записям
+            if (filterType == "Teacher")
+            {
+                customLessonsQuery = customLessonsQuery.Where(s => s.TeacherId == selectedId.Value);
+            }
+            else if (filterType == "Class")
+            {
+                customLessonsQuery = customLessonsQuery.Where(s => s.ClassId == selectedId.Value);
+            }
+
+            var customLessons = await customLessonsQuery.ToListAsync();
+
+            // 2. Преобразование кастомных уроков в ViewModel
+            var items = customLessons.Select(s => new AdminScheduleItemViewModel
+            {
+                ScheduleId = s.LessonId,
+                DayOfWeek = s.Date.DayOfWeek,
+                LessonNumber = s.LessonNumber,
+                LessonTime = lessonTimes.GetValueOrDefault(s.LessonNumber, "N/A"),
+                ClassId = s.ClassId,
+                ClassName = s.Class?.ClassName ?? "—",
+                SubjectId = s.SubjectId,
+                SubjectName = s.Subject?.SubjectName ?? "—",
+                TeacherId = s.TeacherId,
+                TeacherFullName = s.Teacher?.FullName ?? "—",
+                Classroom = s.Room,
+                IsCustomLesson = true // Флаг, что это индивидуальная запись
+            }).ToList();
+
+            // 3. Добавление уроков из Шаблона (ScheduleTemplate)
+            // Список уже занятых слотов (День недели + Номер урока + Класс/Учитель)
+            // Поскольку Schedule может быть изменением, затрагивающим класс ИЛИ учителя, 
+            // нам нужно проверить, перекрывает ли индивидуальный урок шаблон.
+            var overriddenSlots = customLessons
+                .Select(s => new { Day = s.Date.DayOfWeek, s.LessonNumber, s.ClassId, s.TeacherId })
+                .ToHashSet();
+
+            for (int i = 0; i < 5; i++) // С Понедельника (0) по Пятницу (4)
+            {
+                DayOfWeek currentDay = (DayOfWeek)(((int)DayOfWeek.Monday + i) % 7);
+                byte currentDayByte = (byte)currentDay;
+
+                // Загрузка шаблонов, соответствующих фильтру
+                var templateQuery = _context.ScheduleTemplates
+                    .Include(t => t.Class)
+                    .Include(t => t.Subject)
+                    .Include(t => t.Teacher)
+                    .Where(t => t.DayOfWeek == currentDayByte);
+
+                if (filterType == "Teacher")
+                {
+                    templateQuery = templateQuery.Where(t => t.TeacherId == selectedId.Value);
+                }
+                else if (filterType == "Class")
+                {
+                    templateQuery = templateQuery.Where(t => t.ClassId == selectedId.Value);
+                }
+
+                var templates = await templateQuery.ToListAsync();
+
+                foreach (var template in templates)
+                {
+                    // Проверяем, перекрывает ли этот шаблон индивидуальная запись
+                    bool isOverridden = overriddenSlots.Any(slot =>
+                        slot.Day == currentDay &&
+                        slot.LessonNumber == template.LessonNumber &&
+                        (filterType == "Teacher" ? slot.TeacherId == selectedId.Value : slot.ClassId == selectedId.Value)
+                    );
+
+                    if (!isOverridden)
+                    {
+                        // Если кастомной записи нет, добавляем шаблон
+                        items.Add(new AdminScheduleItemViewModel
+                        {
+                            ScheduleId = null, // Шаблон
+                            DayOfWeek = currentDay,
+                            LessonNumber = template.LessonNumber,
+                            LessonTime = lessonTimes.GetValueOrDefault(template.LessonNumber, "N/A"),
+                            ClassId = template.ClassId,
+                            ClassName = template.Class?.ClassName ?? "—",
+                            SubjectId = template.SubjectId,
+                            SubjectName = template.Subject?.SubjectName ?? "—",
+                            TeacherId = template.TeacherId,
+                            TeacherFullName = template.Teacher?.FullName ?? "—",
+                            Classroom = template.Room,
+                            IsCustomLesson = false
+                        });
+                    }
+                }
+            }
+
+            return items;
+        }
+        // -----------------------------------------------------------------------
+        // --- МЕТОД ГЕНЕРАЦИИ РАСПИСАНИЯ ДЛЯ АДМИНИСТРАТОРА (ДИРЕКТОРА) ---
+        // -----------------------------------------------------------------------
+        [HttpPost]
+        [Authorize(Roles = "Директор")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GenerateScheduleFromTemplate(DateTime startDate, DateTime endDate)
+        {
+            if (startDate > endDate || startDate < DateTime.Today.Date)
+            {
+                TempData["ErrorMessage"] = "Неверный диапазон дат или дата начала в прошлом.";
+                return RedirectToAction(nameof(Index), new { date = startDate.ToString("yyyy-MM-dd") });
+            }
+
+            var templates = await _context.ScheduleTemplates.ToListAsync();
+            var newLessons = new List<Schedule>();
+            int lessonsAdded = 0;
+
+            for (DateTime date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+            {
+                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                    continue;
+
+                byte currentDayOfWeek = (byte)date.DayOfWeek;
+
+                // Получаем существующие уроки (индивидуальные изменения) для этой даты
+                var existingLessonsForDay = await _context.Schedules
+                    .Where(s => s.Date.Date == date.Date)
+                    .Select(s => new { s.LessonNumber, s.ClassId })
+                    .ToListAsync();
+
+                var relevantTemplates = templates.Where(t => t.DayOfWeek == currentDayOfWeek);
+
+                foreach (var template in relevantTemplates)
+                {
+                    // Если урока для этого класса и этого номера УЖЕ НЕТ в базе (т.е. нет индивидуального изменения)
+                    if (!existingLessonsForDay.Any(l => l.LessonNumber == template.LessonNumber && l.ClassId == template.ClassId))
+                    {
+                        newLessons.Add(new Schedule
+                        {
+                            Date = date,
+                            LessonNumber = template.LessonNumber,
+                            ClassId = template.ClassId,
+                            SubjectId = template.SubjectId,
+                            TeacherId = template.TeacherId,
+                            Room = template.Room,
+                            LessonTopic = null,
+                            HomeworkText = null
+                        });
+                        lessonsAdded++;
+                    }
+                }
+            }
+
+            if (newLessons.Any())
+            {
+                _context.Schedules.AddRange(newLessons);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Успешно добавлено {lessonsAdded} записей расписания за период с {startDate.ToShortDateString()} по {endDate.ToShortDateString()}.";
             }
             else
             {
-                availableClasses = await _context.ClassSubjectTeachers
-                    .Where(cst => cst.TeacherId == userId)
-                    .Include(cst => cst.Class)
-                    .Select(cst => cst.Class)
-                    .Distinct()
-                    .OrderBy(c => c.ClassNumber)
-                    .ThenBy(c => c.ClassLetter)
-                    .ToListAsync();
+                TempData["InfoMessage"] = "В указанном диапазоне не найдено новых записей для генерации (все слоты либо уже заняты, либо нет шаблонов).";
             }
 
-            if (!availableClasses.Any())
-            {
-                ViewBag.ErrorMessage = "Нет доступных классов.";
-                return View("ScheduleAdmin", CreateEmptyScheduleModel(date, startOfWeek, false, true));
-            }
-
-            int classId = availableClasses.First().ClassId;
-            ViewBag.SelectedClassId = classId;
-
-            ViewBag.AvailableClasses = availableClasses;
-            ViewBag.IsDirector = (role == "Директор");
-
-            var selectedClass = await _context.SchoolClasses
-                .Include(c => c.ClassTeacher)
-                .FirstOrDefaultAsync(c => c.ClassId == classId);
-
-            if (selectedClass != null)
-            {
-                ViewBag.ClassTeacherFullName = selectedClass.ClassTeacher?.FullName;
-                ViewBag.ClassName = selectedClass.ClassName;
-            }
-
-            var scheduleEntries = await _context.Schedules
-                .Include(s => s.Subject)
-                .Include(s => s.Teacher)
-                .Where(s => s.ClassId == classId && s.Date >= startOfWeek && s.Date <= endOfWeek)
-                .OrderBy(s => s.Date)
-                .ThenBy(s => s.LessonNumber)
-                .ToListAsync();
-
-            ViewBag.LessonTimes = LessonTimeMap;
-            var model = CreateScheduleModel(scheduleEntries, date, startOfWeek, false, true, null);
-            model.SelectedClassId = classId;
-
-            return View("ScheduleAdmin", model);
+            return RedirectToAction(nameof(Index), new { date = startDate.ToString("yyyy-MM-dd") });
         }
 
         [HttpPost]

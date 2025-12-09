@@ -11,15 +11,15 @@
     <!-- Сообщения об успехе/ошибке -->
     @if (TempData["SuccessMessage"] != null)
     {
-            <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
-            </div>
+        <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg">
+            <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+        </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-            <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
-            </div>
+        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["ErrorMessage"]
+        </div>
     }
 
     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -68,28 +68,28 @@
 
                         @foreach (var lesson in Model.LessonsForWeek)
                         {
-                                <th scope="col" class="px-2 py-3 border-r border-blue-400 text-center min-w-[80px] cursor-pointer hover:bg-blue-500 transition lesson-header"
-                                    onclick="openLessonModal(@lesson.LessonId, @Model.SelectedClassId, @Model.SelectedSubjectId, '@Model.WeekStart.ToString("yyyy-MM-dd")')"
-                                    title="Нажмите для редактирования урока">
-                                    <div class="font-bold text-white">@lesson.Date.ToString("dd.MM")</div>
-                                    <div class="text-xs text-blue-100 mt-1 truncate topic-preview" 
-                                         title="@lesson.LessonTopic">
+                            <th scope="col" class="px-2 py-3 border-r border-blue-400 text-center min-w-[80px] cursor-pointer hover:bg-blue-500 transition lesson-header"
+                                onclick="openLessonModal(@lesson.LessonId, @Model.SelectedClassId, @Model.SelectedSubjectId, '@Model.WeekStart.ToString("yyyy-MM-dd")')"
+                                title="Нажмите для редактирования урока">
+                                <div class="font-bold text-white">@lesson.Date.ToString("dd.MM")</div>
+                                <div class="text-xs text-blue-100 mt-1 truncate topic-preview"
+                                     title="@lesson.LessonTopic">
                                     @if (!string.IsNullOrEmpty(lesson.LessonTopic))
                                     {
-                                                <i class="fas fa-check-circle text-green-300 mr-1"></i>
+                                        <i class="fas fa-check-circle text-green-300 mr-1"></i>
                                         @lesson.LessonTopic
                                     }
                                     else
                                     {
-                                                <span class="text-yellow-200 italic">тема не указана</span>
+                                        <span class="text-yellow-200 italic">тема не указана</span>
                                     }
-                                    </div>
-                                </th>
+                                </div>
+                            </th>
                         }
 
                         @for (int i = 0; i < (7 - Model.LessonsForWeek.Count); i++)
                         {
-                                <th class="px-2 py-3 border-r border-blue-400 bg-blue-300 opacity-50"></th>
+                            <th class="px-2 py-3 border-r border-blue-400 bg-blue-300 opacity-50"></th>
                         }
                     </tr>
                 </thead>
@@ -102,20 +102,20 @@
                     {
                         var rowClass = rowNumber % 2 == 0 ? "bg-[#EBF3F8]" : "bg-[#DEE9F1]";
 
-                            <tr class="@rowClass hover:bg-blue-50 transition duration-150">
-                                <td class="px-4 py-3 text-center font-bold text-gray-600 border-r border-gray-300">
+                        <tr class="@rowClass hover:bg-blue-50 transition duration-150">
+                            <td class="px-4 py-3 text-center font-bold text-gray-600 border-r border-gray-300">
                                 @rowNumber
-                                </td>
-                                <td class="px-4 py-3 font-bold text-gray-700 border-r border-gray-300">
+                            </td>
+                            <td class="px-4 py-3 font-bold text-gray-700 border-r border-gray-300">
                                 @row.Student.FullName
-                                </td>
+                            </td>
 
                             @foreach (var lesson in Model.LessonsForWeek)
                             {
                                 var cell = row.Cells.ContainsKey(lesson.LessonId) ? row.Cells[lesson.LessonId] : null;
 
-                                        <td class="px-2 py-3 text-center border-r border-gray-300 relative group h-12 cursor-pointer hover:bg-white/50"
-                                            onclick='openEditModal(@row.Student.UserId,
+                                <td class="px-2 py-3 text-center border-r border-gray-300 relative group h-12 cursor-pointer hover:bg-white/50"
+                                    onclick='openEditModal(@row.Student.UserId,
                                                              @lesson.LessonId,
                                                              @Json.Serialize(row.Student.FullName),
                                                              @Json.Serialize(lesson.Date.ToString("dd.MM.yyyy")),
@@ -126,25 +126,25 @@
                                     {
                                         if (cell.IsAttendance)
                                         {
-                                                            <span class="text-gray-500 font-medium">@cell.Value</span>
+                                            <span class="text-gray-500 font-medium">@cell.Value</span>
                                         }
                                         else
                                         {
-                                                            <span class="text-gray-800 font-bold text-lg">@cell.Value</span>
+                                            <span class="text-gray-800 font-bold text-lg">@cell.Value</span>
                                             if (cell.HasComment)
                                             {
-                                                                    <i class="fas fa-comment-dots text-gray-400 text-xs absolute top-1 right-1" title="@cell.Comment"></i>
+                                                <i class="fas fa-comment-dots text-gray-400 text-xs absolute top-1 right-1" title="@cell.Comment"></i>
                                             }
                                         }
                                     }
-                                        </td>
+                                </td>
                             }
 
                             @for (int i = 0; i < (7 - Model.LessonsForWeek.Count); i++)
                             {
-                                        <td class="border-r border-gray-300"></td>
+                                <td class="border-r border-gray-300"></td>
                             }
-                            </tr>
+                        </tr>
                         rowNumber++;
                     }
                 </tbody>
@@ -152,9 +152,9 @@
         </div>
         @if (!Model.Rows.Any())
         {
-                <div class="p-8 text-center text-gray-500">
-                    В этом классе нет учеников или расписание не заполнено на эту неделю.
-                </div>
+            <div class="p-8 text-center text-gray-500">
+                В этом классе нет учеников или расписание не заполнено на эту неделю.
+            </div>
         }
     </div>
 </div>
@@ -217,7 +217,7 @@
 </div>
 
 <!-- Модальное окно для редактирования урока -->
-<div id="lessonModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-black/50" 
+<div id="lessonModal" class="hidden fixed inset-0 z-[60] overflow-y-auto bg-black/50"
      aria-labelledby="lesson-modal-title" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen p-4 text-center">
         <div id="lessonModalContent" class="relative w-full max-w-2xl">

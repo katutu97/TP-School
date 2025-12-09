@@ -34,6 +34,11 @@ namespace TP_School.Controllers
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             bool isDirector = userRole == "Директор";
 
+            // Сохраняем параметры в TempData для перенаправлений
+            if (classId.HasValue) TempData["CurrentClassId"] = classId.Value;
+            if (subjectId.HasValue) TempData["CurrentSubjectId"] = subjectId.Value;
+            if (weekStart.HasValue) TempData["CurrentWeekStart"] = weekStart.Value.ToString("yyyy-MM-dd");
+
             // 1. Определение текущей недели
             var today = DateTime.Today;
             int diff = today.DayOfWeek - DayOfWeek.Monday;
@@ -180,12 +185,11 @@ namespace TP_School.Controllers
                     }
                     else if (grade != null)
                     {
-                        // ⭐ ИСПРАВЛЕНИЕ ЧТЕНИЯ: Безопасная проверка на NULL для GradeValue
                         if (grade.GradeValue.HasValue)
                         {
                             cellData = new CellData
                             {
-                                Value = grade.GradeValue.Value.ToString(), // Используем .Value
+                                Value = grade.GradeValue.Value.ToString(),
                                 IsAttendance = false,
                                 HasComment = !string.IsNullOrEmpty(grade.Comment),
                                 Comment = grade.Comment ?? string.Empty
@@ -200,6 +204,11 @@ namespace TP_School.Controllers
                 }
                 model.Rows.Add(row);
             }
+
+            // Передаем параметры в ViewBag для формы
+            ViewBag.CurrentClassId = selectedClassId;
+            ViewBag.CurrentSubjectId = selectedSubjectId;
+            ViewBag.CurrentWeekStart = weekStart.Value.ToString("yyyy-MM-dd");
 
             return View(model);
         }
@@ -219,7 +228,6 @@ namespace TP_School.Controllers
             gradeValue = gradeValue?.Trim();
             attendanceStatus = attendanceStatus?.Trim();
 
-            // Если комментарий пуст или состоит из пробелов, отправляем NULL.
             string? finalComment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
 
             int gradeInt = 0;
@@ -245,7 +253,6 @@ namespace TP_School.Controllers
                     {
                         StudentId = studentId,
                         LessonId = lessonId,
-                        // GradeValue: поскольку оценка есть, мы используем gradeInt
                         GradeValue = gradeInt,
                         Comment = finalComment
                     });
@@ -260,7 +267,6 @@ namespace TP_School.Controllers
             // 2. Сценарий: Выставлена посещаемость (Оценки нет)
             else if (hasAttendance)
             {
-                // Если есть посещаемость, мы удаляем оценку
                 if (existingGrade != null)
                 {
                     _context.Grades.Remove(existingGrade);
@@ -284,7 +290,6 @@ namespace TP_School.Controllers
             // 3. Сценарий: Очистка 
             else
             {
-                // Если нет ни оценки, ни посещаемости, мы удаляем обе записи
                 if (existingGrade != null)
                 {
                     _context.Grades.Remove(existingGrade);
@@ -297,8 +302,90 @@ namespace TP_School.Controllers
 
             await _context.SaveChangesAsync();
 
-            var returnUrl = Request.Headers["Referer"].ToString() ?? Url.Action("Index", "Journal");
-            return Redirect(returnUrl);
+            // Получаем параметры из TempData или Query
+            var returnClassId = TempData["CurrentClassId"] as int? ??
+                    (Request.Query["classId"].FirstOrDefault() != null ?
+                     int.Parse(Request.Query["classId"].FirstOrDefault()) : (int?)null);
+
+            var returnSubjectId = TempData["CurrentSubjectId"] as int? ??
+                                  (Request.Query["subjectId"].FirstOrDefault() != null ?
+                                   int.Parse(Request.Query["subjectId"].FirstOrDefault()) : (int?)null);
+            var returnWeekStart = TempData["CurrentWeekStart"] as string ?? Request.Query["weekStart"].FirstOrDefault();
+
+            return RedirectToAction("Index", new
+            {
+                classId = returnClassId,
+                subjectId = returnSubjectId,
+                weekStart = returnWeekStart
+            });
+        }
+
+        // =========================================================================
+        // МЕТОД: Отображение формы урока (модальное окно)
+        // =========================================================================
+        [HttpGet]
+        public async Task<IActionResult> LessonForm(int lessonId)
+        {
+            var lesson = await _context.Schedules
+                .Include(s => s.Class)
+                .Include(s => s.Subject)
+                .FirstOrDefaultAsync(s => s.LessonId == lessonId);
+
+            if (lesson == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.ClassName = lesson.Class?.ClassName ?? "Класс";
+            ViewBag.SubjectName = lesson.Subject?.SubjectName ?? "Предмет";
+            ViewBag.LessonDate = lesson.Date.ToString("dd.MM.yyyy");
+            ViewBag.LessonId = lessonId;
+
+            // Получаем текущие параметры фильтров из Query
+            ViewBag.CurrentClassId = Request.Query["classId"].FirstOrDefault();
+            ViewBag.CurrentSubjectId = Request.Query["subjectId"].FirstOrDefault();
+            ViewBag.CurrentWeekStart = Request.Query["weekStart"].FirstOrDefault();
+
+            return PartialView("_LessonFormPartial", lesson);
+        }
+
+        // =========================================================================
+        // МЕТОД: Сохранение формы урока (ОБЫЧНАЯ ФОРМА, не AJAX)
+        // =========================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveLesson(
+            [FromForm] int lessonId,
+            [FromForm] string lessonTopic,
+            [FromForm] string homeworkText,
+            [FromQuery] int? classId,
+            [FromQuery] int? subjectId,
+            [FromQuery] string weekStart)
+        {
+            try
+            {
+                var lesson = await _context.Schedules.FindAsync(lessonId);
+                if (lesson == null)
+                {
+                    TempData["ErrorMessage"] = "Урок не найден";
+                    return RedirectToAction("Index", new { classId, subjectId, weekStart });
+                }
+
+                // Обновляем данные
+                lesson.LessonTopic = lessonTopic?.Trim();
+                lesson.HomeworkText = homeworkText?.Trim();
+
+                _context.Schedules.Update(lesson);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Данные урока успешно сохранены!";
+                return RedirectToAction("Index", new { classId, subjectId, weekStart });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Ошибка при сохранении: {ex.Message}";
+                return RedirectToAction("Index", new { classId, subjectId, weekStart });
+            }
         }
     }
 }

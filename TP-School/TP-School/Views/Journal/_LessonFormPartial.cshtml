@@ -1,0 +1,95 @@
+﻿@model TP_School.Models.Schedule
+
+@{
+    // Получаем параметры для возврата
+    var returnUrl = Url.Action("Index", "Journal", new {
+        classId = ViewBag.CurrentClassId,
+        subjectId = ViewBag.CurrentSubjectId,
+        weekStart = ViewBag.CurrentWeekStart
+    });
+}
+
+<div class="bg-white rounded-lg shadow-xl max-w-2xl mx-auto">
+    <!-- Заголовок -->
+    <div class="bg-blue-600 px-6 py-4 rounded-t-lg">
+        <div class="flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-white">
+                <i class="fas fa-calendar-alt mr-2"></i>Урок
+            </h3>
+            <button type="button" onclick="closeLessonModal()" 
+                    class="text-white hover:text-gray-200 text-2xl">
+                &times;
+            </button>
+        </div>
+        <div class="mt-2 text-blue-100">
+            <div class="flex flex-wrap gap-4">
+                <span><i class="fas fa-users mr-1"></i> @ViewBag.ClassName</span>
+                <span><i class="fas fa-book mr-1"></i> @ViewBag.SubjectName</span>
+                <span><i class="fas fa-calendar-day mr-1"></i> @ViewBag.LessonDate</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ФОРМА ДЛЯ СОХРАНЕНИЯ УРОКА -->
+    <form method="post" 
+          action="@Url.Action("SaveLesson", "Journal", new {
+              classId = ViewBag.CurrentClassId,
+              subjectId = ViewBag.CurrentSubjectId,
+              weekStart = ViewBag.CurrentWeekStart
+          })" 
+          class="p-6 space-y-6"
+          onsubmit="return submitLessonForm(this)">
+        
+        @Html.AntiForgeryToken()
+        
+        <input type="hidden" name="lessonId" value="@Model.LessonId" />
+
+        <!-- Тема урока -->
+        <div>
+            <label for="lessonTopic" class="block text-sm font-medium text-gray-700 mb-1">
+                <i class="fas fa-chalkboard-teacher mr-1"></i>Тема урока
+            </label>
+            <textarea id="lessonTopic" name="lessonTopic" rows="3" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                     placeholder="Введите тему урока...">@Model.LessonTopic</textarea>
+        </div>
+
+        <!-- Домашнее задание -->
+        <div>
+            <label for="homeworkText" class="block text-sm font-medium text-gray-700 mb-1">
+                <i class="fas fa-book-open mr-1"></i>Домашнее задание
+            </label>
+            <textarea id="homeworkText" name="homeworkText" rows="3" 
+                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                     placeholder="Введите домашнее задание...">@Model.HomeworkText</textarea>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="flex justify-end space-x-4 pt-4 border-t">
+            <button type="button" onclick="closeLessonModal()" 
+                    class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                Отмена
+            </button>
+            <button type="submit" 
+                    class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition flex items-center">
+                <i class="fas fa-save mr-2"></i>Сохранить
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Функция для отправки формы
+    function submitLessonForm(form) {
+        console.log('Отправка формы урока...');
+        
+        // Показываем сообщение
+        alert('Сохранение данных урока... После сохранения страница будет обновлена.');
+        
+        // Закрываем модальное окно
+        closeLessonModal();
+        
+        // Форма отправится обычным способом
+        return true;
+    }
+</script>

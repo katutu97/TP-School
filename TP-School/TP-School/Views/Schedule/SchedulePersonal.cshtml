@@ -222,18 +222,18 @@
                                                     @if (!isParent)
                                                     {
                                                         <text>
-                                                                                     onclick="openHomeworkModal(
+                                                                                                             onclick="openHomeworkModal(
                                                             @lesson.ScheduleId,
-                                                                                         '@lesson.SubjectName.Replace("'", "\\'")',
-                                                                                         '@lesson.Date.ToString("dd.MM.yyyy")',
+                                                                                                                 '@lesson.SubjectName.Replace("'", "\\'")',
+                                                                                                                 '@lesson.Date.ToString("dd.MM.yyyy")',
                                                             @lesson.LessonNumber,
-                                                                                         '@lesson.TeacherFullName.Replace("'", "\\'")',
-                                                                                         '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
-                                                                                         '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')"
+                                                                                                                 '@lesson.TeacherFullName.Replace("'", "\\'")',
+                                                                                                                 '@(lesson.LessonTopic?.Replace("'", "\\'") ?? "")',
+                                                                                                                 '@(lesson.HomeworkText?.Replace("'", "\\'") ?? "")')"
                                                         </text>
                                                     }>
                                                         @lesson.HomeworkText
-                                                                        </div>
+                                                                                            </div>
                                                 </div>
                                             }
                                         </div>
@@ -325,19 +325,21 @@
 
                             <div class="mb-4">
                                 <label for="studentAnswer" class="block text-sm font-medium text-gray-700 mb-1">Ваш ответ (текст)</label>
-                                <textarea id="studentAnswer" name="studentAnswer" rows="4" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500" placeholder="Введите ваш ответ или комментарий..."></textarea>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="homeworkFiles" class="block text-sm font-medium text-gray-700 mb-1">Прикрепить файл (макс. 10MB)</label>
-                                <input type="file" id="homeworkFiles" name="homeworkFiles" class="w-full text-gray-700 border border-gray-300 rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500" accept=".pdf, .doc, .docx, .jpg, .png" />
+                                <textarea id="studentAnswer" name="studentAnswer" rows="4"
+                                          class="w-full border border-gray-300 rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder="Введите ваш ответ или комментарий..."
+                                          required></textarea>
                             </div>
 
                             <div id="submissionMessage" class="mb-4 hidden p-3 rounded-lg text-sm font-medium"></div>
 
                             <div class="flex justify-end space-x-3">
-                                <button type="button" onclick="closeHomeworkModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Отмена</button>
-                                <button type="submit" id="submitHomeworkButton" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+                                <button type="button" onclick="closeHomeworkModal()"
+                                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                    Отмена
+                                </button>
+                                <button type="submit" id="submitHomeworkButton"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
                                     <i class="fas fa-paper-plane mr-2"></i>Отправить задание
                                 </button>
                             </div>
@@ -373,7 +375,6 @@
 
 @section Scripts {
     <script>
-        // Предоставляем JavaScript необходимые URL-адреса и данные
         const scheduleServerData = {
             submitHomeworkUrl: '@Url.Action("SubmitHomework", "Schedule")',
             scheduleIndexUrl: '@Url.Action("Index", "Schedule")',
@@ -381,9 +382,7 @@
             isParent: @isParent.ToString().ToLower()
                 };
 
-        // Функция открытия модального окна с домашним заданием
         function openHomeworkModal(lessonId, subject, date, lessonNumber, teacher, topic, homework) {
-            // Заполняем поля модального окна
             document.getElementById('modalSubject').textContent = subject;
             document.getElementById('modalDate').textContent = date;
             document.getElementById('modalLessonNumber').textContent = `Урок ${lessonNumber}`;
@@ -392,9 +391,7 @@
             document.getElementById('modalHomeworkText').textContent = homework || 'Не задано';
             document.getElementById('modalLessonId').value = lessonId;
 
-            // Очищаем форму отправки (если она есть)
             const studentAnswer = document.getElementById('studentAnswer');
-            const homeworkFiles = document.getElementById('homeworkFiles');
             const submissionMessage = document.getElementById('submissionMessage');
 
             if (studentAnswer) {
@@ -403,20 +400,12 @@
                 submissionMessage.textContent = '';
             }
 
-            if (homeworkFiles) {
-                homeworkFiles.value = '';
-            }
-
-            // Показываем модальное окно
             const modal = document.getElementById('homeworkModal');
             modal.classList.remove('hidden');
             modal.classList.add('block');
-
-            // Блокируем прокрутку страницы
             document.body.style.overflow = 'hidden';
         }
 
-        // Функция закрытия модального окна
         function closeHomeworkModal() {
             const modal = document.getElementById('homeworkModal');
             modal.classList.remove('block');
@@ -424,7 +413,6 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Функция для показа уведомлений
         function showNotification(message, type = 'info') {
             const container = document.getElementById('notificationContainer');
             const notification = document.createElement('div');
@@ -466,7 +454,6 @@
             }, 5000);
         }
 
-        // Обработка отправки домашнего задания
         document.addEventListener('DOMContentLoaded', function () {
             const submitHomeworkForm = document.getElementById('submitHomeworkForm');
 
@@ -482,23 +469,17 @@
                     submitButton.disabled = true;
 
                     try {
-                        const formData = new FormData();
-                        formData.append('lessonId', document.getElementById('modalLessonId').value);
-                        formData.append('studentAnswer', document.getElementById('studentAnswer').value);
-
-                        const fileInput = document.getElementById('homeworkFiles');
-                        if (fileInput.files.length > 0) {
-                            formData.append('homeworkFiles', fileInput.files[0]);
-                        }
-
+                        const lessonId = document.getElementById('modalLessonId').value;
+                        const studentAnswer = document.getElementById('studentAnswer').value;
                         const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
                         const response = await fetch(scheduleServerData.submitHomeworkUrl, {
                             method: 'POST',
-                            body: formData,
                             headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
                                 'RequestVerificationToken': token
-                            }
+                            },
+                            body: `lessonId=${lessonId}&studentAnswer=${encodeURIComponent(studentAnswer)}`
                         });
 
                         const result = await response.json();
@@ -527,15 +508,6 @@
     </script>
 
     <style>
-        label[for="homeworkFiles"] {
-            transition: all 0.2s ease;
-        }
-
-            label[for="homeworkFiles"]:hover {
-                border-color: #3b82f6;
-                background-color: #f0f9ff;
-            }
-
         textarea::-webkit-scrollbar {
             width: 8px;
         }

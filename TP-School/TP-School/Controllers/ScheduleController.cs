@@ -43,7 +43,6 @@ namespace TP_School.Controllers
                     return Unauthorized();
                 }
 
-                // Определение текущей недели
                 var selectedDate = date ?? DateTime.Today;
                 int diff = (7 + (selectedDate.DayOfWeek - DayOfWeek.Monday)) % 7;
                 var startOfWeek = selectedDate.AddDays(-diff).Date;
@@ -60,8 +59,7 @@ namespace TP_School.Controllers
                 }
                 else if (userRole == "Учитель" || userRole == "Директор")
                 {
-                    // Получаем параметры фильтрации из строки запроса
-                    var filterType = HttpContext.Request.Query["filterType"].ToString();
+                    var filterType = HttpContext.Request.Query["filterType"].ToString();
                     int? selectedId = HttpContext.Request.Query.ContainsKey("selectedId") && int.TryParse(HttpContext.Request.Query["selectedId"], out int idValue) ? idValue : (int?)null;
 
                     return await GetAdminSchedule(userId, userRole, startOfWeek, endOfWeek, selectedDate, filterType, selectedId);
@@ -85,17 +83,16 @@ namespace TP_School.Controllers
         {
             try
             {
-                int studentUserId = 0; // UserId ученика в таблице Users
+                int studentUserId = 0;
                 string studentName = "";
                 bool isParent = (role == "Родитель");
 
                 ViewBag.IsParent = isParent;
 
-                // Если родитель, находим его ребенка
                 if (role == "Родитель")
                 {
                     var studentParent = await _context.StudentParentses
-                        .Include(sp => sp.Student) // Student здесь ссылается на User
+                        .Include(sp => sp.Student)
                         .FirstOrDefaultAsync(sp => sp.ParentId == userId);
 
                     if (studentParent == null)
@@ -104,13 +101,12 @@ namespace TP_School.Controllers
                         return View("SchedulePersonal", CreateEmptyScheduleModel(date, startOfWeek, true, false));
                     }
 
-                    studentUserId = studentParent.StudentId; // Это UserId в таблице Users
+                    studentUserId = studentParent.StudentId;
                     studentName = studentParent.Student?.FullName ?? "Неизвестно";
                     ViewBag.SelectedChildName = studentName;
                 }
                 else if (role == "Ученик")
                 {
-                    // Для ученика используем его собственный UserId
                     studentUserId = userId;
 
                     var student = await _context.Users
@@ -129,8 +125,6 @@ namespace TP_School.Controllers
                     return View("SchedulePersonal", CreateEmptyScheduleModel(date, startOfWeek, true, false));
                 }
 
-                // Находим класс ученика через таблицу StudentClasses
-                // Обратите внимание: в StudentClasses.StudentId должен храниться UserId
                 var studentClass = await _context.StudentClasses
                     .Include(sc => sc.Class)
                     .FirstOrDefaultAsync(sc => sc.StudentId == studentUserId);
@@ -147,7 +141,6 @@ namespace TP_School.Controllers
                 var classTeacher = await _context.Users
                     .FirstOrDefaultAsync(u => u.UserId == studentClass.Class.ClassTeacherId);
 
-                // Получаем расписание
                 var scheduleEntries = await _context.Schedules
                     .Include(s => s.Subject)
                     .Include(s => s.Teacher)
@@ -159,8 +152,6 @@ namespace TP_School.Controllers
                     .ThenBy(s => s.LessonNumber)
                     .ToListAsync();
 
-                // Получаем оценки для этого ученика
-                // В таблице Grades.StudentId должен храниться UserId
                 Dictionary<int, (int? GradeValue, string Comment)> studentGrades = new Dictionary<int, (int? GradeValue, string Comment)>();
 
                 if (scheduleEntries.Any())
@@ -203,28 +194,24 @@ namespace TP_School.Controllers
         {
             try
             {
-                // 1. Определение типа фильтрации и ID по умолчанию
                 if (string.IsNullOrEmpty(filterType))
                 {
-                    // По умолчанию отображаем расписание текущего учителя/директора
                     filterType = role == "Учитель" ? "Teacher" : "Class";
                 }
 
                 if (selectedId == null)
                 {
-                    // Если ID не передан, устанавливаем значение по умолчанию
                     if (filterType == "Teacher" && role == "Учитель")
                     {
                         selectedId = userId;
                     }
                     else if (filterType == "Class")
                     {
-                        // Для класса берем первый доступный класс (для директора - любой, для учителя - свой)
                         if (role == "Директор")
                         {
                             selectedId = await _context.SchoolClasses.Select(c => (int?)c.ClassId).FirstOrDefaultAsync();
                         }
-                        else // Учитель
+                        else
                         {
                             selectedId = await _context.ClassSubjectTeachers
                                 .Where(cst => cst.TeacherId == userId)
@@ -234,9 +221,8 @@ namespace TP_School.Controllers
                     }
                 }
 
-                // 2. Загрузка справочников для фильтров
                 var availableTeachers = await _context.Users
-                    .Where(u => u.Role.RoleName == "Учитель" || u.Role.RoleName == "Директор") 
+                    .Where(u => u.Role.RoleName == "Учитель" || u.Role.RoleName == "Директор")
                     .OrderBy(u => u.FullName)
                     .ToListAsync();
 
@@ -245,25 +231,21 @@ namespace TP_School.Controllers
                     .ThenBy(c => c.ClassLetter)
                     .ToListAsync();
 
-                // 3. Загрузка и объединение данных (Schedule + ScheduleTemplate)
-                // Вызов нового вспомогательного метода LoadScheduleItemsAsync
                 var scheduleItems = await LoadScheduleItemsAsync(startOfWeek, endOfWeek, filterType, selectedId, LessonTimeMap);
 
-                // 4. Построение ViewModel
                 var viewModel = new AdminScheduleViewModel
                 {
                     StartOfWeek = startOfWeek,
                     FilterType = filterType,
                     SelectedTeacherId = filterType == "Teacher" ? selectedId : null,
                     SelectedClassId = filterType == "Class" ? selectedId : null,
-                    AvailableTeachers = availableTeachers.Where(u => u.Role.RoleName == "Учитель").ToList(), // Показываем только учителей
+                    AvailableTeachers = availableTeachers.Where(u => u.Role.RoleName == "Учитель").ToList(),
                     AvailableClasses = availableClasses,
                     ScheduleByDay = scheduleItems
                         .GroupBy(i => i.DayOfWeek)
                         .ToDictionary(g => g.Key, g => g.OrderBy(i => i.LessonNumber).ToList())
                 };
 
-                // Добавляем пустые дни недели в словарь
                 var days = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday };
                 foreach (var day in days)
                 {
@@ -282,7 +264,6 @@ namespace TP_School.Controllers
 
                 ViewBag.ErrorMessage = $"Произошла ошибка при загрузке расписания: {ex.Message}";
 
-                // Возврат пустой модели для административного представления
                 return View("ScheduleAdmin", new AdminScheduleViewModel
                 {
                     StartOfWeek = startOfWeek,
@@ -292,9 +273,7 @@ namespace TP_School.Controllers
                 });
             }
         }
-        // -----------------------------------------------------------------------
-        // --- Вспомогательный метод загрузки и объединения данных (Schedule + Template) ---
-        // -----------------------------------------------------------------------
+
         private async Task<List<AdminScheduleItemViewModel>> LoadScheduleItemsAsync(
             DateTime startOfWeek,
             DateTime endOfWeek,
@@ -307,14 +286,12 @@ namespace TP_School.Controllers
                 return new List<AdminScheduleItemViewModel>();
             }
 
-            // 1. Загрузка индивидуальных записей (Schedule) за неделю
             var customLessonsQuery = _context.Schedules
                 .Include(s => s.Class)
                 .Include(s => s.Subject)
                 .Include(s => s.Teacher)
                 .Where(s => s.Date >= startOfWeek && s.Date <= endOfWeek);
 
-            // Применяем фильтр к индивидуальным записям
             if (filterType == "Teacher")
             {
                 customLessonsQuery = customLessonsQuery.Where(s => s.TeacherId == selectedId.Value);
@@ -326,7 +303,6 @@ namespace TP_School.Controllers
 
             var customLessons = await customLessonsQuery.ToListAsync();
 
-            // 2. Преобразование кастомных уроков в ViewModel
             var items = customLessons.Select(s => new AdminScheduleItemViewModel
             {
                 ScheduleId = s.LessonId,
@@ -340,23 +316,18 @@ namespace TP_School.Controllers
                 TeacherId = s.TeacherId,
                 TeacherFullName = s.Teacher?.FullName ?? "—",
                 Classroom = s.Room,
-                IsCustomLesson = true // Флаг, что это индивидуальная запись
+                IsCustomLesson = true
             }).ToList();
 
-            // 3. Добавление уроков из Шаблона (ScheduleTemplate)
-            // Список уже занятых слотов (День недели + Номер урока + Класс/Учитель)
-            // Поскольку Schedule может быть изменением, затрагивающим класс ИЛИ учителя, 
-            // нам нужно проверить, перекрывает ли индивидуальный урок шаблон.
             var overriddenSlots = customLessons
                 .Select(s => new { Day = s.Date.DayOfWeek, s.LessonNumber, s.ClassId, s.TeacherId })
                 .ToHashSet();
 
-            for (int i = 0; i < 5; i++) // С Понедельника (0) по Пятницу (4)
+            for (int i = 0; i < 5; i++)
             {
                 DayOfWeek currentDay = (DayOfWeek)(((int)DayOfWeek.Monday + i) % 7);
                 byte currentDayByte = (byte)currentDay;
 
-                // Загрузка шаблонов, соответствующих фильтру
                 var templateQuery = _context.ScheduleTemplates
                     .Include(t => t.Class)
                     .Include(t => t.Subject)
@@ -376,7 +347,6 @@ namespace TP_School.Controllers
 
                 foreach (var template in templates)
                 {
-                    // Проверяем, перекрывает ли этот шаблон индивидуальная запись
                     bool isOverridden = overriddenSlots.Any(slot =>
                         slot.Day == currentDay &&
                         slot.LessonNumber == template.LessonNumber &&
@@ -385,10 +355,9 @@ namespace TP_School.Controllers
 
                     if (!isOverridden)
                     {
-                        // Если кастомной записи нет, добавляем шаблон
                         items.Add(new AdminScheduleItemViewModel
                         {
-                            ScheduleId = null, // Шаблон
+                            ScheduleId = null,
                             DayOfWeek = currentDay,
                             LessonNumber = template.LessonNumber,
                             LessonTime = lessonTimes.GetValueOrDefault(template.LessonNumber, "N/A"),
@@ -407,9 +376,7 @@ namespace TP_School.Controllers
 
             return items;
         }
-        // -----------------------------------------------------------------------
-        // --- МЕТОД ГЕНЕРАЦИИ РАСПИСАНИЯ ДЛЯ АДМИНИСТРАТОРА (ДИРЕКТОРА) ---
-        // -----------------------------------------------------------------------
+
         [HttpPost]
         [Authorize(Roles = "Директор")]
         [ValidateAntiForgeryToken]
@@ -432,7 +399,6 @@ namespace TP_School.Controllers
 
                 byte currentDayOfWeek = (byte)date.DayOfWeek;
 
-                // Получаем существующие уроки (индивидуальные изменения) для этой даты
                 var existingLessonsForDay = await _context.Schedules
                     .Where(s => s.Date.Date == date.Date)
                     .Select(s => new { s.LessonNumber, s.ClassId })
@@ -442,7 +408,6 @@ namespace TP_School.Controllers
 
                 foreach (var template in relevantTemplates)
                 {
-                    // Если урока для этого класса и этого номера УЖЕ НЕТ в базе (т.е. нет индивидуального изменения)
                     if (!existingLessonsForDay.Any(l => l.LessonNumber == template.LessonNumber && l.ClassId == template.ClassId))
                     {
                         newLessons.Add(new Schedule
@@ -476,10 +441,9 @@ namespace TP_School.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Ученик")] // Только для учеников
+        [Authorize(Roles = "Ученик")]
         [ValidateAntiForgeryToken]
-        [RequestSizeLimit(52428800)]
-        public async Task<IActionResult> SubmitHomework(int lessonId, string studentAnswer, IFormFileCollection homeworkFiles)
+        public async Task<IActionResult> SubmitHomework(int lessonId, string studentAnswer)
         {
             var studentId = GetCurrentUserId();
 
@@ -494,28 +458,11 @@ namespace TP_School.Controllers
                 return NotFound(new { success = false, message = "Урок не найден." });
             }
 
-            byte[] fileData = null;
-            var file = homeworkFiles?.FirstOrDefault();
-
-            if (file != null && file.Length > 0)
-            {
-                if (file.Length > 10 * 1024 * 1024)
-                {
-                    return BadRequest(new { success = false, message = $"Файл '{file.FileName}' слишком большой (макс. 10MB)." });
-                }
-
-                using (var memoryStream = new System.IO.MemoryStream())
-                {
-                    await file.CopyToAsync(memoryStream);
-                    fileData = memoryStream.ToArray();
-                }
-            }
-
             var safeStudentAnswer = studentAnswer?.Trim() ?? string.Empty;
 
-            if (safeStudentAnswer.Length == 0 && fileData == null)
+            if (safeStudentAnswer.Length == 0)
             {
-                return BadRequest(new { success = false, message = "Пожалуйста, введите текст ответа или прикрепите файл." });
+                return BadRequest(new { success = false, message = "Пожалуйста, введите текст ответа." });
             }
 
             var homeworkEntry = new Homework
@@ -523,7 +470,6 @@ namespace TP_School.Controllers
                 LessonId = lessonId,
                 Date = lesson.Date,
                 Text = safeStudentAnswer,
-                FilePath = fileData ?? new byte[0],
                 StudentId = studentId
             };
 
@@ -535,7 +481,6 @@ namespace TP_School.Controllers
                 if (existingHomework != null)
                 {
                     existingHomework.Text = homeworkEntry.Text;
-                    existingHomework.FilePath = homeworkEntry.FilePath;
                     _context.Homeworks.Update(existingHomework);
                 }
                 else

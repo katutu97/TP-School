@@ -115,7 +115,6 @@ namespace TP_School.Controllers
                     // Использование SubmissionDate
                     SubmissionDate = x.Homework.Date,
                     StudentAnswer = x.Homework.Text,
-                    HasFile = x.Homework.FilePath != null && x.Homework.FilePath.Length > 0,
                     StatusId = x.Homework.Status,
 
                     // 🛠️ ИСПРАВЛЕНИЕ: Используем CurrentTeacherComment для временного хранения текста задания с урока.
@@ -217,43 +216,6 @@ namespace TP_School.Controllers
             {
                 return StatusCode(500, new { success = false, message = $"Ошибка сохранения: {ex.Message}" });
             }
-        }
-
-        // --- 3. DOWNLOAD HOMEWORK FILE ---
-        [HttpGet]
-        public async Task<IActionResult> DownloadFile(int homeworkId)
-        {
-            var homework = await _context.Homeworks
-                .Include(h => h.Student)
-                .Include(h => h.Lesson)
-                    .ThenInclude(l => l.Subject)
-                .FirstOrDefaultAsync(h => h.HomeworkId == homeworkId);
-
-            if (homework == null || homework.FilePath == null || homework.FilePath.Length == 0)
-            {
-                return NotFound("Файл не найден.");
-            }
-
-            // Проверка прав (повторяем для безопасности)
-            var userId = GetCurrentUserId();
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-            if (userRole == "Учитель")
-            {
-                var isTeacherForSubject = await _context.ClassSubjectTeachers
-                    .AnyAsync(cst => cst.TeacherId == userId &&
-                                     cst.ClassId == homework.Lesson.ClassId &&
-                                     cst.SubjectId == homework.Lesson.SubjectId);
-
-                if (!isTeacherForSubject)
-                {
-                    return Forbid("У вас нет прав на скачивание этого файла.");
-                }
-            }
-
-            var fileName = $"ДЗ_{homework.Lesson.Subject.SubjectName}_{homework.Student.FullName}_{homework.Lesson.Date:yyyyMMdd}.zip";
-
-            return File(homework.FilePath, "application/octet-stream", fileName);
         }
     }
 }

@@ -793,11 +793,58 @@ namespace TP_School.Controllers
                 .Include(u => u.StudentClasses)
                 .Include(u => u.StudentParentsAsParent)
                 .Include(u => u.StudentParentsAsStudent)
+                .Include(u => u.ClassesAsTeacher) 
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null)
                 return NotFound();
 
+
+            // -----------------------------------------------------------
+            // 1. НЕЛЬЗЯ УДАЛИТЬ УЧИТЕЛЯ, ЕСЛИ ОН КЛАССНЫЙ РУКОВОДИТЕЛЬ
+            // -----------------------------------------------------------
+            if (user.ClassesAsTeacher.Any())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Невозможно удалить пользователя. Он является классным руководителем. Сначала назначьте нового классного руководителя."
+                });
+            }
+
+
+            // -----------------------------------------------------------
+            // 2. Удаление сообщений пользователя (как отправителя так и получателя)
+            // -----------------------------------------------------------
+            var messagesSent = await _context.Messages
+                .Where(m => m.FromUserId == id)
+                .ToListAsync();
+
+            var messagesReceived = await _context.Messages
+                .Where(m => m.ToUserId == id)
+                .ToListAsync();
+
+            if (messagesSent.Any())
+                _context.Messages.RemoveRange(messagesSent);
+
+            if (messagesReceived.Any())
+                _context.Messages.RemoveRange(messagesReceived);
+
+
+            // -----------------------------------------------------------
+            // 3. Удаление предметов учителя (если есть такая логика в проекте)
+            // -----------------------------------------------------------
+            var teacherSubjects = await _context.ClassSubjectTeachers
+                .Where(ts => ts.TeacherId == id)
+                .ToListAsync();
+
+            if (teacherSubjects.Any())
+                _context.ClassSubjectTeachers.RemoveRange(teacherSubjects);
+
+
+            // -----------------------------------------------------------
+            // 4. Удаление связи учеников, родителей, классов
+            // -----------------------------------------------------------
             if (user.StudentClasses.Any())
                 _context.StudentClasses.RemoveRange(user.StudentClasses);
 
@@ -807,10 +854,16 @@ namespace TP_School.Controllers
             if (user.StudentParentsAsStudent.Any())
                 _context.StudentParentses.RemoveRange(user.StudentParentsAsStudent);
 
+
+            // -----------------------------------------------------------
+            // 5. Удаление самого пользователя
+            // -----------------------------------------------------------
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
+
             return Json(new { success = true });
         }
+
     }
 }

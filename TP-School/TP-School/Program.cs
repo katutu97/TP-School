@@ -9,15 +9,12 @@ using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Устанавливаем лимит в 50 МБ (52,428,800 байт)
 
-// 1. Увеличение лимита Kestrel 
 builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 52428800;
 });
 
-// 2. Увеличение лимита для MVC (ДОЛЖЕН БЫТЬ ТОЛЬКО ОДИН ВЫЗОВ AddControllersWithViews)
 builder.Services.AddControllersWithViews(options =>
 {
     // Устанавливает лимит для всех контроллеров, если не указано иное
@@ -52,7 +49,6 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

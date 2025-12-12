@@ -16,55 +16,63 @@ namespace TP_School.Controllers
     public class GradesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private List<string> AbsenceStatuses { get; } = new List<string> { "Н", "Б", "У" };
+        private List<string> AbsenceStatuses { get; } = new List<string> { "Н", "Б", "У" }; // Статусы пропусков
 
         public GradesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // Получение ID текущего пользователя 
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return int.TryParse(userIdClaim, out int userId) ? userId : 0;
+            return int.TryParse(userIdClaim, out int userId) ? userId : 0; // Возвращает 0, если не удалось найти
         }
 
+        // Получение роли текущего пользователя
         private string GetCurrentUserRole()
         {
-            return User.FindFirst(ClaimTypes.Role)?.Value ?? "Гость";
+            return User.FindFirst(ClaimTypes.Role)?.Value ?? "Гость"; // Если роль не указана, возвращает "Гость"
         }
 
         // --- ГЛАВНАЯ ТОЧКА ВХОДА ---
+        // Основной метод для отображения страницы успеваемости
         [HttpGet]
         public async Task<IActionResult> Index(int? classId, int? subjectId, string quarter)
         {
-            var userRole = GetCurrentUserRole();
+            var userRole = GetCurrentUserRole(); // Определение роли пользователя
 
+            // Если четверть не указана, определяем текущую
             if (string.IsNullOrEmpty(quarter))
             {
                 quarter = GetCurrentQuarter();
             }
 
+            // Маршрутизация в зависимости от роли пользователя
             if (userRole == "Родитель")
             {
-                return await ParentView(quarter);
+                return await ParentView(quarter); // Родитель видит успеваемость своего ребенка
             }
             else if (userRole == "Ученик")
             {
+                // Ученик видит свою собственную успеваемость
                 return await StudentView(GetCurrentUserId(), quarter, false);
             }
             else if (userRole == "Учитель" || userRole == "Директор")
             {
+                // Учитель и директор видят успеваемость выбранного класса по выбранному предмету
                 return await TeacherView(classId, subjectId, quarter);
             }
 
-            return Forbid();
+            return Forbid(); // Запрет доступа для других ролей
         }
 
         // --- МЕТОД ДЛЯ РОДИТЕЛЯ ---
+        // Отображение успеваемости ребенка родителем
         private async Task<IActionResult> ParentView(string quarter)
         {
-            var parentId = GetCurrentUserId();
+            var parentId = GetCurrentUserId(); // ID текущего родителя
 
             // Получаем первого привязанного ребенка родителя
             var childRelation = await _context.StudentParentses
@@ -78,31 +86,36 @@ namespace TP_School.Controllers
                 return View("NoChild");
             }
 
-            var childId = childRelation.StudentId;
-            var childName = childRelation.FullName;
+            var childId = childRelation.StudentId; // ID ребенка
+            var childName = childRelation.FullName; // Имя ребенка
 
-            // Прямой вызов метода StudentView с флагом isParentView = true
+            // Прямой вызов метода 
             return await StudentView(childId, quarter, true);
         }
 
         // --- МЕТОД ДЛЯ ПРОСМОТРА УСПЕВАЕМОСТИ (общий для ученика и родителя) ---
+        // Отображение детальной успеваемости ученика за выбранную четверть
         private async Task<IActionResult> StudentView(int studentId, string quarter, bool isParentView)
         {
-            var studentData = await _context.Users.FindAsync(studentId);
+            var studentData = await _context.Users.FindAsync(studentId); // Получение данных ученика
 
+            // Если выбраны итоговые оценки, рассчитываем годовую успеваемость
             if (quarter == "Итоговые оценки")
             {
                 return await CalculateYearGrades(studentId, studentData.FullName, "Итоговые оценки", isParentView);
             }
 
+            // Получение дат начала и конца выбранной четверти
             var (startDate, endDate) = GetQuarterDates(quarter);
 
+            // Получение класса, в котором учится ученик
             var studentClass = await _context.StudentClasses
                 .Include(sc => sc.Class)
                 .FirstOrDefaultAsync(sc => sc.StudentId == studentId);
 
             if (studentClass == null)
             {
+                // Если ученик не привязан к классу, возвращаем пустую модель
                 return View("StudentView", new StudentGradesViewModel
                 {
                     AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
@@ -113,43 +126,43 @@ namespace TP_School.Controllers
 
             // Все оценки ученика за период по предметам с детализацией
             var gradesData = await _context.Grades
-                .Where(g => g.StudentId == studentId)
-                .Where(g => g.Date >= startDate && g.Date < endDate.AddDays(1))
-                .Include(g => g.Lesson)
-                .ThenInclude(l => l.Subject)
-                .Where(g => g.GradeValue.HasValue)
-                .GroupBy(g => g.Lesson.Subject)
+                .Where(g => g.StudentId == studentId) // Фильтр по ученику
+                .Where(g => g.Date >= startDate && g.Date < endDate.AddDays(1)) // Фильтр по дате
+                .Include(g => g.Lesson) // Включаем данные урока
+                .ThenInclude(l => l.Subject) // Включаем данные предмета
+                .Where(g => g.GradeValue.HasValue) // Только оценки (не пропуски)
+                .GroupBy(g => g.Lesson.Subject) // Группировка по предмету
                 .Select(g => new
                 {
                     SubjectId = g.Key.SubjectId,
                     SubjectName = g.Key.SubjectName,
-                    AverageGrade = g.Average(gr => gr.GradeValue.Value),
-                    AllGrades = g.Select(gr => gr.GradeValue.Value).ToList()
+                    AverageGrade = g.Average(gr => gr.GradeValue.Value), // Средняя оценка
+                    AllGrades = g.Select(gr => gr.GradeValue.Value).ToList() // Все оценки по предмету
                 })
                 .ToListAsync();
 
             // Все пропуски ученика за период по предметам с детализацией по типам
             var absencesData = await _context.Attendances
-                .Where(a => a.StudentId == studentId && AbsenceStatuses.Contains(a.Status))
-                .Include(a => a.Lesson)
-                .Where(a => a.Lesson != null && a.Lesson.Date >= startDate && a.Lesson.Date < endDate.AddDays(1))
-                .GroupBy(a => new { a.Lesson.SubjectId, a.Status })
+                .Where(a => a.StudentId == studentId && AbsenceStatuses.Contains(a.Status)) // Фильтр по ученику и статусам пропусков
+                .Include(a => a.Lesson) // Включаем данные урока
+                .Where(a => a.Lesson != null && a.Lesson.Date >= startDate && a.Lesson.Date < endDate.AddDays(1)) // Фильтр по дате
+                .GroupBy(a => new { a.Lesson.SubjectId, a.Status }) // Группировка по предмету и типу пропуска
                 .Select(g => new
                 {
                     SubjectId = g.Key.SubjectId,
                     Status = g.Key.Status,
-                    Count = g.Count()
+                    Count = g.Count() // Количество пропусков каждого типа
                 })
                 .ToListAsync();
 
             // Общее количество уроков по каждому предмету за период
             var totalLessonsData = await _context.Schedules
-                .Where(l => l.Date >= startDate && l.Date < endDate.AddDays(1))
-                .GroupBy(l => l.SubjectId)
+                .Where(l => l.Date >= startDate && l.Date < endDate.AddDays(1)) // Фильтр по дате
+                .GroupBy(l => l.SubjectId) // Группировка по предмету
                 .Select(g => new
                 {
                     SubjectId = g.Key,
-                    TotalLessons = g.Count()
+                    TotalLessons = g.Count() // Общее количество уроков
                 })
                 .ToListAsync();
 
@@ -158,16 +171,16 @@ namespace TP_School.Controllers
             {
                 SubjectName = g.SubjectName,
                 AverageGrade = g.AverageGrade,
-                QuarterFinalGrade = (int)Math.Round((double)g.AverageGrade, 0, MidpointRounding.AwayFromZero),
-                TotalAbsences = absencesData.Where(a => a.SubjectId == g.SubjectId).Sum(a => a.Count),
-                AbsentTypeH = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "Н")?.Count ?? 0,
-                AbsentTypeU = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "У")?.Count ?? 0,
-                AbsentTypeB = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "Б")?.Count ?? 0,
-                TotalLessonsInPeriod = totalLessonsData.FirstOrDefault(t => t.SubjectId == g.SubjectId)?.TotalLessons ?? 0,
-                AllGrades = g.AllGrades.Select(grade => (int)Math.Round((double)grade, 0, MidpointRounding.AwayFromZero)).ToList()
+                QuarterFinalGrade = (int)Math.Round((double)g.AverageGrade, 0, MidpointRounding.AwayFromZero), // Итоговая оценка за четверть
+                TotalAbsences = absencesData.Where(a => a.SubjectId == g.SubjectId).Sum(a => a.Count), // Общее количество пропусков
+                AbsentTypeH = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "Н")?.Count ?? 0, // Пропуски по болезни
+                AbsentTypeU = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "У")?.Count ?? 0, // Уважительные пропуски
+                AbsentTypeB = absencesData.FirstOrDefault(a => a.SubjectId == g.SubjectId && a.Status == "Б")?.Count ?? 0, // Неуважительные пропуски
+                TotalLessonsInPeriod = totalLessonsData.FirstOrDefault(t => t.SubjectId == g.SubjectId)?.TotalLessons ?? 0, // Всего уроков за период
+                AllGrades = g.AllGrades.Select(grade => (int)Math.Round((double)grade, 0, MidpointRounding.AwayFromZero)).ToList() // Все оценки
             }).ToList();
 
-            // Добавляем предметы, по которым были только пропуски
+            // Добавление предметов, по которым были только пропуски (без оценок)
             var subjectsWithOnlyAbsences = absencesData
                 .GroupBy(a => a.SubjectId)
                 .Where(g => !subjectItems.Any(si => si.SubjectName == _context.Subjects.Find(g.Key)?.SubjectName))
@@ -183,15 +196,16 @@ namespace TP_School.Controllers
                     TotalLessonsInPeriod = totalLessonsData.FirstOrDefault(t => t.SubjectId == g.Key)?.TotalLessons ?? 0,
                     AllGrades = new List<int>()
                 })
-                .Where(s => s.SubjectName != null);
+                .Where(s => s.SubjectName != null); // Исключаем null
 
             subjectItems.AddRange(subjectsWithOnlyAbsences);
 
+            // Формирование модели представления
             var viewModel = new StudentGradesViewModel
             {
                 StudentFullName = studentData.FullName,
                 ClassName = studentClass.Class.ClassName,
-                Subjects = subjectItems.OrderBy(s => s.SubjectName).ToList(),
+                Subjects = subjectItems.OrderBy(s => s.SubjectName).ToList(), // Сортировка по названию предмета
                 SelectedQuarter = quarter,
                 AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
                 IsParentView = isParentView
@@ -201,23 +215,26 @@ namespace TP_School.Controllers
         }
 
         // --- МЕТОД ДЛЯ УЧИТЕЛЯ ---
+        // Отображение успеваемости класса по предмету для учителя/директора
         private async Task<IActionResult> TeacherView(int? classId, int? subjectId, string quarter)
         {
             var userId = GetCurrentUserId();
-            var (startDate, endDate) = GetQuarterDates(quarter);
+            var (startDate, endDate) = GetQuarterDates(quarter); // Даты выбранной четверти
 
-            // 1. Определение доступных классов и предметов
+            // 1. Определение доступных классов и предметов для текущего пользователя
             var accessibleClasses = await GetAccessibleClasses(userId);
             var accessibleSubjects = await GetAccessibleSubjects(userId, accessibleClasses.Keys.ToList());
 
             if (!accessibleClasses.Any() || !accessibleSubjects.Any())
             {
+                // Если нет доступных классов или предметов, возвращаем пустую модель
                 return View("TeacherView", new TeacherClassGradesViewModel
                 {
                     AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" }
                 });
             }
 
+            // Установка значений по умолчанию, если параметры не указаны
             var currentClassId = classId ?? accessibleClasses.Keys.First();
             var currentSubjectId = subjectId ?? accessibleSubjects.Keys.First();
 
@@ -232,6 +249,7 @@ namespace TP_School.Controllers
 
             if (!studentIdsInClass.Any())
             {
+                // Если в классе нет учеников, возвращаем пустую модель
                 return View("TeacherView", new TeacherClassGradesViewModel
                 {
                     AvailableClasses = accessibleClasses,
@@ -247,30 +265,30 @@ namespace TP_School.Controllers
 
             // 3. Сбор данных об оценках для каждого ученика с детализацией
             var gradesData = await _context.Grades
-                .Where(g => studentIdsInClass.Contains(g.StudentId))
-                .Where(g => g.Lesson.SubjectId == currentSubjectId)
-                .Where(g => g.Date >= startDate && g.Date < endDate.AddDays(1))
-                .Where(g => g.GradeValue.HasValue)
-                .GroupBy(g => g.StudentId)
+                .Where(g => studentIdsInClass.Contains(g.StudentId)) // Фильтр по ученикам класса
+                .Where(g => g.Lesson.SubjectId == currentSubjectId) // Фильтр по предмету
+                .Where(g => g.Date >= startDate && g.Date < endDate.AddDays(1)) // Фильтр по дате
+                .Where(g => g.GradeValue.HasValue) // Только оценки
+                .GroupBy(g => g.StudentId) // Группировка по ученику
                 .Select(g => new
                 {
                     StudentId = g.Key,
-                    AverageGrade = g.Average(gr => gr.GradeValue.Value),
-                    AllGrades = g.Select(gr => gr.GradeValue.Value).ToList()
+                    AverageGrade = g.Average(gr => gr.GradeValue.Value), // Средняя оценка
+                    AllGrades = g.Select(gr => gr.GradeValue.Value).ToList() // Все оценки ученика
                 })
                 .ToListAsync();
 
             // 4. Сбор данных о пропусках для каждого ученика с детализацией по типам
             var absencesData = await _context.Attendances
-                .Where(a => studentIdsInClass.Contains(a.StudentId) && AbsenceStatuses.Contains(a.Status))
-                .Include(a => a.Lesson)
-                .Where(a => a.Lesson != null && a.Lesson.SubjectId == currentSubjectId && a.Lesson.Date >= startDate && a.Lesson.Date < endDate.AddDays(1))
-                .GroupBy(a => new { a.StudentId, a.Status })
+                .Where(a => studentIdsInClass.Contains(a.StudentId) && AbsenceStatuses.Contains(a.Status)) // Фильтр по ученикам и статусам
+                .Include(a => a.Lesson) // Включаем данные урока
+                .Where(a => a.Lesson != null && a.Lesson.SubjectId == currentSubjectId && a.Lesson.Date >= startDate && a.Lesson.Date < endDate.AddDays(1)) // Фильтр по предмету и дате
+                .GroupBy(a => new { a.StudentId, a.Status }) // Группировка по ученику и типу пропуска
                 .Select(g => new
                 {
                     StudentId = g.Key.StudentId,
                     Status = g.Key.Status,
-                    Count = g.Count()
+                    Count = g.Count() // Количество пропусков
                 })
                 .ToListAsync();
 
@@ -279,9 +297,9 @@ namespace TP_School.Controllers
                 .Where(l => l.Date >= startDate && l.Date < endDate.AddDays(1) && l.SubjectId == currentSubjectId)
                 .CountAsync();
 
-            // 6. Формирование ViewModel - ИЗМЕНЕНО: сортировка на клиенте
+            // 6. Формирование ViewModel 
             var students = await _context.Users
-                .Where(u => studentIdsInClass.Contains(u.UserId))
+                .Where(u => studentIdsInClass.Contains(u.UserId)) // Фильтр по ID учеников
                 .Select(u => new
                 {
                     u.UserId,
@@ -289,11 +307,12 @@ namespace TP_School.Controllers
                 })
                 .ToListAsync();
 
-            // Сортируем на клиенте
+            // Сортируем на клиенте по алфавиту
             var sortedStudents = students.OrderBy(s => s.FullName).ToList();
 
             var studentPerformanceItems = new List<TeacherStudentGradeItem>();
 
+            // Создание элементов для каждого ученика
             foreach (var student in sortedStudents)
             {
                 var studentGrades = gradesData.FirstOrDefault(g => g.StudentId == student.UserId);
@@ -307,18 +326,19 @@ namespace TP_School.Controllers
                     StudentId = student.UserId,
                     FullName = student.FullName,
                     AverageGrade = avgGrade,
-                    QuarterFinalGrade = (int)Math.Round((double)avgGrade, 0, MidpointRounding.AwayFromZero),
-                    TotalAbsences = studentAbsences.Sum(a => a.Count),
+                    QuarterFinalGrade = (int)Math.Round((double)avgGrade, 0, MidpointRounding.AwayFromZero), // Итоговая оценка за четверть
+                    TotalAbsences = studentAbsences.Sum(a => a.Count), // Всего пропусков
                     AbsentTypeH = studentAbsences.FirstOrDefault(a => a.Status == "Н")?.Count ?? 0,
                     AbsentTypeU = studentAbsences.FirstOrDefault(a => a.Status == "У")?.Count ?? 0,
                     AbsentTypeB = studentAbsences.FirstOrDefault(a => a.Status == "Б")?.Count ?? 0,
-                    TotalLessonsInPeriod = totalLessons,
-                    AllGrades = allGrades
+                    TotalLessonsInPeriod = totalLessons, // Всего уроков за период
+                    AllGrades = allGrades // Все оценки
                 };
 
                 studentPerformanceItems.Add(item);
             }
 
+            // Формирование модели представления для учителя
             var viewModel = new TeacherClassGradesViewModel
             {
                 Students = studentPerformanceItems,
@@ -336,14 +356,16 @@ namespace TP_School.Controllers
         }
 
         // --- МЕТОД: Расчет годовых оценок ---
+        // Расчет и отображение итоговых годовых оценок ученика
         private async Task<IActionResult> CalculateYearGrades(int studentId, string studentFullName, string quarterName, bool isParentView)
         {
             var allQuarters = new List<string> { "I", "II", "III", "IV" };
-            var yearFinalGrades = new Dictionary<string, List<int>>();
-            var yearAllGrades = new Dictionary<string, List<int>>();
-            var yearAbsences = new Dictionary<string, Dictionary<string, int>>();
-            var yearTotalLessons = new Dictionary<string, int>();
+            var yearFinalGrades = new Dictionary<string, List<int>>(); // Итоговые оценки по четвертям
+            var yearAllGrades = new Dictionary<string, List<int>>(); // Все оценки за год
+            var yearAbsences = new Dictionary<string, Dictionary<string, int>>(); // Пропуски за год
+            var yearTotalLessons = new Dictionary<string, int>(); // Всего уроков за год
 
+            // Сбор данных за каждую четверть
             foreach (var quarter in allQuarters)
             {
                 var (startDate, endDate) = GetQuarterDates(quarter);
@@ -367,11 +389,12 @@ namespace TP_School.Controllers
                     .Select(g => new
                     {
                         SubjectName = g.Key,
-                        QuarterFinalGrade = (int)Math.Round((double)g.Average(x => x.GradeValue), 0, MidpointRounding.AwayFromZero),
-                        AllGrades = g.Select(x => (int)Math.Round((double)x.GradeValue, 0, MidpointRounding.AwayFromZero)).ToList()
+                        QuarterFinalGrade = (int)Math.Round((double)g.Average(x => x.GradeValue), 0, MidpointRounding.AwayFromZero), // Итог за четверть
+                        AllGrades = g.Select(x => (int)Math.Round((double)x.GradeValue, 0, MidpointRounding.AwayFromZero)).ToList() // Все оценки
                     })
                     .ToList();
 
+                // Сохранение данных по предметам
                 foreach (var item in groupedGrades)
                 {
                     if (!yearFinalGrades.ContainsKey(item.SubjectName))
@@ -400,6 +423,7 @@ namespace TP_School.Controllers
                     })
                     .ToListAsync();
 
+                // Сохранение данных о пропусках
                 foreach (var item in absencesInQuarter)
                 {
                     if (!yearAbsences.ContainsKey(item.SubjectName))
@@ -425,6 +449,7 @@ namespace TP_School.Controllers
                     .Select(g => new { SubjectName = g.Key, TotalLessons = g.Count() })
                     .ToListAsync();
 
+                // Сохранение данных об уроках
                 foreach (var item in lessonsInQuarter)
                 {
                     if (!yearTotalLessons.ContainsKey(item.SubjectName))
@@ -435,11 +460,11 @@ namespace TP_School.Controllers
                 }
             }
 
-            // 3. Расчет годовой оценки
+            // 3. Расчет годовой оценки (среднее арифметическое четвертных оценок)
             var finalYearItems = yearFinalGrades.Select(kvp => {
                 var subjectName = kvp.Key;
                 var quarterFinalGrades = kvp.Value;
-                var avgOfFinals = quarterFinalGrades.Average();
+                var avgOfFinals = quarterFinalGrades.Average(); // Среднее за год
 
                 var absences = yearAbsences.ContainsKey(subjectName) ? yearAbsences[subjectName] :
                     new Dictionary<string, int> { { "Н", 0 }, { "У", 0 }, { "Б", 0 } };
@@ -450,17 +475,17 @@ namespace TP_School.Controllers
                 {
                     SubjectName = subjectName,
                     AverageGrade = avgOfFinals,
-                    QuarterFinalGrade = (int)Math.Round((double)avgOfFinals, 0, MidpointRounding.AwayFromZero),
-                    TotalAbsences = absences.Sum(a => a.Value),
+                    QuarterFinalGrade = (int)Math.Round((double)avgOfFinals, 0, MidpointRounding.AwayFromZero), // Итоговая годовая оценка
+                    TotalAbsences = absences.Sum(a => a.Value), // Всего пропусков за год
                     AbsentTypeH = absences.ContainsKey("Н") ? absences["Н"] : 0,
                     AbsentTypeU = absences.ContainsKey("У") ? absences["У"] : 0,
                     AbsentTypeB = absences.ContainsKey("Б") ? absences["Б"] : 0,
-                    TotalLessonsInPeriod = yearTotalLessons.ContainsKey(subjectName) ? yearTotalLessons[subjectName] : 0,
-                    AllGrades = allGrades
+                    TotalLessonsInPeriod = yearTotalLessons.ContainsKey(subjectName) ? yearTotalLessons[subjectName] : 0, // Всего уроков за год
+                    AllGrades = allGrades // Все оценки за год
                 };
             }).ToList();
 
-            // Добавляем предметы, по которым были только пропуски
+            // Добавляем предметы, по которым были только пропуски (без оценок)
             var subjectsWithOnlyAbsences = yearAbsences
                 .Where(kvp => !finalYearItems.Any(f => f.SubjectName == kvp.Key))
                 .Select(kvp => new StudentSubjectItem
@@ -478,15 +503,17 @@ namespace TP_School.Controllers
 
             finalYearItems.AddRange(subjectsWithOnlyAbsences);
 
+            // Получение класса ученика
             var studentClass = await _context.StudentClasses
                 .Include(sc => sc.Class)
                 .FirstOrDefaultAsync(sc => sc.StudentId == studentId);
 
+            // Формирование модели представления для итоговых оценок
             var viewModel = new StudentGradesViewModel
             {
                 StudentFullName = studentFullName,
                 ClassName = studentClass?.Class.ClassName,
-                Subjects = finalYearItems.OrderBy(s => s.SubjectName).ToList(),
+                Subjects = finalYearItems.OrderBy(s => s.SubjectName).ToList(), // Сортировка по алфавиту
                 SelectedQuarter = quarterName,
                 AvailableQuarters = new List<string> { "Итоговые оценки", "I", "II", "III", "IV" },
                 IsParentView = isParentView
@@ -496,6 +523,8 @@ namespace TP_School.Controllers
         }
 
         // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
+
+        // Получение доступных классов для текущего пользователя (учитель/директор)
         private async Task<Dictionary<int, string>> GetAccessibleClasses(int userId)
         {
             var userRole = GetCurrentUserRole();
@@ -507,6 +536,7 @@ namespace TP_School.Controllers
             }
             else if (userRole == "Учитель")
             {
+                // Учитель видит классы, в которых преподает или является классным руководителем
                 var teachingClassIds = await _context.ClassSubjectTeachers
                     .Where(cst => cst.TeacherId == userId)
                     .Select(cst => cst.ClassId)
@@ -519,21 +549,23 @@ namespace TP_School.Controllers
                     .Distinct()
                     .ToListAsync();
 
-                var classIds = teachingClassIds.Union(curatingClassIds).ToList();
+                var classIds = teachingClassIds.Union(curatingClassIds).ToList(); // Объединение списков
 
-                query = query.Where(sc => classIds.Contains(sc.ClassId));
+                query = query.Where(sc => classIds.Contains(sc.ClassId)); // Фильтрация классов
             }
             else
             {
-                return new Dictionary<int, string>();
+                return new Dictionary<int, string>(); // Для других ролей - пустой список
             }
 
+            // Возврат словаря: ID класса -> Название класса
             return await query
-                .OrderBy(sc => sc.ClassNumber)
-                .ThenBy(sc => sc.ClassLetter)
+                .OrderBy(sc => sc.ClassNumber) // Сортировка по номеру
+                .ThenBy(sc => sc.ClassLetter) // Затем по букве
                 .ToDictionaryAsync(sc => sc.ClassId, sc => sc.ClassName);
         }
 
+        // Получение доступных предметов для текущего пользователя (учитель/директор)
         private async Task<Dictionary<int, string>> GetAccessibleSubjects(int userId, List<int> accessibleClassIds)
         {
             var userRole = GetCurrentUserRole();
@@ -545,69 +577,77 @@ namespace TP_School.Controllers
             }
             else if (userRole == "Учитель")
             {
+                // Учитель видит предметы, которые преподает в доступных классах
                 var subjectIds = await _context.ClassSubjectTeachers
                     .Where(cst => cst.TeacherId == userId && accessibleClassIds.Contains(cst.ClassId))
                     .Select(cst => cst.SubjectId)
                     .Distinct()
                     .ToListAsync();
 
-                query = query.Where(s => subjectIds.Contains(s.SubjectId));
+                query = query.Where(s => subjectIds.Contains(s.SubjectId)); // Фильтрация предметов
             }
 
+            // Возврат словаря: ID предмета -> Название предмета
             return await query
-                .OrderBy(s => s.SubjectName)
+                .OrderBy(s => s.SubjectName) // Сортировка по названию
                 .ToDictionaryAsync(s => s.SubjectId, s => s.SubjectName);
         }
 
+        // Определение текущей четверти на основе текущей даты
         private string GetCurrentQuarter()
         {
             var today = DateTime.Today;
-            var currentYear = today.Month >= 9 ? today.Year : today.Year - 1;
+            var currentYear = today.Month >= 9 ? today.Year : today.Year - 1; // Учебный год начинается в сентябре
 
+            // Логика определения четверти
             if (today >= new DateTime(currentYear, 9, 1) && today <= new DateTime(currentYear, 10, 31)) return "I";
             if (today >= new DateTime(currentYear, 11, 1) && today <= new DateTime(currentYear, 12, 31)) return "II";
             if (today >= new DateTime(currentYear + 1, 1, 15) && today <= new DateTime(currentYear + 1, 3, 31)) return "III";
             if (today >= new DateTime(currentYear + 1, 4, 1) && today <= new DateTime(currentYear + 1, 5, 25)) return "IV";
 
-            return "Итоговые оценки";
+            return "Итоговые оценки"; // Если дата вне четвертей
         }
 
+        // Получение дат начала и конца выбранной четверти
         private (DateTime startDate, DateTime endDate) GetQuarterDates(string quarter)
         {
             int currentYear = DateTime.Today.Year;
             if (DateTime.Today.Month >= 9)
             {
+                // Если месяц сентябрь или позже, учебный год текущий
                 currentYear = DateTime.Today.Year;
             }
             else
             {
+                // Если месяц раньше сентября, учебный год предыдущий
                 currentYear = DateTime.Today.Year - 1;
             }
 
-            DateTime startSchoolYear = new DateTime(currentYear, 9, 1);
+            DateTime startSchoolYear = new DateTime(currentYear, 9, 1); // Начало учебного года
             DateTime effectiveEndDate;
 
+            // Определение дат в зависимости от четверти
             switch (quarter)
             {
                 case "I":
-                    effectiveEndDate = new DateTime(currentYear, 10, 31);
+                    effectiveEndDate = new DateTime(currentYear, 10, 31); // Конец I четверти
                     break;
                 case "II":
-                    effectiveEndDate = new DateTime(currentYear, 12, 31);
-                    return (new DateTime(currentYear, 11, 1), effectiveEndDate);
+                    effectiveEndDate = new DateTime(currentYear, 12, 31); // Конец II четверти
+                    return (new DateTime(currentYear, 11, 1), effectiveEndDate); // Начало II четверти
                 case "III":
-                    effectiveEndDate = new DateTime(currentYear + 1, 3, 31);
-                    return (new DateTime(currentYear + 1, 1, 15), effectiveEndDate);
+                    effectiveEndDate = new DateTime(currentYear + 1, 3, 31); // Конец III четверти
+                    return (new DateTime(currentYear + 1, 1, 15), effectiveEndDate); // Начало III четверти
                 case "IV":
-                    effectiveEndDate = new DateTime(currentYear + 1, 5, 25);
-                    return (new DateTime(currentYear + 1, 4, 1), effectiveEndDate);
+                    effectiveEndDate = new DateTime(currentYear + 1, 5, 25); // Конец IV четверти
+                    return (new DateTime(currentYear + 1, 4, 1), effectiveEndDate); // Начало IV четверти
                 case "Итоговые оценки":
                 default:
-                    effectiveEndDate = new DateTime(currentYear + 1, 6, 30);
-                    return (startSchoolYear, effectiveEndDate);
+                    effectiveEndDate = new DateTime(currentYear + 1, 6, 30); // Конец учебного года
+                    return (startSchoolYear, effectiveEndDate); // Весь учебный год
             }
 
-            return (startSchoolYear, effectiveEndDate);
+            return (startSchoolYear, effectiveEndDate); // Для I четверти
         }
     }
 }

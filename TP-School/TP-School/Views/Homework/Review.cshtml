@@ -89,7 +89,6 @@ else
                         <td class="px-6 py-4 text-sm text-gray-500">
                             @if (!string.IsNullOrEmpty(item.CurrentTeacherComment))
                             {
-                                // Кнопка для просмотра полного текста. Показываем первые 50 символов
                                 <button onclick="viewAssignmentText('@item.SubjectName.Replace("'", "\\'").Replace("\"", "")', '@item.CurrentTeacherComment.Replace("'", "\\'").Replace("\n", "\\n")')"
                                         class="text-gray-600 hover:text-gray-800 text-left">
                                     <i class="fas fa-book-open mr-1"></i>
@@ -116,13 +115,6 @@ else
                                         class="text-blue-600 hover:text-blue-900 mr-2">
                                     <i class="fas fa-file-alt"></i> Текст
                                 </button>
-                            }
-                            @if (item.HasFile)
-                            {
-                                <a href="@Url.Action("DownloadFile", "Homework", new { homeworkId = item.HomeworkId })"
-                                   class="text-green-600 hover:text-green-900">
-                                    <i class="fas fa-download"></i> Файл
-                                </a>
                             }
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500">
@@ -154,8 +146,6 @@ else
         </table>
     </div>
 }
-
-
 <div id="textModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl">
@@ -296,17 +286,17 @@ else
 
                     // Визуальное подтверждение сохранения
                     row.style.transition = 'background-color 0.3s';
-                    row.style.backgroundColor = '#d1fae5'; // Светло-зеленый
+                    row.style.backgroundColor = '#d1fae5';
 
                     setTimeout(() => {
-                        row.style.backgroundColor = ''; // Сброс
+                        row.style.backgroundColor = '';
                     }, 1500);
                 } else {
                     row.style.transition = 'background-color 0.3s';
-                    row.style.backgroundColor = '#fee2e2'; // Светло-красный
+                    row.style.backgroundColor = '#fee2e2';
                     alert('Ошибка: ' + result.message);
                     setTimeout(() => {
-                        row.style.backgroundColor = ''; // Сброс
+                        row.style.backgroundColor = '';
                     }, 1500);
                 }
 

@@ -11,8 +11,5 @@ namespace TP_School.ViewModels
 
         [Display(Name = "Ваш ответ")]
         public string AnswerText { get; set; }
-
-        [Display(Name = "Файлы для загрузки")]
-        public List<IFormFile> Files { get; set; }
     }
 }

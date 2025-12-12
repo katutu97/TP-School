@@ -55,7 +55,6 @@
             transform: translateX(-50%);
         }
 
-    /* Адаптация для мобильных устройств */
     @@media (max-width: 768px) {
         .global-tooltip {
             max-width: 95vw;
@@ -325,99 +324,99 @@
                         const allGrades = this.getAttribute('data-all-grades');
 
                         tooltipContent = `
-                                            <div class="font-semibold mb-2 border-b pb-1 border-gray-700">Детализация оценок ученика:</div>
-                                            <div class="text-gray-300 mb-1">${studentName}</div>
-                                            <div class="mb-2">
-                                                <div class="text-gray-300 mb-1">Всего оценок: <span class="font-bold text-white">${gradeCount}</span></div>
-                                                <div class="text-sm text-gray-400 mb-2">Все оценки: <span class="font-bold">[${allGrades}]</span></div>
-                                            </div>
-                                            <div class="space-y-2 mb-3">
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-green-500 rounded mr-2"></span>
-                                                        <span>Отлично (5):</span>
+                                                    <div class="font-semibold mb-2 border-b pb-1 border-gray-700">Детализация оценок ученика:</div>
+                                                    <div class="text-gray-300 mb-1">${studentName}</div>
+                                                    <div class="mb-2">
+                                                        <div class="text-gray-300 mb-1">Всего оценок: <span class="font-bold text-white">${gradeCount}</span></div>
+                                                        <div class="text-sm text-gray-400 mb-2">Все оценки: <span class="font-bold">[${allGrades}]</span></div>
                                                     </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade5')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent5')}%)</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-blue-500 rounded mr-2"></span>
-                                                        <span>Хорошо (4):</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade4')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent4')}%)</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
-                                                        <span>Удовлетворительно (3):</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade3')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent3')}%)</span>
-                                                    </div>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-red-500 rounded mr-2"></span>
-                                                        <span>Неудовлетворительно (2):</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade2')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent2')}%)</span>
-                                                    </div>
-                                                </div>`;
+                                                    <div class="space-y-2 mb-3">
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-green-500 rounded mr-2"></span>
+                                                                <span>Отлично (5):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade5')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent5')}%)</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-blue-500 rounded mr-2"></span>
+                                                                <span>Хорошо (4):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade4')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent4')}%)</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                                                                <span>Удовлетворительно (3):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade3')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent3')}%)</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-red-500 rounded mr-2"></span>
+                                                                <span>Неудовлетворительно (2):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade2')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent2')}%)</span>
+                                                            </div>
+                                                        </div>`;
 
                         if (this.getAttribute('data-grade1') > 0) {
                             tooltipContent += `
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-red-700 rounded mr-2"></span>
-                                                        <span>Очень плохо (1):</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade1')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent1')}%)</span>
-                                                    </div>
-                                                </div>`;
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-red-700 rounded mr-2"></span>
+                                                                <span>Очень плохо (1):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade1')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent1')}%)</span>
+                                                            </div>
+                                                        </div>`;
                         }
 
                         if (this.getAttribute('data-grade0') > 0) {
                             tooltipContent += `
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex items-center">
-                                                        <span class="w-4 h-4 bg-gray-700 rounded mr-2"></span>
-                                                        <span>Нулевые (0):</span>
-                                                    </div>
-                                                    <div class="flex items-center space-x-3">
-                                                        <span class="font-bold">${this.getAttribute('data-grade0')}</span>
-                                                        <span class="text-xs text-gray-400">(${this.getAttribute('data-percent0')}%)</span>
-                                                    </div>
-                                                </div>`;
+                                                        <div class="flex justify-between items-center">
+                                                            <div class="flex items-center">
+                                                                <span class="w-4 h-4 bg-gray-700 rounded mr-2"></span>
+                                                                <span>Нулевые (0):</span>
+                                                            </div>
+                                                            <div class="flex items-center space-x-3">
+                                                                <span class="font-bold">${this.getAttribute('data-grade0')}</span>
+                                                                <span class="text-xs text-gray-400">(${this.getAttribute('data-percent0')}%)</span>
+                                                            </div>
+                                                        </div>`;
                         }
 
                         tooltipContent += `
-                                            </div>
-                                            <div class="mt-3 pt-2 border-t border-gray-700">
-                                                <div class="flex justify-between font-semibold mb-1">
-                                                    <span>Средний балл:</span>
-                                                    <span class="text-lg ${averageGrade >= 4.0 ? 'text-green-400' : (averageGrade >= 3.0 ? 'text-yellow-400' : 'text-red-400')}">
-                                                        ${averageGrade}
-                                                    </span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Итоговая оценка:</span>
-                                                    <span class="font-bold ${finalGrade < 3 ? 'text-red-400' : 'text-green-400'}">
-                                                        ${finalGrade}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div class="tooltip-arrow"></div>`;
+                                                    </div>
+                                                    <div class="mt-3 pt-2 border-t border-gray-700">
+                                                        <div class="flex justify-between font-semibold mb-1">
+                                                            <span>Средний балл:</span>
+                                                            <span class="text-lg ${averageGrade >= 4.0 ? 'text-green-400' : (averageGrade >= 3.0 ? 'text-yellow-400' : 'text-red-400')}">
+                                                                ${averageGrade}
+                                                            </span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span>Итоговая оценка:</span>
+                                                            <span class="font-bold ${finalGrade < 3 ? 'text-red-400' : 'text-green-400'}">
+                                                                ${finalGrade}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tooltip-arrow"></div>`;
                     } else if (type === 'absences') {
                         // Генерируем контент для пропусков
                         const studentName = this.getAttribute('data-student-name');
@@ -428,44 +427,44 @@
                         const totalLessons = this.getAttribute('data-total-lessons');
 
                         tooltipContent = `
-                                            <div class="font-semibold mb-2 border-b pb-1 border-gray-700">Детализация пропусков:</div>
-                                            <div class="text-gray-300 mb-1">${studentName}</div>
-                                            <div class="space-y-2 mb-3">
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-red-300">Неуважительные (Н):</span>
-                                                    <span class="font-bold">${absentH}</span>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-yellow-300">Уважительные (У):</span>
-                                                    <span class="font-bold">${absentU}</span>
-                                                </div>
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-blue-300">Болезнь (Б):</span>
-                                                    <span class="font-bold">${absentB}</span>
-                                                </div>
-                                            </div>
-                                            <div class="mt-3 pt-2 border-t border-gray-700">
-                                                <div class="flex justify-between mb-1">
-                                                    <span>Всего пропусков:</span>
-                                                    <span class="font-bold">${totalAbsences}</span>
-                                                </div>`;
+                                                    <div class="font-semibold mb-2 border-b pb-1 border-gray-700">Детализация пропусков:</div>
+                                                    <div class="text-gray-300 mb-1">${studentName}</div>
+                                                    <div class="space-y-2 mb-3">
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-red-300">Неуважительные (Н):</span>
+                                                            <span class="font-bold">${absentH}</span>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-yellow-300">Уважительные (У):</span>
+                                                            <span class="font-bold">${absentU}</span>
+                                                        </div>
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-blue-300">Болезнь (Б):</span>
+                                                            <span class="font-bold">${absentB}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-3 pt-2 border-t border-gray-700">
+                                                        <div class="flex justify-between mb-1">
+                                                            <span>Всего пропусков:</span>
+                                                            <span class="font-bold">${totalAbsences}</span>
+                                                        </div>`;
 
                         if (totalLessons > 0) {
                             const attendanceRate = 100 - (totalAbsences / totalLessons * 100);
                             tooltipContent += `
-                                                <div class="flex justify-between mb-1">
-                                                    <span>Всего уроков:</span>
-                                                    <span class="font-bold">${totalLessons}</span>
-                                                </div>
-                                                <div class="flex justify-between">
-                                                    <span>Посещаемость:</span>
-                                                    <span class="font-bold">${attendanceRate.toFixed(1)}%</span>
-                                                </div>`;
+                                                        <div class="flex justify-between mb-1">
+                                                            <span>Всего уроков:</span>
+                                                            <span class="font-bold">${totalLessons}</span>
+                                                        </div>
+                                                        <div class="flex justify-between">
+                                                            <span>Посещаемость:</span>
+                                                            <span class="font-bold">${attendanceRate.toFixed(1)}%</span>
+                                                        </div>`;
                         }
 
                         tooltipContent += `
-                                            </div>
-                                            <div class="tooltip-arrow"></div>`;
+                                                    </div>
+                                                    <div class="tooltip-arrow"></div>`;
                     }
 
                     // Устанавливаем контент

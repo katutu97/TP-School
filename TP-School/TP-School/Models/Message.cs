@@ -13,7 +13,6 @@
 
         public MessageStatus Status { get; set; } = MessageStatus.New;
 
-        // Навигационные свойства
         public User ToUser { get; set; }
         public User FromUser { get; set; }
     }
